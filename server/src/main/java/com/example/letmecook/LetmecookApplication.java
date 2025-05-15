@@ -1,4 +1,4 @@
-package com.prj666_group2.letmecook;
+package com.example.letmecook;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

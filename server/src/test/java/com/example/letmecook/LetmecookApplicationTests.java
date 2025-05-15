@@ -1,4 +1,4 @@
-package com.prj666_group2.letmecook;
+package com.example.letmecook;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
