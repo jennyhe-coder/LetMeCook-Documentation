@@ -1,9 +1,9 @@
-package com.example.letmecook.service;
+package com.server.letMeCook.service;
 
-import com.example.letmecook.dto.recipe.RecipeCardDTO;
-import com.example.letmecook.dto.recipe.RecipeDTO;
-import com.example.letmecook.model.Recipe;
-import com.example.letmecook.repository.RecipeRepository;
+import com.server.letMeCook.dto.recipe.RecipeCardDTO;
+import com.server.letMeCook.dto.recipe.RecipeDTO;
+import com.server.letMeCook.model.Recipe;
+import com.server.letMeCook.repository.RecipeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

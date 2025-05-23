@@ -1,10 +1,10 @@
-package com.example.letmecook.controller;
+package com.server.letMeCook.controller;
 
-import com.example.letmecook.dto.recipe.RecipeCardDTO;
-import com.example.letmecook.dto.recipe.RecipeDTO;
-import com.example.letmecook.model.Recipe;
-import com.example.letmecook.repository.RecipeRepository;
-import com.example.letmecook.service.RecipeService;
+import com.server.letMeCook.dto.recipe.RecipeCardDTO;
+import com.server.letMeCook.dto.recipe.RecipeDTO;
+import com.server.letMeCook.model.Recipe;
+import com.server.letMeCook.repository.RecipeRepository;
+import com.server.letMeCook.service.RecipeService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

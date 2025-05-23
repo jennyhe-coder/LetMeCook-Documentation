@@ -1,6 +1,6 @@
-package com.example.letmecook.dto.recipe;
+package com.server.letMeCook.dto.recipe;
 
-import com.example.letmecook.model.Recipe;
+import com.server.letMeCook.model.Recipe;
 import lombok.Getter;
 import lombok.Setter;
 

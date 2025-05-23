@@ -1,6 +1,6 @@
-package com.example.letmecook.repository;
+package com.server.letMeCook.repository;
 
-import com.example.letmecook.model.User;
+import com.server.letMeCook.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;

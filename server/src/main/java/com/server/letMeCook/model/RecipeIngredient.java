@@ -1,4 +1,4 @@
-package com.example.letmecook.model;
+package com.server.letMeCook.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

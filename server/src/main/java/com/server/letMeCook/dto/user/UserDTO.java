@@ -1,4 +1,4 @@
-package com.example.letmecook.dto.user;
+package com.server.letMeCook.dto.user;
 
 public class UserDTO {
 
