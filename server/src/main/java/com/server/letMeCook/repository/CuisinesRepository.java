@@ -1,6 +1,6 @@
-package com.example.letmecook.repository;
+package com.server.letMeCook.repository;
 
-import com.example.letmecook.model.Cuisine;
+import com.server.letMeCook.model.Cuisine;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

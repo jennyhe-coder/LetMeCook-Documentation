@@ -2,7 +2,7 @@ spring:
   application:
     name: letmecook
   server:
-    port: 9999
+    port: 8080
 
   datasource:
     url: "jdbc:postgresql://aws-0-us-east-2.pooler.supabase.com:6543/postgres?sslmode=require"
