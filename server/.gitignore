@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+pom.xml
+mvnw
+mvnw.cmd
