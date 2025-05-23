@@ -50,18 +50,9 @@ export default function Carousel() {
 
   // Fetch data
   useEffect(() => {
-    const fetchWithTimeout = (url, options = {}, timeout = 500) => {
-      return Promise.race([
-        fetch(url, options),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Request timed out")), timeout)
-        ),
-      ]);
-    };
-
     const fetchRecipes = async () => {
       try {
-        const res = await fetchWithTimeout("/api/recipes", {}, 30);
+        const res = await fetch("/api/recipes");
         if (!res.ok) throw new Error("Network response was not ok");
         const data = await res.json();
         if (!Array.isArray(data) || data.length === 0) {
@@ -74,7 +65,7 @@ export default function Carousel() {
       }
     };
 
-    fetchRecipes();
+    fetchRecipes()
   }, []);
 
   // infinite scroll — real items in the middle
