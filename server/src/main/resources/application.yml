@@ -1,0 +1,62 @@
+spring:
+  application:
+    name: letmecook
+  server:
+    port: 9999
+
+  datasource:
+    url: "jdbc:postgresql://aws-0-us-east-2.pooler.supabase.com:6543/postgres?sslmode=require"
+    username: "postgres.cbyiuthgfdbnhrxoaelw"
+    password: "L3tM3C00k@pp"
+    driver-class-name: "org.postgresql.Driver"
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+      auto-commit: false
+      pool-name: HikariPoolLetMeCook
+      idle-timeout: 60000
+      max-lifetime: 300000
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: update         
+      properties:
+        hibernate:
+          dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+
+  security:
+    oauth2:
+      client:
+        registration:
+          auth0:
+            client-id:     "byS97bHUWgafGd7V76sERtE18Ykhw20W"
+            client-secret: "H3S8KSpi9q0gb0AdkCSJ6kDv4qchc6SBA98SBt8nLL0OKZvELswgDVz6ZkQWfpX_"
+            client-name:   Auth0
+            provider:      auth0
+            authorization-grant-type: authorization_code
+            redirect-uri: http://localhost:8080/login/oauth2/code/auth0
+            scope:
+              - openid
+              - profile
+              - email
+
+        provider:
+          auth0:
+            issuer-uri: "https://dev-k6juacqfcvxnltbr.us.auth0.com/"
+
+      resourceserver:
+        jwt:
+          issuer-uri: "https://dev-k6juacqfcvxnltbr.us.auth0.com/"
+
+server:
+  error:
+    include-message: always
+    include-binding-errors: always
+    
+logging:
+  level:
+    org.springframework.security: DEBUG
+
+
