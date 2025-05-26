@@ -6,7 +6,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 export default function MainNav() {
   const location = useLocation();
   const logoRef = useRef();
-  const { loginWithRedirect } = useAuth0();
+  const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
 
   useEffect(() => {
     // Reset default values and kill trailing animations
@@ -105,7 +105,7 @@ export default function MainNav() {
               RECIPES
               <span className="underline"></span>
             </NavLink>
-            <button
+            {/* <button
               className="login-button"
               onClick={() =>
                 loginWithRedirect({
@@ -114,10 +114,14 @@ export default function MainNav() {
               }
             >
               Login
-            </button>
-            {/* <Link to="/login">
-              <button className="login-button">Login</button>
-            </Link> */}
+            </button> */}
+            {isAuthenticated ? (
+              <button onClick={() => logout({logoutParams: { returnTo: window.location.origin}})}>
+                Logout ({user.name})
+              </button>
+            ) : (
+              <button className="login-button" onClick={() => loginWithRedirect()}>Login</button>
+            )}
           </div>
         </nav>
       </div>

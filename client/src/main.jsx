@@ -7,7 +7,7 @@ import "./styles.css";
 import App from "./App.jsx";
 
 const domain = "dev-k6juacqfcvxnltbr.us.auth0.com";
-const clientId = "byS97bHUWgafGd7V76sERtE18Ykhw20W";
+const clientId = "Em74YDN8OzYHWk8Oxc4PGenze73LaSW1";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -16,6 +16,8 @@ createRoot(document.getElementById("root")).render(
       clientId={clientId}
       authorizationParams={{
         redirect_uri: window.location.origin,
+        audience: "https://letmecook/api",
+        scope: "openid profile email"
       }}
       onRedirectCallback={(appState) => {
         window.history.replaceState(
