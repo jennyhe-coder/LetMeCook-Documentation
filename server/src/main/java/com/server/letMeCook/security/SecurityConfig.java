@@ -29,6 +29,7 @@ public class SecurityConfig {
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/",
                         "/api/auth/**",
                                 "/api/public/**",
                                 "/api/recipes/**"

@@ -35,9 +35,9 @@ public class User {
 
     @Column(name = "email", unique = true)
     private String email = "";
-
-    @Column(name = "auth0_id", unique = true)
-    private String auth0Id = "";
+//
+//    @Column(name = "auth0_id", unique = true)
+//    private String auth0Id = "";
 
     public User() {    }
     public User(String email, String firstName, String lastName, String auth0Id, String role) {
@@ -46,6 +46,6 @@ public class User {
         this.lastName = lastName;
         this.registrationDate = java.time.LocalDate.now().toString();
         this.role = (role != null) ? role : "user";
-        this.auth0Id = auth0Id;
+//        this.auth0Id = auth0Id;
     }
 }
