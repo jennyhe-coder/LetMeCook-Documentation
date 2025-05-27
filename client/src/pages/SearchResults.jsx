@@ -9,7 +9,11 @@ export default function SearchResults() {
   useEffect(() => {
     if (!keyword) return;
 
-    fetch(`/api/recipes/search?keyword=${encodeURIComponent(keyword)}`)
+    fetch(
+      `https://letmecook.ca/api/recipes/search?keyword=${encodeURIComponent(
+        keyword
+      )}`
+    )
       .then((res) => res.json())
       .then(setResults)
       .catch((err) => {
