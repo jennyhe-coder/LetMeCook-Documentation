@@ -17,8 +17,7 @@ import java.util.UUID;
 public class RecipeController {
     @Autowired
     private RecipeService recipeService;
-    @Autowired
-    private RecipeRepository recipeRepository;
+
 
     @GetMapping(value = {"","/"})
     public List<RecipeDTO> getAllRecipes() {
@@ -28,10 +27,9 @@ public class RecipeController {
     @GetMapping("/{id}")
     public RecipeDTO getRecipeById(@PathVariable String id) {
         UUID uuid = UUID.fromString(id);
-        Recipe recipe = recipeRepository.findById(uuid)
-                .orElseThrow(() -> new EntityNotFoundException("Recipe not found with id: " + id));
+        RecipeDTO recipeDto = recipeService.getRecipeById(uuid);
 
-        return RecipeDTO.from(recipe);
+        return recipeDto;
     }
 
 
@@ -40,4 +38,19 @@ public class RecipeController {
     public List<RecipeCardDTO> searchRecipes(String keyword) {
         return recipeService.searchRecipes(keyword);
     }
+
+
+//    @GetMapping("/search/")
+//    public List<RecipeCardDTO> advanceSearch(
+//            @RequestParam(required = false, defaultValue = "") String keyword,
+//            @RequestParam(required = false, defaultValue = "") String cuisine,
+//            @RequestParam(required = false) List<String> ingredients,
+//            @RequestParam(required = false) List<String> categories,
+//            @RequestParam(required = false, defaultValue = "") String dietaryPreference,
+//            @RequestParam(required = false, defaultValue = "true") Boolean isPublic
+//    ) {
+//        return recipeService.advancedSearch(keyword, cuisine, ingredients, categories, dietaryPreference, isPublic);
+//    }
+
+
 }
