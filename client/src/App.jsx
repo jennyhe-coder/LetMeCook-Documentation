@@ -8,6 +8,8 @@ import SearchResults from "./pages/SearchResults";
 import { useEffect, useState } from "react";
 import { useApi } from "./utils/Api";
 import { useAuth0 } from "@auth0/auth0-react";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
 
 
 
@@ -32,6 +34,8 @@ function App() {
         <Route path="/recipes" element={<Recipes />} />
         <Route path="/login" element={<Login />} />
         <Route path="/search" element={<SearchResults />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
       </Routes>
       <Footer />
     </>
