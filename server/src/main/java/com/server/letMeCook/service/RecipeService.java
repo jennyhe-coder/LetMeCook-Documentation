@@ -41,4 +41,26 @@ public class RecipeService {
                 .map(RecipeCardDTO::from)
                 .collect(Collectors.toList());
     }
+    public List<RecipeCardDTO> searchPublicRecipesByAuthorId(UUID id) {
+        return recipeRepository.findByAuthorId(id).stream()
+                .map(RecipeCardDTO::from)
+                .collect(Collectors.toList());
+    }
+
+
+    public List<RecipeCardDTO> advancedSearch(String keyword, String cuisine, List<String> inputIngredients, List<String> inputCategories, String dietaryPreference, Boolean isPublic) {
+//        System.out.println("isPublic = " + isPublic);
+//        System.out.println("keyword = " + keyword);
+//        System.out.println("cuisine = " + cuisine);
+//        System.out.println("ingredients = " + ingredients);
+//        System.out.println("categories = " + categories);
+//        System.out.println("dietaryPreference = " + dietaryPreference);
+        var categories = (inputCategories == null || inputCategories.isEmpty()) ? null : inputCategories;
+        var ingredients = (inputIngredients == null || inputIngredients.isEmpty()) ? null : inputIngredients;
+
+
+        return recipeRepository.advancedSearch(keyword, cuisine, ingredients, categories, dietaryPreference, isPublic).stream()
+                .map(RecipeCardDTO::from)
+                .collect(Collectors.toList());
+    }
 }

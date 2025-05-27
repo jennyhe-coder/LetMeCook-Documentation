@@ -20,6 +20,7 @@ public class Ingredient {
     @Id
     @GeneratedValue
     private UUID id;
+
     @OneToMany(mappedBy = "ingredient", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<RecipeIngredient> usedInRecipes = new HashSet<>();
     private String name = "";

@@ -29,7 +29,33 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
     @Query("SELECT r FROM Recipe r WHERE r.isPublic = true")
     List<Recipe> findAllPublic();
 
+    // Find recipes by author ID
+    List<Recipe> findByAuthorId(UUID authorId);
 
 
-    List<Recipe> findAllByAuthorId(UUID authorId);
+
+    @Query("SELECT DISTINCT r FROM Recipe r " +
+            "LEFT JOIN r.author a " +
+            "LEFT JOIN r.categories c " +
+            "LEFT JOIN r.cuisines cu " +
+            "LEFT JOIN r.dietaryPreferences dp " +
+            "LEFT JOIN r.recipeIngredients ri " +
+            "LEFT JOIN ri.ingredient i " +
+            "WHERE (:keyword IS NULL OR LOWER(r.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "   OR LOWER(CONCAT(a.firstName, ' ', a.lastName)) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+            "AND (:cuisine IS NULL OR LOWER(cu.name) = LOWER(:cuisine)) " +
+            "AND (:dietaryPreference IS NULL OR LOWER(dp.name) = LOWER(:dietaryPreference)) " +
+            "AND (:isPublic IS NULL OR r.isPublic = :isPublic) " +
+            "AND (:categories IS NULL OR c.name IN :categories) " +
+            "AND (:ingredients IS NULL OR i.name IN :ingredients)")
+    List<Recipe> advancedSearch(
+            @Param("keyword") String keyword,
+            @Param("cuisine") String cuisine,
+            @Param("ingredients") List<String> ingredients,
+            @Param("categories") List<String> categories,
+            @Param("dietaryPreference") String dietaryPreference,
+            @Param("isPublic") Boolean isPublic
+    );
+
+
 }
