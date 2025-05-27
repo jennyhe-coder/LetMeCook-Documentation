@@ -272,7 +272,7 @@ export default function Carousel() {
         {fullList.map((recipe, i) => (
           <Link
             key={`${recipe.id}-${i}`}
-            to={`/recipes/${recipe.id}`}
+            to={`api/recipes/${recipe.id}`}
             className="recipe-card"
           >
             <div className="img-container">

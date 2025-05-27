@@ -2,9 +2,11 @@ import { useEffect, useRef } from "react";
 import Carousel from "./../components/Carousel";
 import { Link } from "react-router-dom";
 import SearchBar from "./../components/SearchBar-Home";
+import { useAuth0 } from "@auth0/auth0-react";
 
 export default function Home() {
   const inputRef = useRef();
+  const { loginWithRedirect } = useAuth0();
   useEffect(() => {
     inputRef.current?.focus({ preventScroll: true });
   }, []);
@@ -145,6 +147,38 @@ export default function Home() {
             <div className="one">
               <img className="one-one" src="assets/join02.jpg" />
               <img className="one-two" src="assets/join03.jpg" />
+              <div className="one-three">
+                <button
+                  onClick={() =>
+                    loginWithRedirect({
+                      authorizationParams: {
+                        screen_hint: "signup",
+                      },
+                    })
+                  }
+                >
+                  SIGN UP
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="50"
+                    height="50"
+                    viewBox="0 0 50 50"
+                    fill="none"
+                  >
+                    <g clip-path="url(#clip0_30_137)">
+                      <path
+                        d="M18.75 10.4167V14.5834H32.4792L8.33334 38.7292L11.2708 41.6667L35.4167 17.5209V31.2501H39.5833V10.4167H18.75Z"
+                        fill="#EF9FA9"
+                      />
+                    </g>
+                    <defs>
+                      <clipPath id="clip0_30_137">
+                        <rect width="50" height="50" fill="white" />
+                      </clipPath>
+                    </defs>
+                  </svg>
+                </button>
+              </div>
             </div>
             <div className="two">
               <div className="join-box-header">JOIN THE COMMUNITY</div>
@@ -158,6 +192,7 @@ export default function Home() {
             </div>
           </div>
         </section>
+        <div className="section-line"></div>
       </main>
     </>
   );
