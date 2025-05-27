@@ -458,6 +458,8 @@ input {
   margin-top: 20px;
   white-space: nowrap;
   overscroll-behavior-x: contain;
+  min-height: 400px;
+  overflow-x: auto;
 }
 
 .carousel::-webkit-scrollbar {
@@ -506,6 +508,7 @@ input {
 
 .recipe-meta {
   width: 277px;
+  flex: 0 0 auto;
   white-space: normal;
   word-wrap: break-word;
   overflow-wrap: break-word;
