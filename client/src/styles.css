@@ -336,6 +336,7 @@ h1 {
   justify-content: space-between;
   padding-top: 126px;
   color: #e64824;
+  padding-bottom: 156px;
 }
 
 .search-box-image {
@@ -433,11 +434,11 @@ input {
   border: none;
   height: 3px;
   width: 100%;
-  margin-top: 156px;
+  /* margin-top: 156px; */
 }
 
 .footer {
-  padding-top: 120px;
+  padding-top: 360px;
 }
 
 .carousel {
@@ -538,6 +539,7 @@ input {
 .trending-recipes {
   color: #51566f;
   padding-top: 46px;
+  padding-bottom: 140px;
 }
 
 .see-all {
@@ -562,12 +564,6 @@ p {
   font-style: normal;
   font-weight: 500;
   line-height: normal;
-}
-
-.join-banner {
-  background: #b9341f;
-  height: 860px;
-  /* margin-top: 126px; */
 }
 
 .join-box {
@@ -649,4 +645,32 @@ p {
   z-index: 2;
   top: 78px;
   left: 120px;
+}
+
+.join-banner {
+  background: #b9341f;
+  height: 960px;
+  /* margin-top: 126px; */
+}
+
+.join-box .one .one-three button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  cursor: pointer;
+  position: absolute;
+  right: 0;
+  width: 338px;
+  height: 106px;
+  border-radius: 5px;
+  border: 2px solid #000;
+  background: #28200D;
+  color: #EF9FA9;
+  font-family: Archer;
+  font-size: 48px;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 70px;
+  bottom: 180px;
 }
