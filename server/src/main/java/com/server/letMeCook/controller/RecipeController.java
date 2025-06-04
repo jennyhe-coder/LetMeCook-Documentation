@@ -20,8 +20,10 @@ public class RecipeController {
 
 
     @GetMapping(value = {"","/"})
-    public List<RecipeDTO> getAllRecipes() {
-        return recipeService.getAllRecipeDTOs();
+    public List<RecipeDTO> getAllRecipes(
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size){
+        return recipeService.getAllRecipeDTOs(page, size);
     }
 
     @GetMapping("/{id}")
@@ -33,9 +35,20 @@ public class RecipeController {
     }
 
 
+    @GetMapping("search")
+    public List<RecipeCardDTO> searchRecipes(
+            @RequestParam String keyword,
+            @RequestParam(required = false) Integer page,
+            @RequestParam(required = false) Integer size,
+            @RequestParam(required = false) String cuisine,
+            @RequestParam(required = false) List<String> ingredients,
+            @RequestParam(required = false) List<String> categories,
+            @RequestParam(required = false) String dietaryPreference,
+            @RequestParam(required = false, defaultValue = "true") Boolean isPublic,
+            @RequestParam(required = false) Integer pageNumber,
+            @RequestParam(required = false) Integer pageSize
+                                             ) {
 
-    @GetMapping("/search")
-    public List<RecipeCardDTO> searchRecipes(String keyword) {
         return recipeService.searchRecipes(keyword);
     }
 

@@ -55,6 +55,7 @@ public class Recipe {
     private User author;
 
     @ManyToMany(fetch = FetchType.LAZY)
+    @JsonIgnore
     @JoinTable(
             name = "recipe_dietary_pref",
             joinColumns = @JoinColumn(name = "recipe_id"),
@@ -63,6 +64,7 @@ public class Recipe {
     private Set<DietaryPreference> dietaryPreferences = new HashSet<>();
 
     @ManyToMany
+    @JsonIgnore
     @JoinTable(
             name = "recipe_categories",
             joinColumns = @JoinColumn(name = "recipe_id"),
@@ -71,6 +73,7 @@ public class Recipe {
     private Set<Category> categories = new HashSet<>();
 
     @ManyToMany
+    @JsonIgnore
     @JoinTable(
             name = "recipe_cuisines",
             joinColumns = @JoinColumn(name = "recipe_id"),
