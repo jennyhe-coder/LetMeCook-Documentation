@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-const REPEAT_COUNT = 100;
+const REPEAT_COUNT = 25;
 const FALLBACK_RECIPE = [
   {
     id: "fallback-01",
@@ -47,42 +47,37 @@ export default function Carousel() {
   const resumeTimeout = useRef(null);
   const [isInView, setIsInView] = useState(true);
   const [recipes, setRecipes] = useState([]);
+  const [error, setError] = useState(false);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
-  // Fetch data
+  const dataToRender = error ? FALLBACK_RECIPE : recipes;
+
+  // Build fullList only after loading
+  const fullList = [
+    ...Array.from({ length: REPEAT_COUNT }).flatMap(() => dataToRender),
+    ...dataToRender,
+    ...Array.from({ length: REPEAT_COUNT }).flatMap(() => dataToRender),
+  ];
+
+  // Fetch
   useEffect(() => {
-    const fetchWithTimeout = (url, options = {}, timeout = 500) => {
-      return Promise.race([
-        fetch(url, options),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error("Request timed out")), timeout)
-        ),
-      ]);
-    };
-
     const fetchRecipes = async () => {
       try {
-        const res = await fetchWithTimeout("/api/recipes", {}, 30);
-        if (!res.ok) throw new Error("Network response was not ok");
+        const res = await fetch("https://letmecook.ca/api/recipes");
+        if (!res.ok) throw new Error("Network error");
         const data = await res.json();
         if (!Array.isArray(data) || data.length === 0) {
-          throw new Error("No valid data");
+          throw new Error("Invalid or empty data");
         }
         setRecipes(data);
-      } catch (error) {
-        console.error("Fetch failed, using fallback recipe:", error);
-        setRecipes(FALLBACK_RECIPE);
+      } catch (err) {
+        console.error("Failed to fetch recipes:", err);
+        setError(true);
       }
     };
 
     fetchRecipes();
   }, []);
-
-  // infinite scroll — real items in the middle
-  const fullList = [
-    ...Array.from({ length: REPEAT_COUNT }).flatMap(() => recipes),
-    ...recipes,
-    ...Array.from({ length: REPEAT_COUNT }).flatMap(() => recipes),
-  ];
 
   const handleLoopScroll = () => {
     const carousel = carouselRef.current;
@@ -90,7 +85,7 @@ export default function Carousel() {
     if (!carousel || !item) return;
 
     const itemWidth =
-      item.offsetWidth + parseInt(getComputedStyle(item).marginRight);
+      item.offsetWidth + parseInt(getComputedStyle(item).marginRight || "0");
     const totalItems = fullList.length;
     const totalWidth = itemWidth * totalItems;
 
@@ -101,7 +96,7 @@ export default function Carousel() {
     }
   };
 
-  //Observer
+  // Observer for auto-scroll
   useEffect(() => {
     const carousel = carouselRef.current;
     const observer = new IntersectionObserver(
@@ -112,30 +107,48 @@ export default function Carousel() {
     return () => observer.disconnect();
   }, []);
 
-  //initial scroll pos (middle)
+  // Initial scroll position (only for real data)
   useEffect(() => {
+    if (error) return;
+
     const carousel = carouselRef.current;
-    if (!carousel || recipes.length === 0) return;
+    if (!carousel || dataToRender.length === 0) return;
 
-    const item = carousel.querySelector(".recipe-card");
-    if (!item) return;
+    const images = Array.from(carousel.querySelectorAll("img"));
+    const allImagesLoaded = images.map((img) =>
+      img.complete
+        ? Promise.resolve()
+        : new Promise((res) => {
+            img.onload = img.onerror = res;
+          })
+    );
 
-    const itemWidth =
-      item.offsetWidth + parseInt(getComputedStyle(item).marginRight);
+    Promise.all(allImagesLoaded).then(() => {
+      const item = carousel.querySelector(".recipe-card");
+      if (!item) return;
 
-    const totalClones = REPEAT_COUNT * recipes.length;
-    carousel.scrollLeft = totalClones * itemWidth;
-  }, [recipes]);
+      const itemWidth =
+        item.offsetWidth + parseInt(getComputedStyle(item).marginRight || "0");
+      const totalClones = REPEAT_COUNT * dataToRender.length;
+      const scrollTarget = totalClones * itemWidth;
 
-  //auto scroll when not hovering and carousel inv iew
+      carousel.scrollLeft = scrollTarget;
+      setTimeout(() => setHasLoaded(true), 1000);
+    });
+  }, [dataToRender]);
+
+  // Auto-scroll
   useEffect(() => {
+    if (!hasLoaded) return;
     const carousel = carouselRef.current;
+    if (!carousel) return;
+
     let animationFrame;
     const SCROLL_INTERVAL = 10;
     const SCROLL_STEP = 1;
 
     const scroll = (time) => {
-      if (!isDragging.current && !isHovering.current && isInView && carousel) {
+      if (!isDragging.current && !isHovering.current && isInView) {
         if (time - lastScrollTime.current >= SCROLL_INTERVAL) {
           carousel.scrollLeft += SCROLL_STEP;
           lastScrollTime.current = time;
@@ -147,9 +160,9 @@ export default function Carousel() {
 
     animationFrame = requestAnimationFrame(scroll);
     return () => cancelAnimationFrame(animationFrame);
-  }, [isInView]);
+  }, [hasLoaded, isInView]);
 
-  //drag
+  // Drag and touch handlers (same as before, unchanged)
   useEffect(() => {
     const carousel = carouselRef.current;
     if (!carousel) return;
@@ -218,7 +231,6 @@ export default function Carousel() {
     };
 
     const handleLeave = () => {
-      // Delay auto-scroll resume to allow native track pad momentum to settle
       resumeTimeout.current = setTimeout(() => {
         isHovering.current = false;
       }, 300);
@@ -234,7 +246,6 @@ export default function Carousel() {
     window.addEventListener("click", handleClick, true);
     carousel.addEventListener("mouseenter", handleEnter);
     carousel.addEventListener("mouseleave", handleLeave);
-
     carousel.addEventListener("touchstart", onTouchStart);
     window.addEventListener("touchmove", onTouchMove);
     window.addEventListener("touchend", handleMouseUp);
@@ -261,16 +272,15 @@ export default function Carousel() {
         {fullList.map((recipe, i) => (
           <Link
             key={`${recipe.id}-${i}`}
-            to={`/recipes/${recipe.id}`}
+            to={`api/recipes/${recipe.id}`}
             className="recipe-card"
           >
             <div className="img-container">
-              <img src={recipe.imageUrl} alt={recipe.title} />
+              <img src={recipe.imageUrl} alt={recipe.title} loading="eager" />
             </div>
-
             <div className="recipe-meta">
               <div className="recipe-title">{recipe.title}</div>
-              <p> {recipe.authorName}</p>
+              <p>{recipe.authorName}</p>
               <p>{recipe.cookingTime} min</p>
             </div>
           </Link>
