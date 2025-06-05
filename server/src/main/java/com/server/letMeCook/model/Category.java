@@ -2,6 +2,7 @@ package com.server.letMeCook.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import net.minidev.json.annotate.JsonIgnore;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -22,6 +23,7 @@ public class Category {
     private String name = "";
 
     @ManyToMany(mappedBy = "categories")
+    @JsonIgnore
     private Set<Recipe> recipes = new HashSet<>();
 
 
