@@ -17,7 +17,4 @@ public class DiateryPreferenceController {
     public Object getAllDietaryPreferences() {
         return dietaryPreferenceService.getAllDietaryPreferences();
     }
-
-
-
 }
