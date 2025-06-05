@@ -53,17 +53,6 @@ public class RecipeController {
     }
 
 
-//    @GetMapping("/search/")
-//    public List<RecipeCardDTO> advanceSearch(
-//            @RequestParam(required = false, defaultValue = "") String keyword,
-//            @RequestParam(required = false, defaultValue = "") String cuisine,
-//            @RequestParam(required = false) List<String> ingredients,
-//            @RequestParam(required = false) List<String> categories,
-//            @RequestParam(required = false, defaultValue = "") String dietaryPreference,
-//            @RequestParam(required = false, defaultValue = "true") Boolean isPublic
-//    ) {
-//        return recipeService.advancedSearch(keyword, cuisine, ingredients, categories, dietaryPreference, isPublic);
-//    }
 
 
 }

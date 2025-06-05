@@ -5,5 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;
 
-interface DietaryPreferenceRepository extends JpaRepository<DietaryPreference, UUID> {
+public interface DietaryPreferenceRepository extends JpaRepository<DietaryPreference, UUID> {
+
 }

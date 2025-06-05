@@ -39,7 +39,6 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
     List<Recipe> findByAuthorId(UUID authorId);
 
 
-
 //    @Query("SELECT DISTINCT r FROM Recipe r " +
 //            "LEFT JOIN r.author a " +
 //            "LEFT JOIN r.categories c " +
