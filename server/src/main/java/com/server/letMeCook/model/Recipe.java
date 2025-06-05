@@ -2,6 +2,7 @@ package com.server.letMeCook.model;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -19,8 +20,8 @@ import java.util.UUID;
 public class Recipe {
 
     @Id
-    @GeneratedValue
-    @GenericGenerator(name="UUID",strategy = "org.hibernate.id.UUIDGenerator")
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
@@ -50,12 +51,10 @@ public class Recipe {
     int time = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "author_id", referencedColumnName = "id",insertable = false, updatable = false)
-    @JsonIgnore
+    @JoinColumn(name = "author_id", referencedColumnName = "id")
     private User author;
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JsonIgnore
     @JoinTable(
             name = "recipe_dietary_pref",
             joinColumns = @JoinColumn(name = "recipe_id"),
@@ -64,7 +63,6 @@ public class Recipe {
     private Set<DietaryPreference> dietaryPreferences = new HashSet<>();
 
     @ManyToMany
-    @JsonIgnore
     @JoinTable(
             name = "recipe_categories",
             joinColumns = @JoinColumn(name = "recipe_id"),
@@ -73,7 +71,6 @@ public class Recipe {
     private Set<Category> categories = new HashSet<>();
 
     @ManyToMany
-    @JsonIgnore
     @JoinTable(
             name = "recipe_cuisines",
             joinColumns = @JoinColumn(name = "recipe_id"),

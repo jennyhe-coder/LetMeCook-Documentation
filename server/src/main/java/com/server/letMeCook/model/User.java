@@ -49,6 +49,5 @@ public class User {
         this.lastName = lastName;
         this.registrationDate = java.time.LocalDate.now().toString();
         this.role = (role != null) ? role : "user";
-
     }
 }

@@ -1,5 +1,6 @@
 package com.server.letMeCook.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import net.minidev.json.annotate.JsonIgnore;
@@ -23,7 +24,6 @@ public class Category {
     private String name = "";
 
     @ManyToMany(mappedBy = "categories")
-    @JsonIgnore
     private Set<Recipe> recipes = new HashSet<>();
 
 

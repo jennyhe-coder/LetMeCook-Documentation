@@ -7,6 +7,7 @@ import com.server.letMeCook.repository.RecipeRepository;
 import com.server.letMeCook.service.RecipeService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,21 +36,21 @@ public class RecipeController {
     }
 
 
-    @GetMapping("search")
-    public List<RecipeCardDTO> searchRecipes(
+    @GetMapping("/search")
+    public List<RecipeCardDTO> advancedSearch(
             @RequestParam String keyword,
             @RequestParam(required = false) Integer page,
             @RequestParam(required = false) Integer size,
-            @RequestParam(required = false) String cuisine,
+            @RequestParam(required = false) List<String> cuisines,
             @RequestParam(required = false) List<String> ingredients,
             @RequestParam(required = false) List<String> categories,
-            @RequestParam(required = false) String dietaryPreference,
-            @RequestParam(required = false, defaultValue = "true") Boolean isPublic,
-            @RequestParam(required = false) Integer pageNumber,
-            @RequestParam(required = false) Integer pageSize
-                                             ) {
-
-        return recipeService.searchRecipes(keyword);
+            @RequestParam(required = false) List<String> dietaryPreferences,
+            @RequestParam(required = false, defaultValue = "true") Boolean isPublic
+    ) {
+        Integer defaultPage = page != null ? page : 0;
+        Integer defaultSize = size != null ? size : 20;
+        Pageable pageable = Pageable.ofSize(defaultSize).withPage(defaultPage);
+        return recipeService.advancedSearch(keyword, cuisines, ingredients, categories, dietaryPreferences, isPublic, pageable);
     }
 
 
