@@ -37,6 +37,4 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
 
     // Find recipes by author ID
     List<Recipe> findByAuthorId(UUID authorId);
-
-
 }
