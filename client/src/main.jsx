@@ -19,6 +19,8 @@ createRoot(document.getElementById("root")).render(
         audience: "https://letmecook/api",
         scope: "openid profile email"
       }}
+      cacheLocation="localstorage"
+      useRefreshTokens={true}
       onRedirectCallback={(appState) => {
         window.history.replaceState(
           {},

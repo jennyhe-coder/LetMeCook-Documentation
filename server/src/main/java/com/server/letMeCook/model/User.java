@@ -1,13 +1,17 @@
 package com.server.letMeCook.model;
 
 
-import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import java.util.UUID;
+
 import org.hibernate.annotations.GenericGenerator;
 
-import java.util.UUID;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "users")
@@ -38,8 +42,15 @@ public class User {
 
     @Column(name = "about_me", columnDefinition = "TEXT")
     private String aboutMe = "";
+
     @Column(name = "image_url")
     private String imageUrl = "";
+
+    @Column(name = "cooking_skill")
+    private String cookingLvl = "";
+
+    @Column(name = "dietary_pref")
+    private String dietaryPref= "";
 
 
     public User() {    }

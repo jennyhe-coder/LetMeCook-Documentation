@@ -105,16 +105,17 @@ export default function MainNav() {
               RECIPES
               <span className="underline"></span>
             </NavLink>
-            {/* <button
-              className="login-button"
-              onClick={() =>
-                loginWithRedirect({
-                  appState: { returnTo: "/" },
-                })
+            <NavLink
+              to="/profile"
+              className={({ isActive }) =>
+                isActive ? "nav-link active" : "nav-link"
               }
             >
-              Login
-            </button> */}
+              PROFILE
+              <span className="underline"></span>
+            </NavLink>
+
+
             {isAuthenticated ? (
               <button onClick={() => logout({logoutParams: { returnTo: window.location.origin}})}>
                 Logout ({user.name})
