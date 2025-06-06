@@ -51,6 +51,7 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: "https://dev-k6juacqfcvxnltbr.us.auth0.com/"
+          audiences: https://letmecook/api
 
 server:
   error:

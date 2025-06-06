@@ -9,6 +9,7 @@ import Contact from './pages/Contact';
 import About from './pages/About';
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import Profile from "./pages/Profile";
 import { useEffect, useState } from "react";
 import { useApi } from "./utils/Api";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -16,13 +17,19 @@ import { useAuth0 } from "@auth0/auth0-react";
 function App() {
   const [me, setMe] = useState(null);
   const api = useApi();
-  const { isAuthenticated, user } = useAuth0();
+  const { isAuthenticated, getAccessTokenSilently} = useAuth0();
+
   useEffect(() => {
     if(!isAuthenticated) return;
     api.get("/api/me")
     .then((res) => setMe(res.data))
     .catch((err) => console.error("Error fetching user data:", err));
-  }, [api, isAuthenticated])
+    getAccessTokenSilently() //this is temp just for testing 
+      .then(token => {
+        console.log("Access Token: ",token);
+      }) .catch(err => console.error("Token fetch error:", err));
+  }, [api, isAuthenticated, getAccessTokenSilently]);
+
 
   return (
     <>
@@ -38,6 +45,7 @@ function App() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/about" element={<About />} />
+        <Route path="/profile" element={<Profile />} />
       </Routes>
       <Footer />
     </>
@@ -45,3 +53,4 @@ function App() {
 }
 
 export default App;
+
