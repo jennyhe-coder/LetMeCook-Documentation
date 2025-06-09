@@ -31,6 +31,7 @@ export default function Login() {
           <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
           <Link to="/register" variant = "body2">Don't have an account? Sign up here</Link>
           <button type="submit">Login</button>
+          <Link to="/forgot-password" variant="body2">Forgot Password?</Link>
           {error.length > 0 && <p>{error}</p>}
         </form>
       </div>
