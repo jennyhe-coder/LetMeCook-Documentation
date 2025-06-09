@@ -1,34 +1,37 @@
 import { useEffect, useState } from 'react';
-import { useAuth0 } from "@auth0/auth0-react";
+import { supabase } from '../utils/supabaseClient';
+import { AuthProvider, useAuth } from '../context/AuthProvider';
 
 export default function  Profile () {
-    const { getAccessTokenSilently, isAuthenticated } = useAuth0();
+    const { user } = useAuth();
     const [profile, setProfile] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        if (!isAuthenticated) return;
+       if(!user) {
+           setLoading(false);
+           setProfile(null);
+           return;
+       }
+       setLoading(true);
+       supabase
+       .from('users')
+       .select('*')
+       .eq('id', user.id)
+       .single()
+       .then(({data, error}) => {
+        setProfile(data);
+        setLoading(false);
+        setError(error ? error.message : null);
+       })
+    }, [user])
 
-        getAccessTokenSilently()
-            .then(token =>  
-                fetch("http://localhost:8080/api/profile", {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    }
-                })
-            )
-            .then(async (res) => {
-                if (!res.ok) {
-                    const text = await res.text();
-                    throw new Error(`Error ${res.status}: ${text}`)
-                }
-                return res.json();
-            })
-            .then(data => setProfile(data))
-            .catch(err => console.error("Error loading profile", err));
-    }, [getAccessTokenSilently, isAuthenticated])
+    if (!user) return <p>Please log in.</p>;
+    if (loading) return <p>Loading profile...</p>;
+    if (error) return <p>Error loading profile: {error}</p>;
+    if (!profile) return <p>No profile found.</p>;
 
-    if (!isAuthenticated) return <p>Please log in.</p>;
-    if (!profile) return <p>Loading profile...</p>;
 
     return (
     <div>
@@ -36,7 +39,7 @@ export default function  Profile () {
         <p>Email: {profile.email}</p>
         <p>Cooking Skill: {profile.cooking_skill}</p>
         <p>About Me: {profile.about_me}</p>
-        <p>Dietary Preference: {profile.dietary_preg}</p>
+        <p>Dietary Preference: {profile.dietary_preference}</p>
         <img src={profile.image_url} alt="Profile" style={{ width: "150px" }} />
     </div>
   );
