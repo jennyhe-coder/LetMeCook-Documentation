@@ -1,12 +1,15 @@
-import { Link, NavLink, useLocation } from "react-router-dom";
-import { useEffect, useRef } from "react";
+import { NavLink, useLocation } from "react-router-dom";
+import { useRef, useEffect } from "react";
 import { gsap } from "gsap";
-import { useAuth0 } from "@auth0/auth0-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthProvider";
+import { supabase } from "../utils/supabaseClient";
 
 export default function MainNav() {
   const location = useLocation();
   const logoRef = useRef();
-  const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Reset default values and kill trailing animations
@@ -47,6 +50,15 @@ export default function MainNav() {
       }
     }
   }, [location.pathname]);
+
+  const handleLogin = () => {
+    navigate('/login');
+  }
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/');
+  }
 
   return (
     <>
@@ -115,13 +127,12 @@ export default function MainNav() {
               <span className="underline"></span>
             </NavLink>
 
-
-            {isAuthenticated ? (
-              <button onClick={() => logout({logoutParams: { returnTo: window.location.origin}})}>
+            {user ? (
+              <button onClick={handleLogout}>
                 Logout ({user.name})
               </button>
             ) : (
-              <button className="login-button" onClick={() => loginWithRedirect()}>Login</button>
+              <button className="login-button" onClick={handleLogin}>Login</button>
             )}
           </div>
         </nav>
