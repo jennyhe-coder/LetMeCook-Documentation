@@ -13,7 +13,6 @@ import Profile from "./pages/Profile";
 import Register from "./pages/Register";
 import ResetPassword from "./pages/ResetPassword";
 import ForgotPassword from "./pages/ForgotPassword";
-import EditProfile from "./pages/EditProfile";
 
 function App() {
 
@@ -36,7 +35,6 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/edit-profile" element={<EditProfile />} />
       </Routes>
       <Footer />
     </>
