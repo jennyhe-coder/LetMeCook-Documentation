@@ -9,25 +9,18 @@ import Contact from './pages/Contact';
 import About from './pages/About';
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
-import { useEffect, useState } from "react";
-import { useApi } from "./utils/Api";
-import { useAuth0 } from "@auth0/auth0-react";
+import Profile from "./pages/Profile";
+import Register from "./pages/Register";
+import ResetPassword from "./pages/ResetPassword";
+import ForgotPassword from "./pages/ForgotPassword";
+import EditProfile from "./pages/EditProfile";
 
 function App() {
-  const [me, setMe] = useState(null);
-  const api = useApi();
-  const { isAuthenticated, user } = useAuth0();
-  useEffect(() => {
-    if(!isAuthenticated) return;
-    api.get("/api/me")
-    .then((res) => setMe(res.data))
-    .catch((err) => console.error("Error fetching user data:", err));
-  }, [api, isAuthenticated])
 
   return (
     <>
       <header>
-        <MainNav user ={me}/>
+        <MainNav/>
       </header>
       <Routes>
         <Route path="/" element={<Home />} />   
@@ -38,6 +31,12 @@ function App() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/about" element={<About />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/edit-profile" element={<EditProfile />} />
       </Routes>
       <Footer />
     </>
@@ -45,3 +44,4 @@ function App() {
 }
 
 export default App;
+
