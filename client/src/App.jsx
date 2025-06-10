@@ -14,6 +14,7 @@ import Register from "./pages/Register";
 import ResetPassword from "./pages/ResetPassword";
 import ForgotPassword from "./pages/ForgotPassword";
 import IndRecipe from "./pages/IndividualRecipe";
+import EditProfile from "./pages/EditProfile";
 
 function App() {
 
@@ -37,6 +38,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/recipes/:id" element={<IndRecipe />} />
+        <Route path="/edit-profile" element={<EditProfile />} />
       </Routes>
       <Footer />
     </>
