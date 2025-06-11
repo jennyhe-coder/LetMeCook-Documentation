@@ -60,11 +60,11 @@ public class RecipeService {
     @Transactional(readOnly = true)
     public List<RecipeCardDTO> advancedSearch(
             String keyword,
-            List<String> cuisines,
-            List<String> ingredients,
-            List<String> allergies,
-            List<String> categories,
-            List<String> dietaryPreferences,
+            Set<String> cuisines,
+            Set<String> ingredients,
+            Set<String> allergies,
+            Set<String> categories,
+            Set<String> dietaryPreferences,
             boolean isPublic,
             Pageable pageable) {
 
@@ -99,9 +99,11 @@ public class RecipeService {
             hasGroupBy = true;
         }
 
+        // Ingredient filter with partial matching
         if (ingredients != null && !ingredients.isEmpty()) {
             predicates.add(cb.lower(ingredientJoin.get("name")).in(ingredients.stream().map(String::toLowerCase).toList()));
-            havingPredicates.add(cb.equal(cb.countDistinct(ingredientJoin.get("name")), (long) ingredients.size()));
+            // Require at least one matching ingredient (or adjust threshold as needed)
+            havingPredicates.add(cb.greaterThanOrEqualTo(cb.countDistinct(ingredientJoin.get("name")), 1L));
             hasGroupBy = true;
         }
 
@@ -117,13 +119,15 @@ public class RecipeService {
             hasGroupBy = true;
         }
 
+        // Allergy filter with approximate matching
         if (allergies != null && !allergies.isEmpty()) {
             Expression<Long> allergenCount = cb.sum(
                     cb.<Long>selectCase()
                             .when(cb.lower(ingredientJoin.get("name")).in(allergies.stream().map(String::toLowerCase).toList()), 1L)
                             .otherwise(0L)
             );
-            havingPredicates.add(cb.equal(allergenCount, 0L));
+            // Allow recipes with no allergens or a limited number (e.g., less than half of specified allergens)
+            havingPredicates.add(cb.lessThanOrEqualTo(allergenCount, (long) Math.floor(allergies.size() / 2.0)));
             hasGroupBy = true;
         }
 

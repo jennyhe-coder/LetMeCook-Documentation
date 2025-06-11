@@ -17,4 +17,9 @@ public class CuisineService{
                 .map(CuisineDTO::from)
                 .toList();
     }
+    public List<String> getAllCuisineNames() {
+        return cuisineRepository.findAll().stream()
+                .map(cuisine -> cuisine.getName())
+                .toList();
+    }
 }

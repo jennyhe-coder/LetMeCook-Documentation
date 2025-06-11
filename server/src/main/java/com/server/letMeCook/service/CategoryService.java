@@ -19,5 +19,11 @@ public class CategoryService {
                 .collect(Collectors.toList());
     }
 
+    public List<String> getAllCategoryNames() {
+        return categoryRespository.findAll().stream()
+                .map(category -> category.getName().toLowerCase())
+                .toList();
+    }
+
 
 }
