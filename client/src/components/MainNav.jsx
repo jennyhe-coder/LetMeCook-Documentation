@@ -126,6 +126,13 @@ export default function MainNav() {
               PROFILE
               <span className="underline"></span>
             </NavLink>
+            <NavLink
+            to="/dashboard"
+            className={({ isActive }) =>
+              isActive? "nav-link active" : "nav-link"}
+            >
+              DASHBOARD
+            </NavLink>
 
             {user ? (
               <button onClick={handleLogout}>
