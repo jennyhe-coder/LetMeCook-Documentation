@@ -4,6 +4,7 @@ import { supabase } from '../utils/supabaseClient'
 import Select from 'react-select';
 import { useNavigate } from 'react-router-dom';
 
+
 const DIETARY_OPTIONS  = [
     'Vegetarian',
     'Vegan',
