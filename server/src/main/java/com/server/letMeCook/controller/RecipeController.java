@@ -43,7 +43,7 @@ public class RecipeController {
 
     @GetMapping("/search")
     public List<RecipeCardDTO> advancedSearch(
-            @RequestParam String keyword,
+            @RequestParam(required = false) String keyword,
             @RequestParam(required = false, defaultValue = "0") Integer page,
             @RequestParam(required = false, defaultValue = "20") Integer size,
             @RequestParam(required = false) List<String> cuisines,
