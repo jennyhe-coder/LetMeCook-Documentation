@@ -11,13 +11,11 @@
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.3.0",
-    "@supabase/supabase-js": "^2.50.0",
     "axios": "^1.9.0",
     "gsap": "^3.13.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-router-dom": "^7.6.0",
-    "react-select": "^5.10.1"
+    "react-router-dom": "^7.6.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",

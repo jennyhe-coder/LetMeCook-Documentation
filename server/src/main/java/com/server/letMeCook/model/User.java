@@ -31,8 +31,6 @@ public class User {
     @Column(name = "last_name")
     private String lastName = "";
 
-    @Column(name = "registration_date")
-    private String registrationDate = "";
 
     @Column(name = "role")
     private String role = "user";
@@ -58,7 +56,6 @@ public class User {
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.registrationDate = java.time.LocalDate.now().toString();
         this.role = (role != null) ? role : "user";
     }
 }
