@@ -1,6 +1,7 @@
 package com.server.letMeCook.controller;
 
 
+import com.auth0.jwt.JWT;
 import com.server.letMeCook.dto.recipe.RecipeCardDTO;
 import com.server.letMeCook.dto.recipe.RecipeDTO;
 import com.server.letMeCook.dto.recipe.RecipeSearchFields;
@@ -10,6 +11,7 @@ import com.server.letMeCook.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -91,4 +93,17 @@ public class RecipeController {
         return recipeService.advancedSearch(keyword, cuisines, ingredients, allergies,categories, dietaryPreferences, isPublic, pageable);
     }
 
+    @GetMapping("/recommended")
+    public List<RecipeCardDTO> recommended(@AuthenticationPrincipal JWT jwt,
+                                           @RequestParam(required = false, defaultValue = "0") int page,
+                                           @RequestParam(required = false, defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        if (jwt == null ) {
+            return recipeService.getTopView(pageable);
+        }
+        else{
+            return recipeService.getTopView(pageable);
+        }
+
+    }
 }
