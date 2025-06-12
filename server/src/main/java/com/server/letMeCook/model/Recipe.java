@@ -46,6 +46,9 @@ public class Recipe {
     @Column(name = "directions",columnDefinition = "TEXT")
     private String directions = "";
 
+    @Column(name="view_count")
+    private int viewCount = 0;
+
 
     @Column(name ="time")
     int time = 0;

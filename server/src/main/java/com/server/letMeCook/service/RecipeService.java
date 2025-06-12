@@ -49,6 +49,16 @@ public class RecipeService {
                 .map(RecipeMapper::toCardDTO)
                 .collect(Collectors.toList());
     }
+    @Transactional(readOnly = true)
+    public List<RecipeCardDTO> getTopView(Pageable pageable) {
+        if (pageable == null) {
+            pageable = Pageable.ofSize(20).withPage(0); // Default to first page with 20 items
+        }
+
+        return recipeRepository.findTopByViews(pageable).stream()
+                .map(RecipeMapper::toCardDTO)
+                .collect(Collectors.toList());
+    }
 
     @Transactional(readOnly = true)
     public List<RecipeCardDTO> searchPublicRecipesByAuthorId(UUID authorId) {

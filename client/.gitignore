@@ -1,1 +1,6 @@
 node_modules
+.env
+*storybook.log
+.storybook/
+src/stories/
+storybook-static/
