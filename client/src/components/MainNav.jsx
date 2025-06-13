@@ -1,6 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { useRef, useEffect } from "react";
-import { gsap } from "gsap";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthProvider";
 import { supabase } from "../utils/supabaseClient";
@@ -11,54 +10,14 @@ export default function MainNav() {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Reset default values and kill trailing animations
-    gsap.killTweensOf(".underline");
-    gsap.killTweensOf(".logo-fill");
-    const allUnderlines = document.querySelectorAll(".nav-link .underline");
-    const fillPath = logoRef.current?.querySelector(".logo-fill");
-    if (location.pathname !== "/") {
-      gsap.set(fillPath, { fill: "#ffb2bc" });
-    }
-    allUnderlines.forEach((el) => {
-      gsap.set(el, { opacity: 0 });
-    });
-    //Animate menu underline
-    const activeUnderline = document.querySelector(
-      ".nav-link.active .underline"
-    );
-    if (activeUnderline) {
-      gsap.fromTo(
-        activeUnderline,
-        { opacity: 0 },
-        {
-          opacity: 1,
-          duration: 0.6,
-          ease: "sine.out",
-        }
-      );
-    }
-
-    // Animate logo fill only when navigating to home
-    if (location.pathname === "/") {
-      if (fillPath) {
-        gsap.to(fillPath, {
-          fill: "#28200D",
-          duration: 1,
-          ease: "power2.out",
-        });
-      }
-    }
-  }, [location.pathname]);
-
   const handleLogin = () => {
-    navigate('/login');
-  }
+    navigate("/login");
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    navigate('/');
-  }
+    navigate("/");
+  };
 
   return (
     <>
@@ -127,19 +86,20 @@ export default function MainNav() {
               <span className="underline"></span>
             </NavLink>
             <NavLink
-            to="/dashboard"
-            className={({ isActive }) =>
-              isActive? "nav-link active" : "nav-link"}
+              to="/dashboard"
+              className={({ isActive }) =>
+                isActive ? "nav-link active" : "nav-link"
+              }
             >
               DASHBOARD
             </NavLink>
 
             {user ? (
-              <button onClick={handleLogout}>
-                Logout ({user.name})
-              </button>
+              <button onClick={handleLogout}>Logout ({user.name})</button>
             ) : (
-              <button className="login-button" onClick={handleLogin}>Login</button>
+              <button className="login-button" onClick={handleLogin}>
+                Login
+              </button>
             )}
           </div>
         </nav>
