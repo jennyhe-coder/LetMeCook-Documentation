@@ -10,6 +10,7 @@ import jakarta.persistence.criteria.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,12 +44,7 @@ public class RecipeService {
                 .map(RecipeMapper::toDTO);
     }
 
-    @Transactional(readOnly = true)
-    public List<RecipeCardDTO> searchRecipes(String keyword) {
-        return recipeRepository.findByTitleOrAuthorPartNameContainsIgnoreCase(keyword).stream()
-                .map(RecipeMapper::toCardDTO)
-                .collect(Collectors.toList());
-    }
+
     @Transactional(readOnly = true)
     public List<RecipeCardDTO> getTopView(Pageable pageable) {
         if (pageable == null) {
@@ -109,10 +105,8 @@ public class RecipeService {
             hasGroupBy = true;
         }
 
-        // Ingredient filter with partial matching
         if (ingredients != null && !ingredients.isEmpty()) {
             predicates.add(cb.lower(ingredientJoin.get("name")).in(ingredients.stream().map(String::toLowerCase).toList()));
-            // Require at least one matching ingredient (or adjust threshold as needed)
             havingPredicates.add(cb.greaterThanOrEqualTo(cb.countDistinct(ingredientJoin.get("name")), 1L));
             hasGroupBy = true;
         }
@@ -129,14 +123,12 @@ public class RecipeService {
             hasGroupBy = true;
         }
 
-        // Allergy filter with approximate matching
         if (allergies != null && !allergies.isEmpty()) {
             Expression<Long> allergenCount = cb.sum(
                     cb.<Long>selectCase()
                             .when(cb.lower(ingredientJoin.get("name")).in(allergies.stream().map(String::toLowerCase).toList()), 1L)
                             .otherwise(0L)
             );
-            // Allow recipes with no allergens or a limited number (e.g., less than half of specified allergens)
             havingPredicates.add(cb.lessThanOrEqualTo(allergenCount, (long) Math.floor(allergies.size() / 2.0)));
             hasGroupBy = true;
         }
@@ -150,6 +142,28 @@ public class RecipeService {
             }
         }
 
+        // ✅ Thêm xử lý sort
+        Map<String, String> sortFieldMap = Map.of(
+                "title", "title",
+                "createdat", "createdAt",
+                "viewcount", "viewCount",
+                "cooktime", "cookTime"
+        );
+
+        if (pageable.getSort().isSorted()) {
+            List<Order> orders = new ArrayList<>();
+            for (Sort.Order s : pageable.getSort()) {
+                String sortKey = s.getProperty().toLowerCase();
+                String entityField = sortFieldMap.get(sortKey);
+                if (entityField == null) {
+                    throw new IllegalArgumentException("Invalid sort field: " + sortKey);
+                }
+                orders.add(s.isAscending() ? cb.asc(root.get(entityField)) : cb.desc(root.get(entityField)));
+            }
+            query.orderBy(orders);
+        }
+
+        // Phân trang
         TypedQuery<Recipe> typedQuery = entityManager.createQuery(query);
         typedQuery.setFirstResult((int) pageable.getOffset());
         typedQuery.setMaxResults(pageable.getPageSize());
