@@ -9,8 +9,11 @@ import com.server.letMeCook.model.DietaryPreference;
 import com.server.letMeCook.service.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,10 +35,17 @@ public class RecipeController {
 
 
     @GetMapping
-    public List<RecipeDTO> getAllRecipes(
-            @RequestParam(required = false, defaultValue = "0") Integer page,
-            @RequestParam(required = false, defaultValue = "20") Integer size) {
-        Pageable pageable = PageRequest.of(page, size);
+    public Page<RecipeDTO> getAllRecipes(
+            @PageableDefault (size = 20, page = 0,sort="title", direction = Sort.Direction.ASC) Pageable pageable
+    ) {
+        Set<String> allowedSortFields = Set.of("title", "createdAt", "viewCount","cookTime");
+
+        // Validate sort fields
+        for (Sort.Order order : pageable.getSort()) {
+            if (!allowedSortFields.contains(order.getProperty())) {
+                throw new IllegalArgumentException("Invalid sort field: " + order.getProperty());
+            }
+        }
         return recipeService.getAllRecipeDTOs(pageable);
     }
 

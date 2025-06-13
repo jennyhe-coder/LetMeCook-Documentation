@@ -23,7 +23,7 @@ public class RecipeMapper {
                 : "Unknown");
         dto.setCreatedAt(recipe.getCreatedAt());
         dto.setDirections(recipe.getDirections());
-        dto.setCookingTime(recipe.getTime());
+        dto.setCookingTime(recipe.getCookTime());
 
         dto.setCategories(recipe.getCategories().stream()
                 .map(Category::getName)
@@ -51,7 +51,7 @@ public class RecipeMapper {
         dto.setDescription(recipe.getDescription());
         dto.setServings(recipe.getServings());
         dto.setImageUrl(recipe.getImageUrl());
-        dto.setCookingTime(recipe.getTime());
+        dto.setCookingTime(recipe.getCookTime());
         dto.setAuthorName(recipe.getAuthor() != null
                 ? recipe.getAuthor().getFirstName() + " " + recipe.getAuthor().getLastName()
                 : "Unknown");

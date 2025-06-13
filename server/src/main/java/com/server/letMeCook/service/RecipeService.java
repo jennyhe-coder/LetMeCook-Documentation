@@ -8,6 +8,7 @@ import com.server.letMeCook.repository.RecipeRepository;
 import jakarta.persistence.*;
 import jakarta.persistence.criteria.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,10 +32,9 @@ public class RecipeService {
     private EntityManager entityManager;
 
     @Transactional(readOnly = true)
-    public List<RecipeDTO> getAllRecipeDTOs(Pageable pageable) {
-        return recipeRepository.findAllPublic(pageable).stream()
-                .map(RecipeMapper::toDTO)
-                .collect(Collectors.toList());
+    public Page<RecipeDTO> getAllRecipeDTOs(Pageable pageable) {
+        return recipeRepository.findAllPublic(pageable)
+                .map(RecipeMapper::toDTO);
     }
 
     @Transactional(readOnly = true)
