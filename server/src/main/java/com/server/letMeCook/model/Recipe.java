@@ -51,7 +51,7 @@ public class Recipe {
 
 
     @Column(name ="time")
-    int time = 0;
+    int cookTime = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", referencedColumnName = "id")

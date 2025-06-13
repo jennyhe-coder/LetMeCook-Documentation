@@ -9,8 +9,11 @@ import com.server.letMeCook.model.DietaryPreference;
 import com.server.letMeCook.service.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,12 +35,39 @@ public class RecipeController {
 
 
     @GetMapping
-    public List<RecipeDTO> getAllRecipes(
-            @RequestParam(required = false, defaultValue = "0") Integer page,
-            @RequestParam(required = false, defaultValue = "20") Integer size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return recipeService.getAllRecipeDTOs(pageable);
+    public Page<RecipeDTO> getAllRecipes(
+            @PageableDefault(size = 20, page = 0, sort = "title", direction = Sort.Direction.ASC) Pageable pageable
+    ) {
+        // Map lowercase sort keys → actual entity field names
+        Map<String, String> allowedSortFieldMap = Map.of(
+                "title", "title",
+                "createdat", "createdAt",
+                "viewcount", "viewCount",
+                "cooktime", "cookTime"
+        );
+
+        List<Sort.Order> sanitizedOrders = new ArrayList<>();
+
+        for (Sort.Order order : pageable.getSort()) {
+            String requestedField = order.getProperty().toLowerCase();
+
+            if (!allowedSortFieldMap.containsKey(requestedField)) {
+                throw new IllegalArgumentException("Invalid sort field: " + order.getProperty());
+            }
+
+            String actualField = allowedSortFieldMap.get(requestedField);
+            sanitizedOrders.add(new Sort.Order(order.getDirection(), actualField));
+        }
+
+        Pageable sanitizedPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(sanitizedOrders)
+        );
+
+        return recipeService.getAllRecipeDTOs(sanitizedPageable);
     }
+
 
     @GetMapping("/{id}")
     public RecipeDTO getRecipeById(@PathVariable UUID id) {
@@ -56,15 +86,13 @@ public class RecipeController {
     @GetMapping("/search")
     public List<RecipeCardDTO> advancedSearch(
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false, defaultValue = "0") Integer page,
-            @RequestParam(required = false, defaultValue = "20") Integer size,
             @RequestParam(required = false) Set<String> cuisines,
             @RequestParam(required = false) Set<String> ingredients,
             @RequestParam(required = false) Set<String> allergies,
             @RequestParam(required = false) Set<String> categories,
             @RequestParam(required = false) Set<String> dietaryPreferences,
-
-            @RequestParam(required = false, defaultValue = "true") Boolean isPublic
+            @RequestParam(required = false, defaultValue = "true") Boolean isPublic,
+            @PageableDefault(size = 20, page = 0, sort = "title", direction = Sort.Direction.ASC) Pageable pageable
     ) {
         if (keyword!=null && keyword.length()>20) {
             RecipeSearchFields fields = openAIService.extractRecipeSearchFields(keyword);
@@ -86,10 +114,6 @@ public class RecipeController {
         System.out.println("Dietary Preferences: " + (dietaryPreferences != null ? String.join(", ", dietaryPreferences) : "null"));
         System.out.println("Is Public: " + isPublic);
 
-
-
-
-        Pageable pageable = PageRequest.of(page, size);
         return recipeService.advancedSearch(keyword, cuisines, ingredients, allergies,categories, dietaryPreferences, isPublic, pageable);
     }
 
