@@ -1,0 +1,98 @@
+/* src/pages/about.css */
+
+/* Container “card” for all About content */
+.about-container {
+  background-color: #ffffff;            /* white card */
+  max-width: 800px;                     /* limit width */
+  margin: 3rem auto;                    /* vertical + centered */
+  padding: 2.5rem 2rem;                 /* comfortable padding */
+  border-radius: 12px;                  /* rounded corners */
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08); /* soft drop shadow */
+  color: #28200d;                       /* matching text color */
+}
+
+/* Main Heading */
+.about-container h2 {
+  font-size: 2.75rem;                   /* 44px */
+  font-weight: 700;
+  color: #b9341f;                       /* coral accent */
+  text-align: center;
+  margin-bottom: 1.5rem;
+  letter-spacing: 1px;
+}
+
+/* Sub-Headings */
+.about-container h3 {
+  font-size: 2rem;                      /* 32px */
+  font-weight: 600;
+  color: #28200d;
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 2px solid #d3cdc1;
+}
+
+/* Paragraphs */
+.about-container p {
+  font-size: 1.125rem;                  /* 18px */
+  line-height: 1.75;
+  margin-bottom: 1.5rem;
+  text-align: justify;
+}
+
+/* Section Divider */
+.section-line {
+  height: 2px;
+  background-color: #d3cdc1;
+  margin: 3rem 0;
+  border: none;
+}
+
+/* Footer Links (only on About page) */
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  padding: 1rem 0;
+  background: transparent;              /* let global footer bg show */
+}
+
+.footer-links a {
+  color: #28200d;
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+  color: #b9341f;
+}
+
+/* Small Copyright */
+.footer-links + .layout-wrapper p {
+  text-align: center;
+  font-size: 0.875rem;                  /* 14px */
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .about-container {
+    margin: 2rem 1rem;
+    padding: 2rem 1rem;
+  }
+
+  .about-container h2 {
+    font-size: 2.25rem;
+  }
+
+  .about-container h3 {
+    font-size: 1.75rem;
+  }
+
+  .about-container p {
+    font-size: 1rem;
+  }
+}
