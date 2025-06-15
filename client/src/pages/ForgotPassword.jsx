@@ -20,9 +20,11 @@ export default function ForgotPassword() {
     };
 
     return (
-        <div className="layout-wrapper">
-            <h1>Forgot Password</h1>
-            <form onSubmit={handleResetPassword}>
+        <div className="form-page">
+        <div className="center-container">
+            <form onSubmit={handleResetPassword} className='login-form'>
+                <h2>Forgot Password</h2>
+                <p>Enter your email address to receive a password reset link.</p>
                 <input 
                     type="email" 
                     value={email} 
@@ -33,6 +35,7 @@ export default function ForgotPassword() {
                 <button type="submit">Send Reset Email</button>
                 {error && <p>{error}</p>}
             </form>
+            </div>
         </div>
     );
 }

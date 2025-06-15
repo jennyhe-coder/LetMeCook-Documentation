@@ -28,8 +28,9 @@ export default function ResetPassword() {
     };
 
     return(
-        <form onSubmit={handleResetPassword} className="layout-wrapper">
-            <h1>Reset Password</h1>
+        <div className='form-page'>
+        <form onSubmit={handleResetPassword} className="login-form">
+            <h2>Reset Password</h2>
             <input
                 type="password"
                 value={password}
@@ -47,5 +48,6 @@ export default function ResetPassword() {
             <button type="submit">Reset Password</button>
             {error && <p className="error-message">{error}</p>}
         </form>
+        </div>
     );
 }

@@ -49,17 +49,18 @@ export default function Register() {
 
     return(
         <>
-        <div className="layout-wrapper">
-            <h1>Register Page</h1>
-            <form onSubmit={handleRegister}>
-            <h2>Register</h2>
-            <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder='FirstName'/>
-            <input value={lastName} onChange={(e) => {setLastName(e.target.value)}} placeholder='LastName' />
-            <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
-            <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
-            <button type="submit">Register</button>
-            {error.length > 0 && <p>{error}</p>}
-            </form>
+        <div className="form-page">
+            <div className="center-container">
+                <form onSubmit={handleRegister} className='login-form'>
+                <h2>Register</h2>
+                <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder='FirstName'/>
+                <input value={lastName} onChange={(e) => {setLastName(e.target.value)}} placeholder='LastName' />
+                <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
+                <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" />
+                <button type="submit">Register</button>
+                {error.length > 0 && <p>{error}</p>}
+                </form>
+            </div>
         </div>
         </>
     );
