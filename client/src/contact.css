@@ -1,0 +1,137 @@
+/* src/pages/contact.css */
+
+/* 1) Overall container */
+.contact-container {
+  background: #ffffff;
+  max-width: 720px;               /* slightly narrower for focus */
+  margin: 4rem auto;              /* more breathing room above */
+  padding: 3rem 2.5rem;           /* generous padding */
+  border-radius: 12px;
+  box-shadow: 0 12px 36px rgba(0,0,0,0.1);
+  color: #28200d;
+  line-height: 1.6;
+}
+
+/* 2) Section heading */
+.contact-container h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #b9341f;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+/* 3) Intro text */
+.contact-container .intro {
+  font-size: 1.025rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: #4f4831;
+}
+
+/* 4) Form grid */
+.contact-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem 2rem;
+  margin-bottom: 2.5rem;
+}
+@media (max-width: 600px) {
+  .contact-form {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 5) Full-width group (textarea) */
+.form-group--full {
+  grid-column: 1 / -1;
+}
+
+/* 6) Labels and inputs */
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+.form-group label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #28200d;
+}
+
+/* 7) Inputs & textarea */
+.form-input,
+.form-textarea {
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background: #fdfcf9;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #b9341f;
+  box-shadow: 0 0 0 4px rgba(185,52,31,0.15);
+}
+.form-textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+/* 8) Submit button */
+.submit-btn {
+  grid-column: 1 / -1;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #b9341f 0%, #d14d30 100%);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.1s ease;
+}
+.submit-btn:hover {
+  background: linear-gradient(135deg, #d14d30 0%, #b9341f 100%);
+  transform: translateY(-2px);
+}
+.submit-btn:active {
+  transform: translateY(0);
+}
+
+/* 9) Feedback message */
+.form-message {
+  grid-column: 1 / -1;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  text-align: center;
+}
+.form-message.error {
+  background: #ffe6e6;
+  color: #c62828;
+  border: 1px solid #f5c6cb;
+}
+.form-message.success {
+  background: #e8f5e8;
+  color: #2e7d32;
+  border: 1px solid #a5d6a7;
+}
+
+/* 10) Privacy note */
+.privacy-note {
+  font-size: 0.9rem;
+  color: #666;
+  text-align: center;
+  margin-top: 2rem;
+  line-height: 1.5;
+}
+
+/* 11) Tweak footer-links on this page only */
+.footer-links {
+  justify-content: center;
+  gap: 2rem;
+}
