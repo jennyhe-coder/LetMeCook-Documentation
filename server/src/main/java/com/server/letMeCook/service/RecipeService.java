@@ -9,6 +9,7 @@ import jakarta.persistence.*;
 import jakarta.persistence.criteria.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -64,7 +65,7 @@ public class RecipeService {
     }
 
     @Transactional(readOnly = true)
-    public List<RecipeCardDTO> advancedSearch(
+    public Page<RecipeCardDTO> advancedSearch(
             String keyword,
             Set<String> cuisines,
             Set<String> ingredients,
@@ -142,7 +143,7 @@ public class RecipeService {
             }
         }
 
-        // ✅ Thêm xử lý sort
+
         Map<String, String> sortFieldMap = Map.of(
                 "title", "title",
                 "createdat", "createdAt",
@@ -163,13 +164,31 @@ public class RecipeService {
             query.orderBy(orders);
         }
 
-        // Phân trang
+
         TypedQuery<Recipe> typedQuery = entityManager.createQuery(query);
         typedQuery.setFirstResult((int) pageable.getOffset());
         typedQuery.setMaxResults(pageable.getPageSize());
 
-        return typedQuery.getResultList().stream()
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<Recipe> countRoot = countQuery.from(Recipe.class);
+
+        countRoot.join("author", JoinType.LEFT);
+        countRoot.join("cuisines", JoinType.LEFT);
+        countRoot.join("categories", JoinType.LEFT);
+        Join<Recipe, RecipeIngredient> riCountJoin = countRoot.join("recipeIngredients", JoinType.LEFT);
+        riCountJoin.join("ingredient", JoinType.LEFT);
+        countRoot.join("dietaryPreferences", JoinType.LEFT);
+
+        countQuery.select(cb.countDistinct(countRoot)).where(predicates.toArray(new Predicate[0]));
+
+        long total = entityManager.createQuery(countQuery).getSingleResult();
+
+        List<RecipeCardDTO> results = typedQuery.getResultList()
+                .stream()
                 .map(RecipeMapper::toCardDTO)
                 .collect(Collectors.toList());
+
+        return new PageImpl<>(results, pageable, total);
+
     }
 }
