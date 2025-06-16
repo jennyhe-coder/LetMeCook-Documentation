@@ -63,7 +63,6 @@ public class RecipeService {
                 .map(RecipeMapper::toCardDTO)
                 .collect(Collectors.toList());
     }
-
     @Transactional(readOnly = true)
     public Page<RecipeCardDTO> advancedSearch(
             String keyword,
@@ -143,7 +142,7 @@ public class RecipeService {
             }
         }
 
-
+        // Sort
         Map<String, String> sortFieldMap = Map.of(
                 "title", "title",
                 "createdat", "createdAt",
@@ -169,9 +168,14 @@ public class RecipeService {
         typedQuery.setFirstResult((int) pageable.getOffset());
         typedQuery.setMaxResults(pageable.getPageSize());
 
+        List<Recipe> resultList = typedQuery.getResultList();
+        List<RecipeCardDTO> results = resultList.stream()
+                .map(RecipeMapper::toCardDTO)
+                .collect(Collectors.toList());
+
+
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<Recipe> countRoot = countQuery.from(Recipe.class);
-
         countRoot.join("author", JoinType.LEFT);
         countRoot.join("cuisines", JoinType.LEFT);
         countRoot.join("categories", JoinType.LEFT);
@@ -179,16 +183,25 @@ public class RecipeService {
         riCountJoin.join("ingredient", JoinType.LEFT);
         countRoot.join("dietaryPreferences", JoinType.LEFT);
 
-        countQuery.select(cb.countDistinct(countRoot)).where(predicates.toArray(new Predicate[0]));
+        List<Predicate> countPredicates = new ArrayList<>();
 
+        if (keyword != null && !keyword.isBlank()) {
+            String pattern = "%" + keyword.toLowerCase() + "%";
+            Predicate titleLike = cb.like(cb.lower(countRoot.get("title")), pattern);
+            Predicate authorLike = cb.like(cb.lower(cb.concat(
+                    countRoot.join("author", JoinType.LEFT).get("firstName"),
+                    cb.concat(" ", countRoot.join("author", JoinType.LEFT).get("lastName"))
+            )), pattern);
+            Predicate descriptionLike = cb.like(cb.lower(countRoot.get("description")), pattern);
+            countPredicates.add(cb.or(titleLike, authorLike, descriptionLike));
+        }
+
+        countPredicates.add(cb.equal(countRoot.get("isPublic"), isPublic));
+
+        countQuery.select(cb.countDistinct(countRoot)).where(countPredicates.toArray(new Predicate[0]));
         long total = entityManager.createQuery(countQuery).getSingleResult();
 
-        List<RecipeCardDTO> results = typedQuery.getResultList()
-                .stream()
-                .map(RecipeMapper::toCardDTO)
-                .collect(Collectors.toList());
-
         return new PageImpl<>(results, pageable, total);
-
     }
+
 }
