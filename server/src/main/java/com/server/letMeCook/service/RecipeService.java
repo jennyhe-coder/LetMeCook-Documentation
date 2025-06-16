@@ -8,7 +8,10 @@ import com.server.letMeCook.repository.RecipeRepository;
 import jakarta.persistence.*;
 import jakarta.persistence.criteria.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,10 +34,9 @@ public class RecipeService {
     private EntityManager entityManager;
 
     @Transactional(readOnly = true)
-    public List<RecipeDTO> getAllRecipeDTOs(Pageable pageable) {
-        return recipeRepository.findAllPublic(pageable).stream()
-                .map(RecipeMapper::toDTO)
-                .collect(Collectors.toList());
+    public Page<RecipeDTO> getAllRecipeDTOs(Pageable pageable) {
+        return recipeRepository.findAllPublic(pageable)
+                .map(RecipeMapper::toDTO);
     }
 
     @Transactional(readOnly = true)
@@ -43,9 +45,14 @@ public class RecipeService {
                 .map(RecipeMapper::toDTO);
     }
 
+
     @Transactional(readOnly = true)
-    public List<RecipeCardDTO> searchRecipes(String keyword) {
-        return recipeRepository.findByTitleOrAuthorPartNameContainsIgnoreCase(keyword).stream()
+    public List<RecipeCardDTO> getTopView(Pageable pageable) {
+        if (pageable == null) {
+            pageable = Pageable.ofSize(20).withPage(0); // Default to first page with 20 items
+        }
+
+        return recipeRepository.findTopByViews(pageable).stream()
                 .map(RecipeMapper::toCardDTO)
                 .collect(Collectors.toList());
     }
@@ -58,7 +65,7 @@ public class RecipeService {
     }
 
     @Transactional(readOnly = true)
-    public List<RecipeCardDTO> advancedSearch(
+    public Page<RecipeCardDTO> advancedSearch(
             String keyword,
             Set<String> cuisines,
             Set<String> ingredients,
@@ -99,10 +106,8 @@ public class RecipeService {
             hasGroupBy = true;
         }
 
-        // Ingredient filter with partial matching
         if (ingredients != null && !ingredients.isEmpty()) {
             predicates.add(cb.lower(ingredientJoin.get("name")).in(ingredients.stream().map(String::toLowerCase).toList()));
-            // Require at least one matching ingredient (or adjust threshold as needed)
             havingPredicates.add(cb.greaterThanOrEqualTo(cb.countDistinct(ingredientJoin.get("name")), 1L));
             hasGroupBy = true;
         }
@@ -119,14 +124,12 @@ public class RecipeService {
             hasGroupBy = true;
         }
 
-        // Allergy filter with approximate matching
         if (allergies != null && !allergies.isEmpty()) {
             Expression<Long> allergenCount = cb.sum(
                     cb.<Long>selectCase()
                             .when(cb.lower(ingredientJoin.get("name")).in(allergies.stream().map(String::toLowerCase).toList()), 1L)
                             .otherwise(0L)
             );
-            // Allow recipes with no allergens or a limited number (e.g., less than half of specified allergens)
             havingPredicates.add(cb.lessThanOrEqualTo(allergenCount, (long) Math.floor(allergies.size() / 2.0)));
             hasGroupBy = true;
         }
@@ -140,12 +143,52 @@ public class RecipeService {
             }
         }
 
+
+        Map<String, String> sortFieldMap = Map.of(
+                "title", "title",
+                "createdat", "createdAt",
+                "viewcount", "viewCount",
+                "cooktime", "cookTime"
+        );
+
+        if (pageable.getSort().isSorted()) {
+            List<Order> orders = new ArrayList<>();
+            for (Sort.Order s : pageable.getSort()) {
+                String sortKey = s.getProperty().toLowerCase();
+                String entityField = sortFieldMap.get(sortKey);
+                if (entityField == null) {
+                    throw new IllegalArgumentException("Invalid sort field: " + sortKey);
+                }
+                orders.add(s.isAscending() ? cb.asc(root.get(entityField)) : cb.desc(root.get(entityField)));
+            }
+            query.orderBy(orders);
+        }
+
+
         TypedQuery<Recipe> typedQuery = entityManager.createQuery(query);
         typedQuery.setFirstResult((int) pageable.getOffset());
         typedQuery.setMaxResults(pageable.getPageSize());
 
-        return typedQuery.getResultList().stream()
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<Recipe> countRoot = countQuery.from(Recipe.class);
+
+        countRoot.join("author", JoinType.LEFT);
+        countRoot.join("cuisines", JoinType.LEFT);
+        countRoot.join("categories", JoinType.LEFT);
+        Join<Recipe, RecipeIngredient> riCountJoin = countRoot.join("recipeIngredients", JoinType.LEFT);
+        riCountJoin.join("ingredient", JoinType.LEFT);
+        countRoot.join("dietaryPreferences", JoinType.LEFT);
+
+        countQuery.select(cb.countDistinct(countRoot)).where(predicates.toArray(new Predicate[0]));
+
+        long total = entityManager.createQuery(countQuery).getSingleResult();
+
+        List<RecipeCardDTO> results = typedQuery.getResultList()
+                .stream()
                 .map(RecipeMapper::toCardDTO)
                 .collect(Collectors.toList());
+
+        return new PageImpl<>(results, pageable, total);
+
     }
 }

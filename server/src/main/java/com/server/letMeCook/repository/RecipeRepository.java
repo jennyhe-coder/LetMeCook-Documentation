@@ -34,6 +34,9 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
     @Query("SELECT r FROM Recipe r WHERE r.isPublic = true")
     Page<Recipe> findAllPublic(Pageable pageable);
 
+    @Query("SELECT r FROM Recipe r WHERE r.isPublic = true ORDER BY r.viewCount DESC")
+    Page<Recipe> findTopByViews(Pageable pageable);
+
 
     // Find recipes by author ID
     List<Recipe> findByAuthorId(UUID authorId);

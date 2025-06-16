@@ -46,9 +46,12 @@ public class Recipe {
     @Column(name = "directions",columnDefinition = "TEXT")
     private String directions = "";
 
+    @Column(name="view_count")
+    private int viewCount = 0;
+
 
     @Column(name ="time")
-    int time = 0;
+    int cookTime = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", referencedColumnName = "id")

@@ -1,81 +1,113 @@
+// src/pages/Contact.jsx
 import React, { useState } from 'react';
-import '../styles.css';
+import '../styles.css';    // global styles
+import '../contact.css';    // page-specific styles
 import { Link } from 'react-router-dom';
 
-const Contact = () => {
+export default function Contact() {
   const [formMessage, setFormMessage] = useState('');
-  const [formClass, setFormClass] = useState('');
+  const [formClass, setFormClass]   = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const name = e.target.name.value.trim();
-    const email = e.target.email.value.trim();
+    const name    = e.target.name.value.trim();
+    const email   = e.target.email.value.trim();
     const message = e.target.message.value.trim();
 
     if (!name || !email.includes('@') || !message) {
-      setFormMessage("Please fill in all fields with valid information.");
-      setFormClass("error");
+      setFormMessage('Please fill in all fields with valid information.');
+      setFormClass('error');
       return;
     }
 
-    // Placeholder for actual submission logic
-    setFormMessage("Thank you! Your message has been sent successfully.");
-    setFormClass("success");
+    setFormMessage('Thank you! Your message has been sent successfully.');
+    setFormClass('success');
     e.target.reset();
   };
 
   return (
     <>
+      {/* Header / Navigation */}
       <header>
-        <nav>
-          <Link to="/about">About</Link>
-          <Link to="/privacy">Privacy Policy</Link>
-          <Link to="/terms">Terms & Conditions</Link>
-          <Link to="/contact">Contact</Link>
+        <nav className="layout-wrapper main-nav">
+          <div className="logo-section">
+            <Link to="/">Let Me Cook</Link>
+          </div>
+          <div className="nav-links">
+            <Link to="/">Home</Link>
+            <Link to="/recipes">Recipes</Link>
+            <Link to="/contact" className="active">Contact</Link>
+            <Link to="/about">About</Link>
+            <Link to="/privacy">Privacy</Link>
+            <Link to="/terms">Terms</Link>
+          </div>
         </nav>
       </header>
 
+      {/* Contact Card */}
       <main>
-        <section>
+        <section className="layout-wrapper contact-container">
           <h2>Contact Us</h2>
-          <p>
-            We’d love to hear from you! Whether you have questions about recipes,
-            feedback about the site, or ideas to share, please don’t hesitate to reach out.
+          <p className="intro">
+            We’d love to hear from you! Whether you have questions about recipes, feedback about the site,
+            or ideas to share, please don’t hesitate to reach out.
           </p>
 
-          <form onSubmit={handleSubmit} aria-label="Contact form">
-            <label htmlFor="name">Your Name</label>
-            <input type="text" id="name" name="name" placeholder="Your Name" required />
+          <form onSubmit={handleSubmit} className="contact-form" aria-label="Contact form">
+            <div className="form-group">
+              <label htmlFor="name">Your Name *</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                className="form-input"
+                placeholder="Enter your full name"
+                required
+              />
+            </div>
 
-            <label htmlFor="email">Your Email</label>
-            <input type="email" id="email" name="email" placeholder="Your Email" required />
+            <div className="form-group">
+              <label htmlFor="email">Your Email *</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                className="form-input"
+                placeholder="Enter your email address"
+                required
+              />
+            </div>
 
-            <label htmlFor="message">Your Message</label>
-            <textarea id="message" name="message" rows="5" placeholder="Write your message here..." required></textarea>
+            <div className="form-group form-group--full">
+              <label htmlFor="message">Your Message *</label>
+              <textarea
+                id="message"
+                name="message"
+                className="form-input form-textarea"
+                placeholder="Tell us what's on your mind..."
+                required
+              ></textarea>
+            </div>
 
-            <button type="submit">Send</button>
-            <p role="alert" aria-live="polite" className={formClass}>{formMessage}</p>
+            <button type="submit" className="submit-btn">
+              Send Message
+            </button>
+
+            {formMessage && (
+              <div role="alert" aria-live="polite" className={`form-message ${formClass}`}>
+                {formMessage}
+              </div>
+            )}
           </form>
 
-          <h3>Privacy & Security</h3>
-          <p>
+          <h3>Privacy &amp; Security</h3>
+          <p className="privacy-note">
             Any information you submit through this form is used solely to respond to your inquiry and improve our services.
             We do not share your contact details with third parties. Our site employs secure encryption protocols to protect
             your data during transmission and storage.
           </p>
         </section>
       </main>
-
-      <footer>
-        <div>
-          <Link to="/privacy">Privacy Policy</Link>
-          <Link to="/terms">Terms & Conditions</Link>
-          <Link to="/contact">Contact</Link>
-        </div>
-        <p>&copy; 2025 Let Me Cook. All rights reserved.</p>
-      </footer>
     </>
   );
-};
-
-export default Contact;
+}

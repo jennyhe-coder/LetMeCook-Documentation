@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom"; // or use next/link if you're in Next.js
+import React from 'react';
+import './RecipeCard.css';
 
 export default function RecipeCard({
   id,
