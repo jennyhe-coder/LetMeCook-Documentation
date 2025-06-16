@@ -1,7 +1,8 @@
 import { useRef, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import RecipeCard from "./RecipeCard";
 
-const REPEAT_COUNT = 25;
+const MAX_RECIPES = 20;
+
 const FALLBACK_RECIPE = [
   {
     id: "fallback-01",
@@ -42,130 +43,48 @@ export default function Carousel() {
   const lastX = useRef(0);
   const lastTime = useRef(0);
   const momentumFrame = useRef(null);
-  const isHovering = useRef(false);
-  const lastScrollTime = useRef(0);
   const resumeTimeout = useRef(null);
-  const [isInView, setIsInView] = useState(true);
+
   const [recipes, setRecipes] = useState([]);
   const [error, setError] = useState(false);
-  const [hasLoaded, setHasLoaded] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const dataToRender = error ? FALLBACK_RECIPE : recipes;
+  const dataToRender = (error ? FALLBACK_RECIPE : recipes).slice(
+    0,
+    MAX_RECIPES
+  );
 
-  // Build fullList only after loading
-  const fullList = [
-    ...Array.from({ length: REPEAT_COUNT }).flatMap(() => dataToRender),
-    ...dataToRender,
-    ...Array.from({ length: REPEAT_COUNT }).flatMap(() => dataToRender),
-  ];
-
-  // Fetch
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
-        const res = await fetch("https://letmecook.ca/api/recipes");
+        const res = await fetch("https://letmecook.ca/api/recipes?size=20");
         if (!res.ok) throw new Error("Network error");
+
         const data = await res.json();
-        if (!Array.isArray(data) || data.length === 0) {
+        if (!Array.isArray(data.content) || data.content.length === 0) {
           throw new Error("Invalid or empty data");
         }
-        setRecipes(data);
+
+        setRecipes(data.content);
       } catch (err) {
         console.error("Failed to fetch recipes:", err);
         setError(true);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchRecipes();
   }, []);
 
-  const handleLoopScroll = () => {
-    const carousel = carouselRef.current;
-    const item = carousel?.querySelector(".recipe-card");
-    if (!carousel || !item) return;
-
-    const itemWidth =
-      item.offsetWidth + parseInt(getComputedStyle(item).marginRight || "0");
-    const totalItems = fullList.length;
-    const totalWidth = itemWidth * totalItems;
-
-    if (carousel.scrollLeft <= 0) {
-      carousel.scrollLeft += totalWidth / 2;
-    } else if (carousel.scrollLeft + carousel.offsetWidth >= totalWidth) {
-      carousel.scrollLeft -= totalWidth / 2;
-    }
-  };
-
-  // Observer for auto-scroll
   useEffect(() => {
-    const carousel = carouselRef.current;
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsInView(entry.isIntersecting),
-      { threshold: 0.5 }
-    );
-    if (carousel) observer.observe(carousel);
-    return () => observer.disconnect();
-  }, []);
+    if (loading) return;
 
-  // Initial scroll position (only for real data)
-  useEffect(() => {
-    if (error) return;
-
-    const carousel = carouselRef.current;
-    if (!carousel || dataToRender.length === 0) return;
-
-    const images = Array.from(carousel.querySelectorAll("img"));
-    const allImagesLoaded = images.map((img) =>
-      img.complete
-        ? Promise.resolve()
-        : new Promise((res) => {
-            img.onload = img.onerror = res;
-          })
-    );
-
-    Promise.all(allImagesLoaded).then(() => {
-      const item = carousel.querySelector(".recipe-card");
-      if (!item) return;
-
-      const itemWidth =
-        item.offsetWidth + parseInt(getComputedStyle(item).marginRight || "0");
-      const totalClones = REPEAT_COUNT * dataToRender.length;
-      const scrollTarget = totalClones * itemWidth;
-
-      carousel.scrollLeft = scrollTarget;
-      setTimeout(() => setHasLoaded(true), 1000);
-    });
-  }, [dataToRender]);
-
-  // Auto-scroll
-  useEffect(() => {
-    if (!hasLoaded) return;
     const carousel = carouselRef.current;
     if (!carousel) return;
 
-    let animationFrame;
-    const SCROLL_INTERVAL = 10;
-    const SCROLL_STEP = 1;
-
-    const scroll = (time) => {
-      if (!isDragging.current && !isHovering.current && isInView) {
-        if (time - lastScrollTime.current >= SCROLL_INTERVAL) {
-          carousel.scrollLeft += SCROLL_STEP;
-          lastScrollTime.current = time;
-          handleLoopScroll();
-        }
-      }
-      animationFrame = requestAnimationFrame(scroll);
-    };
-
-    animationFrame = requestAnimationFrame(scroll);
-    return () => cancelAnimationFrame(animationFrame);
-  }, [hasLoaded, isInView]);
-
-  // Drag and touch handlers (same as before, unchanged)
-  useEffect(() => {
-    const carousel = carouselRef.current;
-    if (!carousel) return;
+    const track = carousel.querySelector(".carousel-track");
+    if (!track) return;
 
     let preventClick = false;
 
@@ -195,7 +114,7 @@ export default function Carousel() {
       carousel.scrollLeft = scrollStart.current - dx;
       lastX.current = point.pageX;
       lastTime.current = now;
-      handleLoopScroll();
+
       document.body.classList.add("grabbing-cursor");
     };
 
@@ -207,7 +126,6 @@ export default function Carousel() {
         if (Math.abs(velocity.current) < 0.01) return;
         carousel.scrollLeft -= velocity.current * 10;
         velocity.current *= 0.95;
-        handleLoopScroll();
         momentumFrame.current = requestAnimationFrame(applyMomentum);
       };
       momentumFrame.current = requestAnimationFrame(applyMomentum);
@@ -222,70 +140,49 @@ export default function Carousel() {
       }
     };
 
-    const handleEnter = () => {
-      isHovering.current = true;
-      if (resumeTimeout.current) {
-        clearTimeout(resumeTimeout.current);
-        resumeTimeout.current = null;
-      }
-    };
-
-    const handleLeave = () => {
-      resumeTimeout.current = setTimeout(() => {
-        isHovering.current = false;
-      }, 300);
-    };
-
     const onMouseDown = (e) => handleMouseDown(e, e);
     const onTouchStart = (e) => handleMouseDown(e.touches[0], e);
     const onTouchMove = (e) => handleMouseMove(e.touches[0]);
 
-    carousel.addEventListener("mousedown", onMouseDown);
+    track.addEventListener("mousedown", onMouseDown);
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mouseup", handleMouseUp);
     window.addEventListener("click", handleClick, true);
-    carousel.addEventListener("mouseenter", handleEnter);
-    carousel.addEventListener("mouseleave", handleLeave);
-    carousel.addEventListener("touchstart", onTouchStart);
+    track.addEventListener("touchstart", onTouchStart);
     window.addEventListener("touchmove", onTouchMove);
     window.addEventListener("touchend", handleMouseUp);
 
     return () => {
-      carousel.removeEventListener("mousedown", onMouseDown);
+      track.removeEventListener("mousedown", onMouseDown);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
       window.removeEventListener("click", handleClick, true);
-      carousel.removeEventListener("mouseenter", handleEnter);
-      carousel.removeEventListener("mouseleave", handleLeave);
-      carousel.removeEventListener("touchstart", onTouchStart);
+      track.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchmove", onTouchMove);
       window.removeEventListener("touchend", handleMouseUp);
 
       if (resumeTimeout.current) clearTimeout(resumeTimeout.current);
       cancelAnimationFrame(momentumFrame.current);
     };
-  }, []);
+  }, [loading]);
 
   return (
     <div className="carousel" ref={carouselRef}>
-      <div className="carousel-track">
-        {fullList.map((recipe, i) => (
-          <Link
-            key={`${recipe.id}-${i}`}
-            to={`api/recipes/${recipe.id}`}
-            className="recipe-card"
-          >
-            <div className="img-container">
-              <img src={recipe.imageUrl} alt={recipe.title} loading="eager" />
-            </div>
-            <div className="recipe-meta">
-              <div className="recipe-title">{recipe.title}</div>
-              <p>{recipe.authorName}</p>
-              <p>{recipe.cookingTime} min</p>
-            </div>
-          </Link>
-        ))}
-      </div>
+      {loading ? (
+        <div className="carousel-loading">Loading recipes...</div>
+      ) : (
+        <div className="carousel-track">
+          {dataToRender.map((recipe, i) => (
+            <RecipeCard
+              key={`${recipe.id}-${i}`}
+              title={recipe.title}
+              author={recipe.authorName}
+              imageUrl={recipe.imageUrl}
+              cookingTime={recipe.cookingTime}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
