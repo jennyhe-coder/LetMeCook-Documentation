@@ -40,6 +40,8 @@ const SORT_OPTIONS = {
 
 export default function FilterBar({ filters, setFilters, sort, setSort }) {
   const [showSortOptions, setShowSortOptions] = useState(false);
+  const [openDropdownGroup, setOpenDropdownGroup] = useState(null);
+
   const handleSelect = (group, value) => {
     setFilters((prev) => {
       const isSelected = prev[group].includes(value);
@@ -57,7 +59,12 @@ export default function FilterBar({ filters, setFilters, sort, setSort }) {
       <div className="filter-top-row">
         <div className="filter-dropdowns">
           {Object.entries(FILTERS).map(([group, { label, options }]) => (
-            <div key={group} className="dropdown">
+            <div
+              key={group}
+              className="dropdown"
+              onMouseEnter={() => setOpenDropdownGroup(group)}
+              onMouseLeave={() => setOpenDropdownGroup(null)}
+            >
               <div className="dropdown-button-wrapper">
                 <button className="dropdown-button">
                   <span>{label}</span>
@@ -81,31 +88,36 @@ export default function FilterBar({ filters, setFilters, sort, setSort }) {
                   </span>
                 )}
               </div>
-
-              <div className="dropdown-content">
-                {options.map(({ label: optLabel, value }) => (
-                  <div
-                    key={value}
-                    className="dropdown-item"
-                    onClick={() => handleSelect(group, value)}
-                  >
-                    <span>{optLabel}</span>
-                    {filters[group].includes(value) && (
-                      <span className="checkmark">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          height="16px"
-                          viewBox="0 -960 960 960"
-                          width="16px"
-                          fill="##1e1e1e"
-                        >
-                          <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
-                        </svg>
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
+              {openDropdownGroup === group && (
+                <div className="dropdown-content">
+                  {options.map(({ label: optLabel, value }) => (
+                    <div
+                      key={value}
+                      className="dropdown-item"
+                      onClick={() => {
+                        handleSelect(group, value);
+                        setOpenDropdownGroup(null);
+                      }}
+                    >
+                      <span>{optLabel}</span>
+                      {filters[group].includes(value) && (
+                        <span className="checkmark">
+                          {" "}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            height="16px"
+                            viewBox="0 -960 960 960"
+                            width="16px"
+                            fill="##1e1e1e"
+                          >
+                            <path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z" />
+                          </svg>
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>

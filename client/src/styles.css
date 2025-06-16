@@ -1040,6 +1040,7 @@ p {
   text-underline-offset: auto;
   text-underline-position: from-font;
   cursor: pointer;
+  transform: translateY(-3px);
 }
 
 .dropdown-button-wrapper {
