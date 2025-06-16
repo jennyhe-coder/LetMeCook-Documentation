@@ -14,7 +14,7 @@ export default function Home() {
   return (
     <>
       <main>
-        <section className="search-box-container">
+        <section className="prompt-section">
           <div className="layout-wrapper">
             <div className="search-container">
               <SearchBar />

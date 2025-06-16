@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import RecipeCard from "./RecipeCard";
 
-const MAX_RECIPES = 25;
+const MAX_RECIPES = 20;
 
 const FALLBACK_RECIPE = [
   {
@@ -47,6 +47,7 @@ export default function Carousel() {
 
   const [recipes, setRecipes] = useState([]);
   const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const dataToRender = (error ? FALLBACK_RECIPE : recipes).slice(
     0,
@@ -56,16 +57,20 @@ export default function Carousel() {
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
-        const res = await fetch("https://letmecook.ca/api/recipes");
+        const res = await fetch("https://letmecook.ca/api/recipes?size=20");
         if (!res.ok) throw new Error("Network error");
+
         const data = await res.json();
-        if (!Array.isArray(data) || data.length === 0) {
+        if (!Array.isArray(data.content) || data.content.length === 0) {
           throw new Error("Invalid or empty data");
         }
-        setRecipes(data);
+
+        setRecipes(data.content);
       } catch (err) {
         console.error("Failed to fetch recipes:", err);
         setError(true);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -73,9 +78,13 @@ export default function Carousel() {
   }, []);
 
   useEffect(() => {
+    if (loading) return;
+
     const carousel = carouselRef.current;
-    const track = carousel.querySelector(".carousel-track");
     if (!carousel) return;
+
+    const track = carousel.querySelector(".carousel-track");
+    if (!track) return;
 
     let preventClick = false;
 
@@ -155,21 +164,25 @@ export default function Carousel() {
       if (resumeTimeout.current) clearTimeout(resumeTimeout.current);
       cancelAnimationFrame(momentumFrame.current);
     };
-  }, []);
+  }, [loading]);
 
   return (
     <div className="carousel" ref={carouselRef}>
-      <div className="carousel-track">
-        {dataToRender.map((recipe, i) => (
-          <RecipeCard
-            key={`${recipe.id}-${i}`}
-            title={recipe.title}
-            author={recipe.authorName}
-            imageUrl={recipe.imageUrl}
-            cookingTime={recipe.cookingTime}
-          />
-        ))}
-      </div>
+      {loading ? (
+        <div className="carousel-loading">Loading recipes...</div>
+      ) : (
+        <div className="carousel-track">
+          {dataToRender.map((recipe, i) => (
+            <RecipeCard
+              key={`${recipe.id}-${i}`}
+              title={recipe.title}
+              author={recipe.authorName}
+              imageUrl={recipe.imageUrl}
+              cookingTime={recipe.cookingTime}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

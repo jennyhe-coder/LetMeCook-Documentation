@@ -10,7 +10,7 @@ export default function RecipeCard({
   return (
     <Link to={`/recipes/${id}`} className="recipe-card">
       <div className="recipe-card-img-container">
-        <img src={imageUrl} alt={title} className="blob-image" />
+        <img src={imageUrl} alt={title} loading="lazy" className="blob-image" />
       </div>
       <div className="recipe-card-meta">
         <div className="top-half">
