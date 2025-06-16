@@ -78,7 +78,6 @@ public class RecipeService {
         CriteriaQuery<Recipe> query = cb.createQuery(Recipe.class);
         Root<Recipe> root = query.from(Recipe.class);
 
-        // Join ở query chính
         Join<Recipe, User> authorJoin = root.join("author", JoinType.LEFT);
         Join<Recipe, Cuisine> cuisineJoin = root.join("cuisines", JoinType.LEFT);
         Join<Recipe, Category> categoryJoin = root.join("categories", JoinType.LEFT);
@@ -164,7 +163,7 @@ public class RecipeService {
             query.orderBy(orders);
         }
 
-        // Thực hiện query chính
+
         TypedQuery<Recipe> typedQuery = entityManager.createQuery(query);
         typedQuery.setFirstResult((int) pageable.getOffset());
         typedQuery.setMaxResults(pageable.getPageSize());
@@ -174,7 +173,7 @@ public class RecipeService {
                 .map(RecipeMapper::toCardDTO)
                 .collect(Collectors.toList());
 
-        // === ❗ Tạo countQuery mới hoàn toàn ===
+
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<Recipe> countRoot = countQuery.from(Recipe.class);
         countRoot.join("author", JoinType.LEFT);
