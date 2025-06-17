@@ -1076,7 +1076,6 @@ p {
 .prompt-section {
   padding-top: 200px;
   padding-bottom: 100px;
-=======
   font-weight: 800;
   line-height: 70px;
   bottom: 180px;
@@ -1089,7 +1088,7 @@ p {
   justify-content: center;
   max-width: 500px;
   gap: 20px;
-  
+
 }
 
 .login-form h2 {
@@ -1124,6 +1123,7 @@ p {
   font-weight: 600;
   cursor: pointer;
 }
+
 .login-form button:hover {
   background-color: #28200d;
   color: #ef9fa9;
@@ -1137,6 +1137,7 @@ p {
   font-style: normal;
   font-weight: 500;
 }
+
 .link:hover {
   text-decoration: underline;
 }
@@ -1148,7 +1149,8 @@ p {
   justify-content: center;
   height: 70vh;
   width: 60%;
-  background-color: #f0d8fb9a;  border-style: solid;
+  background-color: #f0d8fb9a;
+  border-style: solid;
   border-color: #28200d;
   border-width: 2px;
   border-radius: 10px;
