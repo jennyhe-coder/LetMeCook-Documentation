@@ -1,0 +1,92 @@
+.recipe-card-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #fefaf3;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  font-family: 'Georgia', serif;
+  color: #333;
+}
+
+.recipe-card-detail {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.recipe-image-column {
+  flex: 1; /* 1/4 chiều rộng */
+  text-align: center;
+}
+
+.recipe-image {
+  width: 100%;
+  max-width: 160px;
+  border-radius: 12px;
+  margin-bottom: 0.5rem;
+}
+
+.recipe-rating {
+  font-size: 0.9rem;
+  color: #444;
+}
+
+.recipe-info-column {
+  flex: 3; /* 3/4 chiều rộng */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.recipe-title {
+  font-size: 1.6rem;
+  margin-bottom: 0.3rem;
+}
+
+.recipe-meta {
+  font-size: 0.95rem;
+  color: #666;
+}
+
+.recipe-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.print-btn, .save-btn {
+  padding: 0.5rem 1.2rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.print-btn {
+  background-color: #eee;
+}
+
+.save-btn {
+  background-color: #f8bfc6;
+  color: #fff;
+}
+
+.recipe-body {
+  margin-top: 1rem;
+}
+
+.instruction-list {
+  list-style: decimal;
+  margin-left: 0;        
+  padding-left: 0;      
+  margin-top: 1rem;
+}
+.instruction-list li {
+  margin-bottom: 0.5rem;
+  text-indent: 0;   
+}
+.recipe-meta {
+  line-height: 1.6; /* Hoặc 1.7 nếu bạn muốn thoáng hơn */
+}

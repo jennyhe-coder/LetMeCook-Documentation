@@ -1,0 +1,65 @@
+.recipe-page-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  font-family: 'Segoe UI', sans-serif;
+  color: #333;
+}
+
+.header-section {
+  margin-bottom: 2.5rem;
+}
+
+.recipe-title {
+  font-size: 2.25rem;
+  font-weight: 800;
+  margin-bottom: 0.25rem;
+  color: #222;
+}
+
+.meta-info {
+  font-size: 0.95rem;
+  color: #777;
+  margin-bottom: 1.2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.recipe-image {
+  width: 100%;
+  height: auto;
+  max-height: 460px;
+  object-fit: cover;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  margin: 1.2rem 0 1.8rem 0;
+}
+
+.description {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  margin-bottom: 2.5rem;
+  color: #444;
+}
+
+/* Optional: Styling for loading + not-found */
+.loading, .not-found {
+  text-align: center;
+  margin-top: 4rem;
+  font-size: 1.2rem;
+  color: #888;
+}
+.image-wrapper {
+  margin: 1.5rem 0;
+  position: relative;
+}
+
+.recipe-image {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 0px;
+  display: block;
+}
