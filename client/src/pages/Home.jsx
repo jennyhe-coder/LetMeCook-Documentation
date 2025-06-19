@@ -22,10 +22,10 @@ export default function Home() {
           </div>
         </section>
 
-        <CarouselSection sectionClass="section-1" />
-        <CarouselSection sectionClass="section-2" />
-        <CarouselSection sectionClass="section-3" />
-        <CarouselSection sectionClass="section-4" />
+        <CarouselSection title="Latest Picks" sectionClass="section-1" />
+        <CarouselSection title="Most Popular" sectionClass="section-2" />
+        <CarouselSection title="Vegetarian/Vegan" sectionClass="section-3" />
+        <CarouselSection title="Quick & Easy Meals" sectionClass="section-4" />
       </main>
     </>
   );

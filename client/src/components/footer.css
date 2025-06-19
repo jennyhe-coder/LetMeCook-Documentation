@@ -3,7 +3,10 @@
   background: #28200d;
   color: #ece9e2;
   padding: 2rem 0 1rem;
-  margin-top: 3rem;
+  height: 300px;
+  border-radius: 20px 20px 0px 0px;
+  /* margin-top: -100px; */
+  z-index: 1;
 }
 
 /* center everything within the layout wrapper */
@@ -28,6 +31,7 @@
   text-decoration: none;
   transition: color 0.25s ease;
 }
+
 .footer-nav a:hover {
   color: #b9341f;
 }
@@ -44,6 +48,7 @@
   .footer-full-width {
     padding: 1.5rem 0 1rem;
   }
+
   .footer-nav {
     gap: 1rem;
   }

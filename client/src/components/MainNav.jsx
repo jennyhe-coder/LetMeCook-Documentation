@@ -9,80 +9,86 @@ export default function MainNav() {
   const logoRef = useRef();
   const { user } = useAuth();
   const navigate = useNavigate();
-
-  const handleLogin = () => {
-    navigate("/login");
-  };
+  const linkRefs = useRef([]);
+  const indicatorRef = useRef();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/");
   };
 
-  return (
-    <>
-      <div className="banner-nav">
-        <nav className="layout-wrapper main-nav">
-          <div className="logo-section">
-            <NavLink
-              to="/"
-              className={({ isActive }) =>
-                isActive ? "nav-link active" : "nav-link"
-              }
-            >
-              <div className="logo-container" ref={logoRef}>
-                <div className="logo"></div>
-                <span>let me cook</span>
-              </div>
-            </NavLink>
-          </div>
-          <div className="nav-links">
-            <NavLink
-              to="/"
-              className={({ isActive }) =>
-                isActive ? "nav-link active" : "nav-link"
-              }
-            >
-              home
-              <span className="underline"></span>
-            </NavLink>
-            <NavLink
-              to="/recipes"
-              className={({ isActive }) =>
-                isActive ? "nav-link active" : "nav-link"
-              }
-            >
-              recipes
-              <span className="underline"></span>
-            </NavLink>
-            <NavLink
-              to="/profile"
-              className={({ isActive }) =>
-                isActive ? "nav-link active" : "nav-link"
-              }
-            >
-              profile
-              <span className="underline"></span>
-            </NavLink>
-            <NavLink
-              to="/dashboard"
-              className={({ isActive }) =>
-                isActive ? "nav-link active" : "nav-link"
-              }
-            >
-              dashboard
-            </NavLink>
+  useEffect(() => {
+    const paths = ["/", "/recipes", "/profile", "/dashboard", "/login"];
+    const activeIndex = paths.indexOf(location.pathname);
+    const activeEl = linkRefs.current[activeIndex];
+    const indicator = indicatorRef.current;
 
-            {user ? (
-              <button onClick={handleLogout}>Logout ({user.name})</button>
-            ) : (
-              <button className="login-button" onClick={handleLogin}>
-                Login
-              </button>
-            )}
-          </div>
-        </nav>
-      </div>
-    </>
+    if (activeEl && indicator) {
+      const rect = activeEl.getBoundingClientRect();
+      const parentRect = activeEl.parentNode.parentNode.getBoundingClientRect();
+
+      const offsetLeft = rect.left - parentRect.left;
+      const width = rect.width + 12;
+
+      indicator.style.left = `${offsetLeft - 6}px`;
+      indicator.style.width = `${width}px`;
+    }
+  }, [location.pathname]);
+
+  const navItems = [
+    { path: "/", label: "home" },
+    { path: "/recipes", label: "recipes" },
+    { path: "/profile", label: "profile" },
+    { path: "/dashboard", label: "dashboard" },
+  ];
+
+  if (!user) {
+    navItems.push({ path: "/login", label: "login" });
+  }
+
+  return (
+    <div className="banner-nav">
+      <nav className="layout-wrapper main-nav">
+        <div className="logo-section">
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              isActive ? "nav-link active" : "nav-link"
+            }
+          >
+            <div className="logo-container" ref={logoRef}>
+              <div className="logo"></div>
+              <span>let me cook</span>
+            </div>
+          </NavLink>
+        </div>
+
+        <div className="nav-links">
+          <div className="nav-link-indicator" ref={indicatorRef}></div>
+
+          {navItems.map((item, i) => (
+            <div className="nav-link-wrapper" key={item.path}>
+              <NavLink
+                to={item.path}
+                className={({ isActive }) =>
+                  isActive ? "nav-link active" : "nav-link"
+                }
+                ref={(el) => (linkRefs.current[i] = el)}
+              >
+                {item.label}
+              </NavLink>
+            </div>
+          ))}
+
+          {user && (
+            <div className="nav-link-wrapper">
+              <span className="nav-link" onClick={handleLogout}>
+                Logout ({user.name})
+              </span>
+            </div>
+          )}
+        </div>
+      </nav>
+    </div>
   );
 }
