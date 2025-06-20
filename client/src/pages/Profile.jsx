@@ -2,70 +2,78 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { useAuth } from '../context/AuthProvider';
 import { Link } from 'react-router-dom';
+import "../Profile.css"; 
 
+export default function Profile() {
+  const { user } = useAuth();
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [allergyNames, setAllergyNames] = useState([]);
+  const [error, setError] = useState(null);
 
-export default function  Profile () {
-    const { user } = useAuth();
-    const [profile, setProfile] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [allergyNames, setAllergyNames] = useState([]);
-    const [error, setError] = useState(null);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) {
+        setLoading(false);
+        setProfile(null);
+        return;
+      }
 
-    useEffect(() => {
-        const fetchProfile = async () => {
-            if(!user) {
-                setLoading(false);
-                setProfile(null);
-                return;
-            }
-            setLoading(true);
-            const { data, error } = await supabase
-                .from('users')
-                .select('*')
-                .eq('id', user.id)
-                .single();
-            setProfile(data);
-            setLoading(false);
-            setError(error ? error.message : null);
+      setLoading(true);
 
-            if (data && data.user_allergy && data.user_allergy.length > 0) {
-                const { data: ingredients, error: ingredientsError } = await supabase
-                    .from('ingredients')
-                    .select('id, name')
-                    .in('id', data.user_allergy);
-                if (ingredientsError) {
-                    setError(ingredientsError.message);
-                } else {
-                    setAllergyNames(ingredients);
-                }
-            }
-        };
-        fetchProfile();
-    }, [user]);
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', user.id)
+        .single();
 
-    if (!user) return <p>Please log in.</p>;
-    if (loading) return <p>Loading profile...</p>;
-    if (error) return <p>Error loading profile: {error}</p>;
-    if (!profile) return <p>No profile found.</p>;
+      setProfile(data);
+      setLoading(false);
+      setError(error ? error.message : null);
 
+      if (data?.user_allergy?.length > 0) {
+        const { data: ingredients, error: ingredientsError } = await supabase
+          .from('ingredients')
+          .select('id, name')
+          .in('id', data.user_allergy);
 
-    return (
-    <div>
-        <p>{profile.full_name}</p>
-        <p>Email: {profile.email}</p>
-        <p>Cooking Skill: {profile.cooking_skill}</p>
-        <p>About Me: {profile.about_me}</p>
-        <p>Dietary Preference: {(profile.dietary_pref || ['No preference']).map(pref => <span key={pref}>{pref}</span>)}</p>
-        <p>
-            Allergies:&nbsp;
-            {allergyNames.length > 0
-                ? allergyNames.map(a => a.name).join(', ')
-                : 'None'}
-        </p>
-        <img src={profile.image_url} alt="Profile" style={{ width: 150, borderRadius: '50%' }} />        
-        <Link to="/edit-profile" className="btn btn-primary">
-            <button>Edit Profile</button>
-        </Link>
+        if (ingredientsError) {
+          setError(ingredientsError.message);
+        } else {
+          setAllergyNames(ingredients);
+        }
+      }
+    };
+
+    fetchProfile();
+  }, [user]);
+
+  if (!user) return <p>Please log in.</p>;
+  if (loading) return <p>Loading profile...</p>;
+  if (error) return <p>Error loading profile: {error}</p>;
+  if (!profile) return <p>No profile found.</p>;
+
+  return (
+    <div className="profile-container">
+      <h1>My Profile</h1>
+      {profile.image_url && (
+        <img
+          src={profile.image_url}
+          alt="Profile"
+          className="profile-image"
+        />
+      )}
+      <div className="profile-info">
+        <p><strong>Full Name:</strong> {profile.full_name}</p>
+        <p><strong>Email:</strong> {profile.email}</p>
+        <p><strong>Cooking Skill:</strong> {profile.cooking_skill}</p>
+        <p><strong>About Me:</strong> {profile.about_me}</p>
+        <p><strong>Dietary Preference:</strong> {(profile.dietary_pref || ['No preference']).join(', ')}</p>
+        <p><strong>Allergies:</strong> {allergyNames.length > 0 ? allergyNames.map(a => a.name).join(', ') : 'None'}</p>
+      </div>
+      <Link to="/edit-profile" className="edit-btn">
+        <button>Edit Profile</button>
+      </Link>
     </div>
   );
 }
