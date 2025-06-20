@@ -12,23 +12,59 @@ export default function IndividualRecipe() {
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
-  const [refreshFlag, setRefreshFlag] = useState(false); 
+  const [refreshFlag, setRefreshFlag] = useState(false);
 
   useEffect(() => {
-    const fetchRecipe = async () => {
+    const fetchAll = async () => {
       try {
         const response = await fetch(`https://letmecook.ca/api/recipes/${id}`);
         if (!response.ok) throw new Error("Recipe not found");
         const data = await response.json();
         setRecipe(data);
-        // Increment view count using Supabase RPC function
 
-        const { error } = await supabase.rpc("increment_view_count", {
-        recipe_id: id,
-      });
-      if (error) {
-        console.error("Failed to increment view count:", error.message);
-      }
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+        if (userError) {
+          console.error("Error fetching user:", userError.message);
+        } else {
+          const currentUser = userData.user;
+          setUser(currentUser);
+
+          if (currentUser?.id) {
+            const now = new Date().toISOString();
+
+            const { error: insertError } = await supabase
+              .from("recipe_browsing_history")
+              .insert([
+                {
+                  user_id: currentUser.id,
+                  recipe_id: id,
+                  viewed_at: now,
+                },
+              ]);
+
+            if (insertError) {
+              if (insertError.code === "23505") {
+                const { error: updateError } = await supabase
+                  .from("recipe_browsing_history")
+                  .update({ viewed_at: now })
+                  .eq("user_id", currentUser.id)
+                  .eq("recipe_id", id);
+
+                if (updateError) {
+                  console.error("Failed to update browsing history:", updateError.message);
+                }
+              } else {
+                console.error("Failed to insert browsing history:", insertError.message);
+              }
+            }
+          }
+        }
+
+        const { error: viewError } = await supabase.rpc("increment_view_count", {
+          recipe_id: id,
+        });
+        if (viewError) console.error("Failed to increment view count:", viewError.message);
+
       } catch (error) {
         console.error("Error fetching recipe:", error.message);
         setRecipe(null);
@@ -36,22 +72,9 @@ export default function IndividualRecipe() {
         setLoading(false);
       }
     };
-  
-    if (id) fetchRecipe();
-  }, [id]);
 
-  // Fetch user session
-  useEffect(() => {
-    const fetchUser = async () => {
-      const {data, error} = await supabase.auth.getUser();
-      if (error) {
-        console.error("Error fetching user:", error.message);
-      } else {
-        setUser(data.user);
-      }
-    };
-    fetchUser();
-  },[]); 
+    if (id) fetchAll();
+  }, [id]);
 
   if (loading) return <div className="loading">Loading...</div>;
   if (!recipe) return <div className="not-found">Recipe not found.</div>;
@@ -86,12 +109,11 @@ export default function IndividualRecipe() {
       <section className="layout-wrapper review-section">
         <h2 className="section-heading">User Reviews</h2>
         {user && (
-          <ReviewForm recipeId={recipe.id}  onReviewSubmitted={refreshReviews}/>
+          <ReviewForm recipeId={recipe.id} onReviewSubmitted={refreshReviews} />
         )}
 
         <ReviewList recipeId={recipe.id} refreshTrigger={refreshFlag} />
       </section>
-
     </main>
   );
 }
