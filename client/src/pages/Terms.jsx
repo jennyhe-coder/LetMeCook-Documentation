@@ -1,18 +1,27 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import "../terms.css";        // ← your new page CSS
+import "../terms.css";        
 import "../styles.css"; 
-
+import Modal from "../components/Modal";
+import { useState } from "react";
 const Terms = () => {
   const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
 
   const acceptTerms = () => {
-    alert("Thank you for accepting the Terms & Conditions.");
-    navigate("/about");
+    setShowModal(true)
   };
 
   return (
     <>
+      <Modal
+        isOpen={showModal}
+        message={"Thank you for accepting the Terms & Conditions."}
+        onClose={ () => {
+          setShowModal(false)
+          navigate("/")
+        }}
+      />
       {/* Header / Navigation */}
       <header>
         <nav className="layout-wrapper main-nav">

@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthProvider'
 import { supabase } from '../utils/supabaseClient'
 import Select from 'react-select';
 import { useNavigate } from 'react-router-dom';
-
+import Modal from '../components/Modal';
 
 const DIETARY_OPTIONS  = [
     'Vegetarian',
@@ -42,6 +42,7 @@ export default function EditProfile() {
     const [ingredientSearch, setIngredientSearch] = useState([]);
     const [ingredientsResults, setIngredientsResults] = useState([]);
     const [uploading, setUploading] = useState(false);
+    const [showModal, setShowModal] = useState(false);
     const fileInputRef = useRef(null);
     const navigate = useNavigate();
 
@@ -151,8 +152,8 @@ export default function EditProfile() {
         }
         console.log({data,error})
         setError(null);
-        alert("Profile updated successfully!");
         setProfile({ ...profile, ...form });
+        setShowModal(true)
      }
 
      const handleImgUpload = async (e) => {
@@ -192,7 +193,6 @@ export default function EditProfile() {
         }
         setForm({ ...form, image_url: publicURLData.publicUrl });
         setUploading(false);
-        navigate('/profile');
      }
 
 
@@ -283,6 +283,14 @@ export default function EditProfile() {
             Update Profile
         </button>
     </form>
+    <Modal
+        isOpen={showModal}
+        message={"You've successfully updated your profile."}
+        onClose={() => {
+            setShowModal(false);
+            navigate("/profile");
+        }}
+    />
     </>
   )
 }
