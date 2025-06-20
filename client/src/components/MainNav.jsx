@@ -90,9 +90,9 @@ export default function MainNav() {
     // { path: "/dashboard", label: "dashboard" },
   ];
 
-  if (!user) {
-    navItems.push({ path: "/login", label: "login" });
-  } 
+  // if (!user) {
+  //   navItems.push({ path: "/login", label: "login" });
+  // } 
 
   return (
     <div className="banner-nav">
