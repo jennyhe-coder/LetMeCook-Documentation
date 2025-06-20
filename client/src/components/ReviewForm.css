@@ -1,0 +1,75 @@
+.review-form {
+  margin: 2rem 0;
+  padding: 2rem;
+  background-color: #fffdf7;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  font-family: 'Raleway', sans-serif;
+}
+
+.form-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #1e1e1e;
+}
+
+.review-comment-input {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  font-family: 'Raleway', sans-serif;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  resize: vertical;
+}
+
+.review-ratings-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.rating-field {
+  flex: 1 1 150px;
+}
+
+.rating-label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.rating-select {
+  width: 100%;
+  padding: 6px;
+  font-family: 'Raleway', sans-serif;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.submit-button {
+  background-color: #009266;
+  color: white;
+  font-family: 'Raleway', sans-serif;
+  font-size: 1rem;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.submit-button:hover {
+  background-color: #006a4e;
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
