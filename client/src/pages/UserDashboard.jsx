@@ -3,6 +3,7 @@ import  { useState, useEffect} from "react";
 import { supabase } from "../utils/supabaseClient";
 import { useAuth } from "../context/AuthProvider";
 import { useNavigate } from "react-router-dom";
+import Modal from "../components/Modal";
 
 export default function UserDashboard() {
     const {user} = useAuth();
@@ -10,12 +11,12 @@ export default function UserDashboard() {
     const [history, setHistory] = useState([]);
     const [error, setError] = useState(null);
     const [recipeCreations, setRecipeCreations] = useState([]);
+    const [showModal, setShowModal] = useState(false)
     //const [recommendations, setRecommendations] = useState([]);
     const navigate = useNavigate();
     useEffect(() => {
             if (!user) {
-                alert("Please log in first.")
-                navigate('/login')
+                setShowModal(true)
             } else {
                 fetchFavourites(user.id);
                 fetchHistory(user.id);
@@ -71,6 +72,15 @@ export default function UserDashboard() {
 
     return (
         <>
+        <Modal
+            isOpen={showModal}
+            message={"Please login first."}
+            onClose={() => {
+                setShowModal(false)
+                navigate('/login')
+            }}
+        />
+        { user && 
         <div className="layout">
             <h2>Welcome, {user? user.first_name || user.email : "User"}!</h2>
             <section>
@@ -90,6 +100,7 @@ export default function UserDashboard() {
                 <div className="carousel"/>
             </section>
         </div>
+        }
         </>
     )
 

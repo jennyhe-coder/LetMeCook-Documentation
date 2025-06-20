@@ -1,9 +1,14 @@
 import { useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
+import Modal from '../components/Modal';
+import { useNavigate } from 'react-router-dom';
+
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState('');
     const [error, setError] = useState('');
+    const [showModal, setShowModal] = useState(false)
+    const navigate = useNavigate();
 
     const handleResetPassword = async (e) => {
         e.preventDefault();
@@ -15,13 +20,21 @@ export default function ForgotPassword() {
             setError(error.message);
             return;
         }
-        
-        alert('Password reset email sent! Please check your inbox.');
+        setShowModal(true)        
     };
 
     return (
+        <>
+        <Modal
+            isOpen ={showModal}
+            message = {"Password reset email sent! Please check your inbox."}
+            onClose = {() => {
+                setShowModal(false)
+                navigate('/')
+            }}
+        />
+        <div className="layout-wrapper">
         <div className="form-page">
-        <div className="center-container">
             <form onSubmit={handleResetPassword} className='login-form'>
                 <h2>Forgot Password</h2>
                 <p>Enter your email address to receive a password reset link.</p>
@@ -37,5 +50,6 @@ export default function ForgotPassword() {
             </form>
             </div>
         </div>
+        </>
     );
 }
