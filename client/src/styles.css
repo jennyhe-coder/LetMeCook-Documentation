@@ -742,7 +742,7 @@ p {
   padding-top: 50px;
   padding-bottom: 40px;
   overflow: visible;
-  min-height: 400px;
+  min-height: 100vh;
 }
 
 .search-results-bg,
