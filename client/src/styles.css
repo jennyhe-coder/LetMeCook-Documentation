@@ -1237,3 +1237,30 @@ p {
   object-fit: cover;
   display: block;
 }
+
+/*------------------*/
+.ellipsis {
+  margin: 0 6px;
+  color: #aaa;
+}
+
+.dropdown-content.scrollable {
+  max-height: 200px; 
+  overflow-y: auto;  
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  z-index: 10;
+}
+
+
+.dropdown-content.scrollable::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dropdown-content.scrollable::-webkit-scrollbar-thumb {
+  background-color: #aaa;
+  border-radius: 3px;
+}
+
+/*------------------*/
