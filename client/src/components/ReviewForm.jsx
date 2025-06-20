@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
+import './ReviewForm.css'; 
 
 const ReviewForm = ({ recipeId, onReviewSubmitted }) => {
     const [comment, setComment] = useState('');

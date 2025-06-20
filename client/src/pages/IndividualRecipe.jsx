@@ -3,12 +3,16 @@ import { useParams } from "react-router-dom";
 import RecipeDetailCard from "../components/RecipeDetailCard";
 import ReviewList from "../components/ReviewList";
 import CarouselSection from "../components/CarouselSection";
+import ReviewForm from "../components/ReviewForm";
 import "./IndividualRecipe.css";
+import { supabase } from "../utils/supabaseClient";
 
 export default function IndividualRecipe() {
   const { id } = useParams();
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [refreshFlag, setRefreshFlag] = useState(false); 
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -17,6 +21,14 @@ export default function IndividualRecipe() {
         if (!response.ok) throw new Error("Recipe not found");
         const data = await response.json();
         setRecipe(data);
+        // Increment view count using Supabase RPC function
+
+        const { error } = await supabase.rpc("increment_view_count", {
+        recipe_id: id,
+      });
+      if (error) {
+        console.error("Failed to increment view count:", error.message);
+      }
       } catch (error) {
         console.error("Error fetching recipe:", error.message);
         setRecipe(null);
@@ -24,13 +36,26 @@ export default function IndividualRecipe() {
         setLoading(false);
       }
     };
-
+  
     if (id) fetchRecipe();
   }, [id]);
 
+  // Fetch user session
+  useEffect(() => {
+    const fetchUser = async () => {
+      const {data, error} = await supabase.auth.getUser();
+      if (error) {
+        console.error("Error fetching user:", error.message);
+      } else {
+        setUser(data.user);
+      }
+    };
+    fetchUser();
+  },[]); 
+
   if (loading) return <div className="loading">Loading...</div>;
   if (!recipe) return <div className="not-found">Recipe not found.</div>;
-
+  const refreshReviews = () => setRefreshFlag(!refreshFlag);
   const formattedDate = new Date(recipe.createdAt).toLocaleDateString();
 
   return (
@@ -60,10 +85,13 @@ export default function IndividualRecipe() {
 
       <section className="layout-wrapper review-section">
         <h2 className="section-heading">User Reviews</h2>
-        <ReviewList recipeId={recipe.id} />
+        {user && (
+          <ReviewForm recipeId={recipe.id}  onReviewSubmitted={refreshReviews}/>
+        )}
+
+        <ReviewList recipeId={recipe.id} refreshTrigger={refreshFlag} />
       </section>
 
     </main>
   );
 }
-
