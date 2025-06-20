@@ -35,19 +35,21 @@ export default function ForgotPassword() {
         />
         <div className="layout-wrapper">
         <div className="form-page">
-            <form onSubmit={handleResetPassword} className='login-form'>
-                <h2>Forgot Password</h2>
-                <p>Enter your email address to receive a password reset link.</p>
-                <input 
-                    type="email" 
-                    value={email} 
-                    onChange={(e) => setEmail(e.target.value)} 
-                    placeholder="Enter your email" 
-                    required 
-                />
-                <button type="submit">Send Reset Email</button>
-                {error && <p>{error}</p>}
-            </form>
+            <div className='center-container'>
+                <form onSubmit={handleResetPassword} className='login-form'>
+                    <h2>Forgot Password</h2>
+                    <p>Enter your email address to receive a password reset link.</p>
+                    <input 
+                        type="email" 
+                        value={email} 
+                        onChange={(e) => setEmail(e.target.value)} 
+                        placeholder="Enter your email" 
+                        required 
+                    />
+                    <button type="submit">Send Reset Email</button>
+                    {error && <p>{error}</p>}
+                </form>
+            </div>
             </div>
         </div>
         </>

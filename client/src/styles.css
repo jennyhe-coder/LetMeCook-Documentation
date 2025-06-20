@@ -27,6 +27,7 @@ body,
   background: #FCF8ED;
 }
 
+
 img {
   width: 100%;
   height: 100%;
@@ -1130,8 +1131,8 @@ p {
   align-items: center;
   max-width: 500px;
   gap: 20px;
-  padding-bottom: 10%;
-
+  padding-bottom: 20%;
+  padding-top: 5%;
 }
 
 .login-form h2 {
@@ -1190,14 +1191,8 @@ p {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 70vh;
+  height: 50vh;
   width: 60%;
-  background-color: #f0d8fb9a;
-  border-style: solid;
-  border-color: #28200d;
-  border-width: 2px;
-  border-radius: 10px;
-  box-shadow: 0 10px 8px rgba(0, 0, 0, 0.1);
 }
 
 .form-page {

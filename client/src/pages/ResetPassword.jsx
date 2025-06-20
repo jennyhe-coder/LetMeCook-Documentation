@@ -42,33 +42,35 @@ export default function ResetPassword() {
         />
         <div className="layout-wrapper">
         <div className='form-page'>
-        <form onSubmit={handleResetPassword} className="login-form">
-            <h2>Reset Password</h2>
-            <div className="password-wrapper">
-                 <input type={showPassword ? "text" : "password" } 
-                    value={password} 
-                    onChange={(e) => setPassword(e.target.value)} 
-                    placeholder="Password" 
-                />
-                <span className="flex justify-around items-center" onClick={() => setShowPassword(!showPassword)}>
-                    {showPassword ?  <FiEye className="input-icon" size={25} /> : <FiEyeOff className="input-icon" size={25} />}
-                </span>
+            <div className='center-container'>
+                <form onSubmit={handleResetPassword} className="login-form">
+                    <h2>Reset Password</h2>
+                    <div className="password-wrapper">
+                        <input type={showPassword ? "text" : "password" } 
+                            value={password} 
+                            onChange={(e) => setPassword(e.target.value)} 
+                            placeholder="Password" 
+                        />
+                        <span className="flex justify-around items-center" onClick={() => setShowPassword(!showPassword)}>
+                            {showPassword ?  <FiEye className="input-icon" size={25} /> : <FiEyeOff className="input-icon" size={25} />}
+                        </span>
+                    </div>
+                    <div className='password-wrapper'>
+                        <input
+                        type={showConfirmPassword ? "text" : "password" }
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="Confirm password"
+                        required
+                        />
+                        <span className="flex justify-around items-center" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                            {showConfirmPassword ?  <FiEye className="input-icon" size={25} /> : <FiEyeOff className="input-icon" size={25} />}
+                        </span>
+                    </div>
+                    <button type="submit">Reset Password</button>
+                    {error && <p className="error-message">{error}</p>}
+                </form>
             </div>
-            <div className='password-wrapper'>
-                <input
-                type={showConfirmPassword ? "text" : "password" }
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm password"
-                required
-                />
-                <span className="flex justify-around items-center" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
-                    {showConfirmPassword ?  <FiEye className="input-icon" size={25} /> : <FiEyeOff className="input-icon" size={25} />}
-                </span>
-            </div>
-            <button type="submit">Reset Password</button>
-            {error && <p className="error-message">{error}</p>}
-        </form>
         </div>
         </div>
         </>
