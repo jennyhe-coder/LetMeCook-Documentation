@@ -5,6 +5,8 @@ import Select from 'react-select';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../components/Modal';
 import '../EditProfile.css';
+import { debounce } from 'lodash';
+
 
 const DIETARY_OPTIONS = [
   'Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free', 'Nut-Free',
@@ -66,32 +68,34 @@ export default function EditProfile() {
     })();
   }, [user]);
 
-  useEffect(() => {
-    if (!ingredientSearch) return;
-
-    const fetchIngredients = async () => {
+  const debouncedSearch = useRef(debounce(async (input) => {
+      if (!input) return;
       const { data, error } = await supabase
         .from('ingredients')
         .select('*')
-        .ilike('name', `%${ingredientSearch}%`)
+        .ilike('name', `%${input}%`)
         .limit(10);
 
       if (!error) {
+        console.log("Fetched ingredients:", data);
         setIngredientsResults(data.map(ingredient => ({
           id: ingredient.id,
           name: ingredient.name,
           ...ingredient
         })));
+      } else {
+        console.error("Ingredient search error:", error.message);
       }
+    }, 300)).current;
+
+    useEffect(() => {
+      debouncedSearch(ingredientSearch);
+    }, [ingredientSearch]);
+
+    const handleChange = (e) => {
+      const { name, value } = e.target;
+      setForm({ ...form, [name]: value });
     };
-
-    fetchIngredients();
-  }, [ingredientSearch]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-  };
 
   const handleCookingLvl = (e) => {
     setForm({ ...form, cooking_skill: e.target.value });
@@ -174,7 +178,13 @@ export default function EditProfile() {
   return (
     <div className="edit-profile-container">
       <h1>Edit Profile</h1>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} 
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+          }
+        }}
+      >
         {form.image_url && (
           <img src={form.image_url} alt="Profile" />
         )}
@@ -245,7 +255,11 @@ export default function EditProfile() {
               label: a.name
             }))}
           onChange={handleAllergies}
-          onInputChange={inputVal => setIngredientSearch(inputVal)}
+          onInputChange={(inputVal, actionMeta) => {
+            if (actionMeta.action === 'input-change') {
+              setIngredientSearch(inputVal);
+            }
+          }}
           isMulti
           closeMenuOnSelect={false}
           placeholder="Search for allergies..."
