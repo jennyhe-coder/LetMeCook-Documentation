@@ -1,5 +1,5 @@
-import React from 'react';
-import './RecipeDetailCard.css';
+import React from "react";
+import "./RecipeDetailCard.css";
 
 export default function RecipeDetailCard({ recipe }) {
   const handlePrint = () => window.print();
@@ -8,35 +8,57 @@ export default function RecipeDetailCard({ recipe }) {
     text.replace(/\b\w/g, (char) => char.toUpperCase());
 
   return (
-    <div className="recipe-card-container">
-      <div className="recipe-card-detail">
+    <div className="recipe-detail-card-container">
+      <div className="recipe-detail-card">
         {/* Left Column */}
-        <div className="recipe-image-column">
-          <img src={recipe.imageUrl} alt={recipe.title} className="recipe-image" />
-          <p className="recipe-rating">★★★★★ ({recipe.rating || 250})</p>
-        </div>
 
         {/* Right Column */}
-        <div className="recipe-info-column">
-          <h1 className="recipe-title">{recipe.title}</h1>
+        <div className="recipe-detail-info-column">
+          <h1 className="recipe-detail-title">{recipe.title}</h1>
 
-          <div className="recipe-meta">
-            <p><strong>{recipe.authorName}</strong></p>
-            <p>Yield: {recipe.servings} servings • ⏱ {recipe.cookingTime} minutes</p>
-            <p><strong>Category:</strong> {recipe.categories?.map(capitalizeWords).join(", ") || "N/A"}</p>
-            <p><strong>Dietary:</strong> {recipe.dietaryPreferences?.map(capitalizeWords).join(", ") || "N/A"}</p>
-            <p><strong>Cuisine:</strong> {recipe.cuisines?.map(capitalizeWords).join(", ") || "N/A"}</p>
+          <div className="recipe-detail-meta">
+            <p>
+              By <strong>{recipe.authorName}</strong>
+            </p>
+            <p>
+              Yield: {recipe.servings} servings • ⏱ {recipe.cookingTime} minutes
+            </p>
+            <p>
+              <strong>Category:</strong>{" "}
+              {recipe.categories?.map(capitalizeWords).join(", ") || "N/A"}
+            </p>
+            <p>
+              <strong>Dietary:</strong>{" "}
+              {recipe.dietaryPreferences?.map(capitalizeWords).join(", ") ||
+                "N/A"}
+            </p>
+            <p>
+              <strong>Cuisine:</strong>{" "}
+              {recipe.cuisines?.map(capitalizeWords).join(", ") || "N/A"}
+            </p>
           </div>
 
-          <div className="recipe-actions">
-            <button className="print-btn" onClick={handlePrint}>🖨️ Print Recipe</button>
-            <button className="save-btn">❤️ Save</button>
+          <div className="recipe-detail-actions">
+            <button className="print-btn" onClick={handlePrint}>
+              {" "}
+              Print Recipe
+            </button>
+            <button className="save-btn"> Save</button>
           </div>
+        </div>
+
+        <div className="recipe-detail-image-column">
+          <img
+            src={recipe.imageUrl}
+            alt={recipe.title}
+            className="recipe-detail-image"
+          />
+          <p className="recipe-detail-rating">★★★★★ ({recipe.rating || 250})</p>
         </div>
       </div>
 
       {/* Ingredients + Instructions */}
-      <div className="recipe-body">
+      <div className="recipe-detail-body">
         <h2>Ingredients</h2>
         <ul className="ingredient-list">
           {recipe.ingredients.map((item, index) => (
@@ -47,7 +69,10 @@ export default function RecipeDetailCard({ recipe }) {
         </ul>
 
         <h2>Instructions</h2>
-        <ol className="instruction-list" dangerouslySetInnerHTML={{ __html: recipe.directions }} />
+        <ol
+          className="instruction-list"
+          dangerouslySetInnerHTML={{ __html: recipe.directions }}
+        />
       </div>
     </div>
   );

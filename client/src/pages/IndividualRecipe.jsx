@@ -22,7 +22,8 @@ export default function IndividualRecipe() {
         const data = await response.json();
         setRecipe(data);
 
-        const { data: userData, error: userError } = await supabase.auth.getUser();
+        const { data: userData, error: userError } =
+          await supabase.auth.getUser();
         if (userError) {
           console.error("Error fetching user:", userError.message);
         } else {
@@ -51,20 +52,29 @@ export default function IndividualRecipe() {
                   .eq("recipe_id", id);
 
                 if (updateError) {
-                  console.error("Failed to update browsing history:", updateError.message);
+                  console.error(
+                    "Failed to update browsing history:",
+                    updateError.message
+                  );
                 }
               } else {
-                console.error("Failed to insert browsing history:", insertError.message);
+                console.error(
+                  "Failed to insert browsing history:",
+                  insertError.message
+                );
               }
             }
           }
         }
 
-        const { error: viewError } = await supabase.rpc("increment_view_count", {
-          recipe_id: id,
-        });
-        if (viewError) console.error("Failed to increment view count:", viewError.message);
-
+        const { error: viewError } = await supabase.rpc(
+          "increment_view_count",
+          {
+            recipe_id: id,
+          }
+        );
+        if (viewError)
+          console.error("Failed to increment view count:", viewError.message);
       } catch (error) {
         console.error("Error fetching recipe:", error.message);
         setRecipe(null);
@@ -82,38 +92,44 @@ export default function IndividualRecipe() {
   const formattedDate = new Date(recipe.createdAt).toLocaleDateString();
 
   return (
-    <main className="recipe-page-container">
-      <section className="layout-wrapper header-section">
-        <h1 className="recipe-title">{recipe.title}</h1>
-        <div className="meta-info">
-          <p>👨‍🍳 <strong>{recipe.authorName || "Anonymous"}</strong></p>
-          <p>📅 {formattedDate}</p>
-        </div>
-        <div className="image-wrapper">
-          <img
-            src={recipe.imageUrl}
-            alt={recipe.title}
-            className="recipe-image"
+    <main className="layout-wrapper">
+      <div className="recipe-page-container">
+        <section className="header-section">
+          <h1 className="recipe-title">{recipe.title}</h1>
+          <div className="meta-info">
+            <p>
+              <strong>Recipe by {recipe.authorName || "Anonymous"}</strong>
+            </p>
+            <br />
+            <p> {formattedDate}</p>
+          </div>
+          <div className="image-wrapper">
+            <img
+              src={recipe.imageUrl}
+              alt={recipe.title}
+              className="recipe-image"
+            />
+          </div>
+          <div
+            className="description"
+            dangerouslySetInnerHTML={{ __html: recipe.description }}
           />
-        </div>
-        <div
-          className="description"
-          dangerouslySetInnerHTML={{ __html: recipe.description }}
-        />
-      </section>
+        </section>
 
-      <section className="layout-wrapper">
         <RecipeDetailCard recipe={recipe} />
-      </section>
 
-      <section className="layout-wrapper review-section">
-        <h2 className="section-heading">User Reviews</h2>
-        {user && (
-          <ReviewForm recipeId={recipe.id} onReviewSubmitted={refreshReviews} />
-        )}
+        <section className="review-section">
+          <h2 className="section-heading">User Reviews</h2>
+          {user && (
+            <ReviewForm
+              recipeId={recipe.id}
+              onReviewSubmitted={refreshReviews}
+            />
+          )}
 
-        <ReviewList recipeId={recipe.id} refreshTrigger={refreshFlag} />
-      </section>
+          <ReviewList recipeId={recipe.id} refreshTrigger={refreshFlag} />
+        </section>
+      </div>
     </main>
   );
 }
