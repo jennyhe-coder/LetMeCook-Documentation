@@ -1,8 +1,9 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthProvider";
 import { supabase } from "../utils/supabaseClient";
+import {FaUserCircle} from "react-icons/fa"
 
 export default function MainNav() {
   const location = useLocation();
@@ -11,6 +12,10 @@ export default function MainNav() {
   const navigate = useNavigate();
   const linkRefs = useRef([]);
   const indicatorRef = useRef();
+  const [open, setOpen] = useState(false)
+  const dropdownRef = useRef();
+  const avatarRef = useRef(null);
+  const [avatar, setAvatar] = useState(null);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -18,11 +23,15 @@ export default function MainNav() {
   };
 
   useEffect(() => {
-    const paths = ["/", "/recipes", "/profile", "/dashboard", "/login"];
-    const activeIndex = paths.indexOf(location.pathname);
+    const paths = ["/", "/recipes", "/profile", "/dashboard", "/login", "avatar"];
+    let activeIndex = paths.indexOf(location.pathname);
+    if (user && open) {
+      activeIndex = paths.indexOf("avatar");
+    }
     const activeEl = linkRefs.current[activeIndex];
     const indicator = indicatorRef.current;
-
+ 
+  
     if (activeEl && indicator) {
       const rect = activeEl.getBoundingClientRect();
       const parentRect = activeEl.parentNode.parentNode.getBoundingClientRect();
@@ -33,18 +42,57 @@ export default function MainNav() {
       indicator.style.left = `${offsetLeft - 6}px`;
       indicator.style.width = `${width}px`;
     }
-  }, [location.pathname]);
+
+    if (user) {
+      linkRefs.current[paths.length - 1] = avatarRef.current;
+    }
+
+  }, [location.pathname, open]);
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setOpen(false);
+      };
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!user) {
+        return
+      }
+
+      const {data, error} = await supabase
+      .from('users')
+      .select('image_url')
+      .eq('id', user.id)
+      .single()
+
+      if (error) {
+        console.error("Error fetching avatar:", error);
+      } else {
+        setAvatar(data?.image_url || null);
+      }
+    }
+
+    fetchProfile();
+  }, [user])
+
+
 
   const navItems = [
     { path: "/", label: "home" },
     { path: "/recipes", label: "recipes" },
-    { path: "/profile", label: "profile" },
-    { path: "/dashboard", label: "dashboard" },
+    // { path: "/profile", label: "profile" },
+    // { path: "/dashboard", label: "dashboard" },
   ];
 
   if (!user) {
     navItems.push({ path: "/login", label: "login" });
-  }
+  } 
 
   return (
     <div className="banner-nav">
@@ -80,11 +128,46 @@ export default function MainNav() {
             </div>
           ))}
 
-          {user && (
+          {user ? (
+            <div className="nav-link-wrapper relative" ref={dropdownRef}>
+              <div ref={avatarRef} className="cursor-pointer" onClick={() => setOpen((prev) => !prev)}>
+                {avatar ? (
+                  <img
+                    src={avatar}
+                    alt="avatar"
+                    className="avatar-icon-nav"
+                  />
+                ) : (
+                  <FaUserCircle size={28} />
+                )}
+              </div>
+
+              {open && (
+                <ul className="dropdown-menu-nav">
+                  <li className="dropdown-nav-item">
+                    <NavLink to="/profile" onClick={() => setOpen(false)}>
+                      Profile
+                    </NavLink>
+                  </li>
+                  <li
+                    className="dropdown-nav-item cursor-pointer"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </li>
+                </ul>
+              )}
+            </div>
+          ) : (
             <div className="nav-link-wrapper">
-              <span className="nav-link" onClick={handleLogout}>
-                Logout ({user.name})
-              </span>
+              <NavLink
+                to="/login"
+                className={({ isActive }) =>
+                  isActive ? "nav-link active" : "nav-link"
+                }
+              >
+                Login
+              </NavLink>
             </div>
           )}
         </div>
