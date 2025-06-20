@@ -159,6 +159,11 @@ import { useEffect, useRef, useState } from "react";
 import RecipeList from "./../components/RecipeList";
 import SortDropdown from "./../components/SortDropdown";
 
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
+
 const RESULTS_PER_PAGE = 24;
 
 export default function SearchResults() {
@@ -179,7 +184,7 @@ export default function SearchResults() {
     const params = new URLSearchParams();
     params.set("keyword", keyword);
     params.set("sort", sort);
-    params.set("page", page - 1); 
+    params.set("page", page - 1);
     params.set("size", RESULTS_PER_PAGE);
 
     setSearchParams(params);
@@ -210,6 +215,27 @@ export default function SearchResults() {
     }
   }, [page]);
 
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (el) {
+      gsap.fromTo(
+        el,
+        { opacity: 1, y: 100 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: el,
+            start: "top 100%",
+            toggleActions: "play none none none",
+          },
+        }
+      );
+    }
+  }, []);
+
   return (
     <section className="search-results-section" ref={sectionRef}>
       <div className="search-results-bg" />
@@ -228,13 +254,23 @@ export default function SearchResults() {
         </div>
         <br />
 
-        {loading ? (
-          <p>Loading recipes...</p>
-        ) : results.length === 0 ? (
+        {results.length === 0 && !loading ? (
           <p>No results found.</p>
         ) : (
           <>
-            <RecipeList recipes={results} />
+            <RecipeList
+              recipes={
+                loading
+                  ? Array.from({ length: 24 }, (_, i) => ({
+                      id: `placeholder-${i}`,
+                      title: "Loading...",
+                      authorName: "Please wait",
+                      imageUrl: "/assets/placeholder.jpg", // use same placeholder image
+                      cookingTime: "...",
+                    }))
+                  : results
+              }
+            />
 
             <div className="pagination-wrapper">
               <div className="pagination-meta">
@@ -252,7 +288,13 @@ export default function SearchResults() {
                   className={`page-prev ${page === 1 ? "disabled" : ""}`}
                   onClick={() => page > 1 && setPage(page - 1)}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="8" height="14" viewBox="0 0 8 14" fill="none">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="8"
+                    height="14"
+                    viewBox="0 0 8 14"
+                    fill="none"
+                  >
                     <path d="M0 7L8 14L8 0L0 7Z" fill="#1E1E1E" />
                   </svg>
                 </span>
@@ -263,7 +305,8 @@ export default function SearchResults() {
                     if (p === 1 || p === totalPages) return true;
                     if (Math.abs(p - page) <= 1) return true;
                     if (page <= 3 && p <= 3) return true;
-                    if (page >= totalPages - 2 && p >= totalPages - 2) return true;
+                    if (page >= totalPages - 2 && p >= totalPages - 2)
+                      return true;
                     return false;
                   })
                   .map((p, idx, arr) => {
@@ -274,7 +317,9 @@ export default function SearchResults() {
                       <span key={p} className="pagination-item">
                         {showDots && <span className="ellipsis">...</span>}
                         <span
-                          className={`page-number ${p === page ? "current" : ""}`}
+                          className={`page-number ${
+                            p === page ? "current" : ""
+                          }`}
                           onClick={() => setPage(p)}
                         >
                           {p}
@@ -284,10 +329,18 @@ export default function SearchResults() {
                   })}
 
                 <span
-                  className={`page-next ${page === totalPages ? "disabled" : ""}`}
+                  className={`page-next ${
+                    page === totalPages ? "disabled" : ""
+                  }`}
                   onClick={() => page < totalPages && setPage(page + 1)}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="8" height="14" viewBox="0 0 8 14" fill="none">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="8"
+                    height="14"
+                    viewBox="0 0 8 14"
+                    fill="none"
+                  >
                     <path d="M8 7L0 14L0 0L8 7Z" fill="#1E1E1E" />
                   </svg>
                 </span>
