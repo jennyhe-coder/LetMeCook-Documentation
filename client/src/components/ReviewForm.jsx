@@ -8,6 +8,7 @@ const ReviewForm = ({ recipeId, onReviewSubmitted }) => {
         cost: 0,
         time: 0,
         difficulty: 0,
+        overall: 0
     });
     const [submitting, setSubmitting] = useState(false);
 
@@ -71,37 +72,39 @@ const ReviewForm = ({ recipeId, onReviewSubmitted }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-        <h3>Leave a Review</h3>
-        <textarea
-            placeholder="Your comment"
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            rows={10}
-            cols={50}
-            required
-        />
-        <div>
-            {['cost', 'time', 'difficulty'].map((cat) => (
-            <div key={cat}>
-                <label>{cat.charAt(0).toUpperCase() + cat.slice(1)} : </label>
-                <select
-                value={ratings[cat]}
-                onChange={(e) => handleRatingChange(cat, e.target.value)}
+        <div style={{ marginTop: '1.5rem' }}>
+            <form onSubmit={handleSubmit}>
+            <h3>Leave a Review</h3>
+            <textarea
+                placeholder="Your comment"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                rows={10}
+                cols={50}
                 required
-                >
-                <option value="">Select rating</option>
-                {[1, 2, 3, 4, 5].map((val) => (
-                    <option key={val} value={val}>{val}</option>
+            />
+            <div>
+                {['cost', 'time', 'difficulty', 'overall'].map((cat) => (
+                <div key={cat}>
+                    <label>{cat.charAt(0).toUpperCase() + cat.slice(1)} : </label>
+                    <select
+                    value={ratings[cat]}
+                    onChange={(e) => handleRatingChange(cat, e.target.value)}
+                    required
+                    >
+                    <option value="">Select rating</option>
+                    {[1, 2, 3, 4, 5].map((val) => (
+                        <option key={val} value={val}>{val}</option>
+                    ))}
+                    </select>
+                </div>
                 ))}
-                </select>
             </div>
-            ))}
+            <button type="submit" disabled={submitting}>
+                {submitting ? 'Submitting...' : 'Submit Review'}
+            </button>
+            </form>
         </div>
-        <button type="submit" disabled={submitting}>
-            {submitting ? 'Submitting...' : 'Submit Review'}
-        </button>
-        </form>
     );
 };
 
