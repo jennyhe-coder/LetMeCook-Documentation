@@ -1,3 +1,26 @@
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  .recipe-detail-card-container,
+  .recipe-detail-card-container * {
+    visibility: visible !important;
+  }
+
+  .recipe-detail-card-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+
+  /* Optional: Remove buttons during print */
+  .recipe-detail-actions {
+    display: none !important;
+  }
+}
+
 .recipe-detail-card-container {
   width: 700px;
   margin-left: 0;

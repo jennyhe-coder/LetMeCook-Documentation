@@ -73,8 +73,9 @@ export default function IndividualRecipe() {
             recipe_id: id,
           }
         );
-        if (viewError)
+        if (viewError) {
           console.error("Failed to increment view count:", viewError.message);
+        }
       } catch (error) {
         console.error("Error fetching recipe:", error.message);
         setRecipe(null);
@@ -86,49 +87,62 @@ export default function IndividualRecipe() {
     if (id) fetchAll();
   }, [id]);
 
-  if (loading) return <div className="loading">Loading...</div>;
-  if (!recipe) return <div className="not-found">Recipe not found.</div>;
   const refreshReviews = () => setRefreshFlag(!refreshFlag);
-  const formattedDate = new Date(recipe.createdAt).toLocaleDateString();
+  const formattedDate = recipe
+    ? new Date(recipe.createdAt).toLocaleDateString()
+    : "";
 
   return (
     <main className="layout-wrapper">
-      <div className="recipe-page-container">
-        <section className="header-section">
-          <h1 className="recipe-title">{recipe.title}</h1>
-          <div className="meta-info">
-            <p>
-              <strong>Recipe by {recipe.authorName || "Anonymous"}</strong>
-            </p>
-            <br />
-            <p> {formattedDate}</p>
+      <div className="recipe-page-container" style={{ minHeight: "100vh" }}>
+        {loading ? (
+          <div className="loading">
+            <h1 className="recipe-title">Loading...</h1>
+            <div className="image-wrapper" />
+            <div className="description">
+              Please wait while the recipe loads.
+            </div>
           </div>
-          <div className="image-wrapper">
-            <img
-              src={recipe.imageUrl}
-              alt={recipe.title}
-              className="recipe-image"
-            />
-          </div>
-          <div
-            className="description"
-            dangerouslySetInnerHTML={{ __html: recipe.description }}
-          />
-        </section>
+        ) : !recipe ? (
+          <div className="not-found">Recipe not found.</div>
+        ) : (
+          <>
+            <section className="header-section">
+              <h1 className="recipe-title">{recipe.title}</h1>
+              <div className="meta-info">
+                <p>
+                  <strong>Recipe by {recipe.authorName || "Anonymous"}</strong>
+                </p>
+                <br />
+                <p>{formattedDate}</p>
+              </div>
+              <div className="image-wrapper">
+                <img
+                  src={recipe.imageUrl}
+                  alt={recipe.title}
+                  className="recipe-image"
+                />
+              </div>
+              <div
+                className="description"
+                dangerouslySetInnerHTML={{ __html: recipe.description }}
+              />
+            </section>
 
-        <RecipeDetailCard recipe={recipe} />
+            <RecipeDetailCard recipe={recipe} />
 
-        <section className="review-section">
-          <h2 className="section-heading">User Reviews</h2>
-          {user && (
-            <ReviewForm
-              recipeId={recipe.id}
-              onReviewSubmitted={refreshReviews}
-            />
-          )}
-
-          <ReviewList recipeId={recipe.id} refreshTrigger={refreshFlag} />
-        </section>
+            <section className="review-section">
+              <h2 className="section-heading">User Reviews</h2>
+              {user && (
+                <ReviewForm
+                  recipeId={recipe.id}
+                  onReviewSubmitted={refreshReviews}
+                />
+              )}
+              <ReviewList recipeId={recipe.id} refreshTrigger={refreshFlag} />
+            </section>
+          </>
+        )}
       </div>
     </main>
   );

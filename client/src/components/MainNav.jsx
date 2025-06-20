@@ -3,7 +3,7 @@ import { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthProvider";
 import { supabase } from "../utils/supabaseClient";
-import {FaUserCircle} from "react-icons/fa"
+import { FaUserCircle } from "react-icons/fa";
 
 export default function MainNav() {
   const location = useLocation();
@@ -12,7 +12,7 @@ export default function MainNav() {
   const navigate = useNavigate();
   const linkRefs = useRef([]);
   const indicatorRef = useRef();
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
   const dropdownRef = useRef();
   const avatarRef = useRef(null);
   const [avatar, setAvatar] = useState(null);
@@ -23,15 +23,21 @@ export default function MainNav() {
   };
 
   useEffect(() => {
-    const paths = ["/", "/recipes", "/profile", "/dashboard", "/login", "avatar"];
+    const paths = [
+      "/",
+      "/recipes",
+      "/profile",
+      "/dashboard",
+      "/login",
+      "avatar",
+    ];
     let activeIndex = paths.indexOf(location.pathname);
     if (user && open) {
       activeIndex = paths.indexOf("avatar");
     }
     const activeEl = linkRefs.current[activeIndex];
     const indicator = indicatorRef.current;
- 
-  
+
     if (activeEl && indicator) {
       const rect = activeEl.getBoundingClientRect();
       const parentRect = activeEl.parentNode.parentNode.getBoundingClientRect();
@@ -46,14 +52,13 @@ export default function MainNav() {
     if (user) {
       linkRefs.current[paths.length - 1] = avatarRef.current;
     }
-
   }, [location.pathname, open]);
 
   useEffect(() => {
     const handleClick = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         setOpen(false);
-      };
+      }
     };
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
@@ -62,26 +67,24 @@ export default function MainNav() {
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user) {
-        return
+        return;
       }
 
-      const {data, error} = await supabase
-      .from('users')
-      .select('image_url')
-      .eq('id', user.id)
-      .single()
+      const { data, error } = await supabase
+        .from("users")
+        .select("image_url")
+        .eq("id", user.id)
+        .single();
 
       if (error) {
         console.error("Error fetching avatar:", error);
       } else {
         setAvatar(data?.image_url || null);
       }
-    }
+    };
 
     fetchProfile();
-  }, [user])
-
-
+  }, [user]);
 
   const navItems = [
     { path: "/", label: "home" },
@@ -92,7 +95,7 @@ export default function MainNav() {
 
   // if (!user) {
   //   navItems.push({ path: "/login", label: "login" });
-  // } 
+  // }
 
   return (
     <div className="banner-nav">
@@ -130,13 +133,13 @@ export default function MainNav() {
 
           {user ? (
             <div className="nav-link-wrapper relative" ref={dropdownRef}>
-              <div ref={avatarRef} className="cursor-pointer" onClick={() => setOpen((prev) => !prev)}>
+              <div
+                ref={avatarRef}
+                className="cursor-pointer"
+                onClick={() => setOpen((prev) => !prev)}
+              >
                 {avatar ? (
-                  <img
-                    src={avatar}
-                    alt="avatar"
-                    className="avatar-icon-nav"
-                  />
+                  <img src={avatar} alt="avatar" className="avatar-icon-nav" />
                 ) : (
                   <FaUserCircle size={28} />
                 )}
@@ -166,7 +169,7 @@ export default function MainNav() {
                   isActive ? "nav-link active" : "nav-link"
                 }
               >
-                Login
+                login
               </NavLink>
             </div>
           )}

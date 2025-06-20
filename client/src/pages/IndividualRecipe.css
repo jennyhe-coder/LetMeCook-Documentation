@@ -2,11 +2,14 @@
   /* max-width: 900px; */
   /* margin: 0 auto; */
   /* padding: 2rem 1rem; */
-  margin-top: 100px;
+  margin-top: 80px;
   color: #333;
   font-family: Raleway;
   margin-left: 0;
   width: 700px;
+  padding-left: 6px;
+  min-height: 100vh;
+  text-align: left;
 }
 
 .header-section {
@@ -61,7 +64,7 @@
 /* Optional: Styling for loading + not-found */
 .loading,
 .not-found {
-  text-align: center;
+  /* text-align: center; */
   margin-top: 4rem;
   font-size: 1.2rem;
   color: #888;
@@ -91,7 +94,7 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  background-color: #fafafa;
+  background-color: #fefaf3;
   padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
