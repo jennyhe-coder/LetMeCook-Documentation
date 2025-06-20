@@ -65,7 +65,7 @@ export default function Register() {
         />
         <div className="layout-wrapper">
         <div className="form-page">
-            <div >
+            <div className="center-container">
                 <form onSubmit={handleRegister} className='login-form'>
                 <h2>Register</h2>
                 <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder='FirstName'/>

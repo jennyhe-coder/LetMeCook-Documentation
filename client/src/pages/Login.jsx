@@ -28,7 +28,8 @@ export default function Login() {
   return (
     <>
     <div className= "layout-wrapper">
-      <div  className="form-page">
+      <div className="form-page">
+        <div className="center-container">
           <form className="login-form" onSubmit={handleLogin}>
             <h2>Login</h2>
             <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
@@ -43,6 +44,7 @@ export default function Login() {
             <Link to="/forgot-password" className="link">Forgot Password?</Link>
             {error.length > 0 && <p>{error}</p>}
           </form>
+        </div>
       </div>
     </div>
     </>
