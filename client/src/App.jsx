@@ -15,6 +15,7 @@ import ResetPassword from "./pages/ResetPassword";
 import ForgotPassword from "./pages/ForgotPassword";
 import EditProfile from "./pages/EditProfile";
 import UserDashboard from "./pages/UserDashboard";
+import IndividualRecipe from "./pages/IndividualRecipe";
 
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />   
         <Route path="/recipes" element={<Recipes />} />
+        <Route path="/recipes/:id" element={<IndividualRecipe />} />
         <Route path="/login" element={<Login />} />
         <Route path="/search" element={<SearchResults />} />
         <Route path="/terms" element={<Terms />} />
