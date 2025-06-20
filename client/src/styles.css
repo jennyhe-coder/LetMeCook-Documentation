@@ -51,7 +51,7 @@ img {
   padding: 0 0;
   width: calc(100% - 25%);
   overflow: visible;
-  position: relative;
+  /* position: relative; */
   z-index: 0;
 }
 
@@ -158,7 +158,7 @@ a {
 
 
 h1 {
-  font-family: archer-pro, sans-serif;
+  font-family: Raleway;
   font-weight: 500;
   font-size: 124px;
   font-style: normal;

@@ -1,9 +1,12 @@
 .recipe-page-container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-  font-family: 'Segoe UI', sans-serif;
+  /* max-width: 900px; */
+  /* margin: 0 auto; */
+  /* padding: 2rem 1rem; */
+  margin-top: 100px;
   color: #333;
+  font-family: Raleway;
+  margin-left: 0;
+  width: 700px;
 }
 
 .header-section {
@@ -11,10 +14,13 @@
 }
 
 .recipe-title {
-  font-size: 2.25rem;
-  font-weight: 800;
-  margin-bottom: 0.25rem;
-  color: #222;
+  color: #1E1E1E;
+  font-family: Raleway;
+  font-size: 40px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  padding-bottom: 10px;
 }
 
 .meta-info {
@@ -24,6 +30,10 @@
   display: flex;
   flex-wrap: wrap;
   gap: 1.5rem;
+}
+
+.meta-info strong {
+  font-weight: 700;
 }
 
 .recipe-image {
@@ -37,19 +47,26 @@
 }
 
 .description {
-  font-size: 1.1rem;
-  line-height: 1.7;
+  color: #1E1E1E;
+  font-family: Raleway;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 26px;
+  /* 144.444% */
   margin-bottom: 2.5rem;
   color: #444;
 }
 
 /* Optional: Styling for loading + not-found */
-.loading, .not-found {
+.loading,
+.not-found {
   text-align: center;
   margin-top: 4rem;
   font-size: 1.2rem;
   color: #888;
 }
+
 .image-wrapper {
   margin: 1.5rem 0;
   position: relative;
@@ -63,6 +80,7 @@
   border-radius: 0px;
   display: block;
 }
+
 .review-section {
   margin-top: 3rem;
   padding: 2rem 0;
@@ -76,7 +94,7 @@
   background-color: #fafafa;
   padding: 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   margin-bottom: 2rem;
 }
 
