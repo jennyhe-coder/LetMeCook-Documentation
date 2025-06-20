@@ -142,7 +142,7 @@ public class RecipeService {
             }
         }
 
-        // Sort
+        // Sorting
         Map<String, String> sortFieldMap = Map.of(
                 "title", "title",
                 "createdat", "createdAt",
@@ -163,7 +163,6 @@ public class RecipeService {
             query.orderBy(orders);
         }
 
-
         TypedQuery<Recipe> typedQuery = entityManager.createQuery(query);
         typedQuery.setFirstResult((int) pageable.getOffset());
         typedQuery.setMaxResults(pageable.getPageSize());
@@ -173,35 +172,83 @@ public class RecipeService {
                 .map(RecipeMapper::toCardDTO)
                 .collect(Collectors.toList());
 
+        // Count query sửa lại cho chính xác
+        CriteriaQuery<Recipe> countBaseQuery = cb.createQuery(Recipe.class);
+        Root<Recipe> countRoot = countBaseQuery.from(Recipe.class);
 
-        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-        Root<Recipe> countRoot = countQuery.from(Recipe.class);
-        countRoot.join("author", JoinType.LEFT);
-        countRoot.join("cuisines", JoinType.LEFT);
-        countRoot.join("categories", JoinType.LEFT);
-        Join<Recipe, RecipeIngredient> riCountJoin = countRoot.join("recipeIngredients", JoinType.LEFT);
-        riCountJoin.join("ingredient", JoinType.LEFT);
-        countRoot.join("dietaryPreferences", JoinType.LEFT);
+        Join<Recipe, User> countAuthorJoin = countRoot.join("author", JoinType.LEFT);
+        Join<Recipe, Cuisine> countCuisineJoin = countRoot.join("cuisines", JoinType.LEFT);
+        Join<Recipe, Category> countCategoryJoin = countRoot.join("categories", JoinType.LEFT);
+        Join<Recipe, RecipeIngredient> countRIJoin = countRoot.join("recipeIngredients", JoinType.LEFT);
+        Join<RecipeIngredient, Ingredient> countIngredientJoin = countRIJoin.join("ingredient", JoinType.LEFT);
+        Join<Recipe, DietaryPreference> countDPJoin = countRoot.join("dietaryPreferences", JoinType.LEFT);
 
         List<Predicate> countPredicates = new ArrayList<>();
+        List<Predicate> countHavingPredicates = new ArrayList<>();
+        boolean countHasGroupBy = false;
 
         if (keyword != null && !keyword.isBlank()) {
             String pattern = "%" + keyword.toLowerCase() + "%";
             Predicate titleLike = cb.like(cb.lower(countRoot.get("title")), pattern);
-            Predicate authorLike = cb.like(cb.lower(cb.concat(
-                    countRoot.join("author", JoinType.LEFT).get("firstName"),
-                    cb.concat(" ", countRoot.join("author", JoinType.LEFT).get("lastName"))
-            )), pattern);
+            Predicate authorLike = cb.like(cb.lower(cb.concat(countAuthorJoin.get("firstName"), cb.concat(" ", countAuthorJoin.get("lastName")))), pattern);
             Predicate descriptionLike = cb.like(cb.lower(countRoot.get("description")), pattern);
             countPredicates.add(cb.or(titleLike, authorLike, descriptionLike));
         }
 
         countPredicates.add(cb.equal(countRoot.get("isPublic"), isPublic));
 
-        countQuery.select(cb.countDistinct(countRoot)).where(countPredicates.toArray(new Predicate[0]));
-        long total = entityManager.createQuery(countQuery).getSingleResult();
+        if (cuisines != null && !cuisines.isEmpty()) {
+            countPredicates.add(cb.lower(countCuisineJoin.get("name")).in(cuisines.stream().map(String::toLowerCase).toList()));
+            countHavingPredicates.add(cb.equal(cb.countDistinct(countCuisineJoin.get("name")), (long) cuisines.size()));
+            countHasGroupBy = true;
+        }
 
-        return new PageImpl<>(results, pageable, total);
+        if (ingredients != null && !ingredients.isEmpty()) {
+            countPredicates.add(cb.lower(countIngredientJoin.get("name")).in(ingredients.stream().map(String::toLowerCase).toList()));
+            countHavingPredicates.add(cb.greaterThanOrEqualTo(cb.countDistinct(countIngredientJoin.get("name")), 1L));
+            countHasGroupBy = true;
+        }
+
+        if (categories != null && !categories.isEmpty()) {
+            countPredicates.add(cb.lower(countCategoryJoin.get("name")).in(categories.stream().map(String::toLowerCase).toList()));
+            countHavingPredicates.add(cb.equal(cb.countDistinct(countCategoryJoin.get("name")), (long) categories.size()));
+            countHasGroupBy = true;
+        }
+
+        if (dietaryPreferences != null && !dietaryPreferences.isEmpty()) {
+            countPredicates.add(cb.lower(countDPJoin.get("name")).in(dietaryPreferences.stream().map(String::toLowerCase).toList()));
+            countHavingPredicates.add(cb.equal(cb.countDistinct(countDPJoin.get("name")), (long) dietaryPreferences.size()));
+            countHasGroupBy = true;
+        }
+
+        if (allergies != null && !allergies.isEmpty()) {
+            Expression<Long> allergenCount = cb.sum(
+                    cb.<Long>selectCase()
+                            .when(cb.lower(countIngredientJoin.get("name")).in(allergies.stream().map(String::toLowerCase).toList()), 1L)
+                            .otherwise(0L)
+            );
+            countHavingPredicates.add(cb.lessThanOrEqualTo(allergenCount, (long) Math.floor(allergies.size() / 2.0)));
+            countHasGroupBy = true;
+        }
+
+        countBaseQuery.select(countRoot).where(countPredicates.toArray(new Predicate[0])).distinct(true);
+
+        if (countHasGroupBy) {
+            countBaseQuery.groupBy(countRoot.get("id"));
+            if (!countHavingPredicates.isEmpty()) {
+                countBaseQuery.having(cb.and(countHavingPredicates.toArray(new Predicate[0])));
+            }
+            long total = entityManager.createQuery(countBaseQuery).getResultList().size();
+            return new PageImpl<>(results, pageable, total);
+        } else {
+            CriteriaQuery<Long> simpleCount = cb.createQuery(Long.class);
+            Root<Recipe> simpleCountRoot = simpleCount.from(Recipe.class);
+            simpleCount.select(cb.countDistinct(simpleCountRoot));
+            simpleCount.where(countPredicates.toArray(new Predicate[0]));
+            long total = entityManager.createQuery(simpleCount).getSingleResult();
+            return new PageImpl<>(results, pageable, total);
+        }
     }
+
 
 }
