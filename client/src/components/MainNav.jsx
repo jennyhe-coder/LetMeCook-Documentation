@@ -152,6 +152,11 @@ export default function MainNav() {
                       Profile
                     </NavLink>
                   </li>
+                  <li className="dropdown-nav-item">
+                    <NavLink to="/dashboard" onClick={() => setOpen(false)}>
+                      User Dashboard
+                    </NavLink>
+                  </li>
                   <li
                     className="dropdown-nav-item cursor-pointer"
                     onClick={handleLogout}

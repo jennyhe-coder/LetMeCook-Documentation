@@ -1,9 +1,9 @@
-import React from "react";
 import  { useState, useEffect} from "react";
 import { supabase } from "../utils/supabaseClient";
 import { useAuth } from "../context/AuthProvider";
 import { useNavigate } from "react-router-dom";
 import Modal from "../components/Modal";
+import CarouselSection from "./../components/CarouselSection";
 
 export default function UserDashboard() {
     const {user} = useAuth();
@@ -82,29 +82,50 @@ export default function UserDashboard() {
         />
         { user && 
         <div className="layout">
-            <h2>Welcome, {user? user.first_name || user.email : "User"}!</h2>
+            <div className="welcome">
+              <h2>Welcome back, <span>{user.first_name || user.email}</span>! 👋</h2>
+              <p>Here’s your personalized dashboard. Create, view, and manage your recipes easily.</p>
+            </div>
             <section>
-                <h3>Your Favourites</h3>
-                <div className="carousel"/>
+                <CarouselSection
+                    title="Your Own Recipes"
+                    sectionClass="section-1"
+                    dataSource={`https://letmecook.ca/api/recipes?authorId=${user?.id}`}
+                    actionButton={
+                        <button
+                            onClick={() => navigate('/create-recipe')}
+                            className="create-button" >
+                                + Add
+                        </button>
+                    }
+                />
             </section>
             <section>
-                <h3>Recently Viewed</h3>
-                <div className="carousel" emptyMsg="No browsing history." />
+                {/* Have to get the data source for this later */}
+                <CarouselSection
+                    title="Your Favourites"
+                    sectionClass="section-2"
+                    dataSource=""
+                />
             </section>
             <section>
-                <h3>Your Own Recipes</h3>
-                <div className="carousel"/>
+                {/* Have to get the data source for this later */}
+                <CarouselSection
+                    title="Recently Viewed"
+                    sectionClass="section-3"
+                    dataSource=""
+                />
             </section>
             <section>
-                <h3>Recommended For You</h3>
-                <div className="carousel"/>
+                {/* Have to get the data source for this later */}
+                <CarouselSection
+                    title="Recommended For You"
+                    sectionClass="section-4"
+                    dataSource=""
+                />
             </section>
         </div>
         }
         </>
     )
-
-
-
-
 }

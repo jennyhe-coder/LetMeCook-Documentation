@@ -9,6 +9,7 @@ export default function CarouselSection({
   sectionClass = "",
   title = "",
   dataSource,
+  actionButton = null
 }) {
   const sectionRef = useRef();
 
@@ -36,7 +37,10 @@ export default function CarouselSection({
     <section ref={sectionRef} className={`carousel-section ${sectionClass}`}>
       <div className="carousel-section-bg" />
       <div className="layout-wrapper">
-        {title && <div className="section-title">{title}</div>}
+        <div className="section-header">
+          {title && <div className="section-title">{title}</div>}
+          {actionButton && <div className="section-button">{actionButton}</div>}
+        </div>
         <Carousel dataSource={dataSource} />
       </div>
     </section>

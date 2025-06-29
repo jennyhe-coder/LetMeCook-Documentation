@@ -723,6 +723,14 @@ p {
   overflow: visible;
 }
 
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
 .section-title {
   color: #1E1E1E;
   font-family: Raleway;
@@ -732,6 +740,11 @@ p {
   line-height: normal;
   letter-spacing: -0.62px;
   padding-bottom: 12px;
+}
+
+.section-button {
+  display: flex;
+  align-items: center;
 }
 
 .search-results-section,
@@ -1300,4 +1313,27 @@ p {
   border-radius: 3px;
 }
 
+.create-button {
+  font-size: 23px;
+  font-weight: bold;
+  color: white;
+  background-color: #F5B43C;
+  border: none;
+  border-radius: 400px;
+  cursor: pointer;
+  padding: 8px 20px;
+  transition: transform 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.create-button:hover {
+  transform: scale(1.2);
+  background-color: #E3A636;
+}
+
+.welcome{
+  padding: 10rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+}
 /*------------------*/
