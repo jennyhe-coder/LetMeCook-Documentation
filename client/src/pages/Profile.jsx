@@ -64,7 +64,7 @@ export default function Profile() {
         />
       )}
       <div className="profile-info">
-        <p><strong>Full Name:</strong> {profile.full_name}</p>
+        <p><strong>Full Name:</strong> {`${profile.first_name || ''} ${profile.last_name || ''}`.trim()}</p>
         <p><strong>Email:</strong> {profile.email}</p>
         <p><strong>Cooking Skill:</strong> {profile.cooking_skill}</p>
         <p><strong>About Me:</strong> {profile.about_me}</p>
