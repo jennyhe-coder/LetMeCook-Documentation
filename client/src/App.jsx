@@ -16,7 +16,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import EditProfile from "./pages/EditProfile";
 import UserDashboard from "./pages/UserDashboard";
 import IndividualRecipe from "./pages/IndividualRecipe";
-
+import Favourites from "./pages/Favourites";
 
 function App() {
 
@@ -42,6 +42,7 @@ function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/dashboard" element={<UserDashboard />} />
+        <Route path="/favourites" element={<Favourites />} />
       </Routes>
       <Footer />
     </>

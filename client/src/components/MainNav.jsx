@@ -30,6 +30,7 @@ export default function MainNav() {
       "/dashboard",
       "/login",
       "avatar",
+      "/favourites"
     ];
     let activeIndex = paths.indexOf(location.pathname);
     if (user && open) {
@@ -155,6 +156,11 @@ export default function MainNav() {
                   <li className="dropdown-nav-item">
                     <NavLink to="/dashboard" onClick={() => setOpen(false)}>
                       User Dashboard
+                    </NavLink>
+                  </li>
+                  <li>
+                    <NavLink to="/favourites" onClick={() => setOpen(false)}>
+                      Favourites
                     </NavLink>
                   </li>
                   <li
