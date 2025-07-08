@@ -1,0 +1,47 @@
+# Python cache & virtual environment
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.swp
+*.bak
+*.tmp
+*.log
+.venv/
+env/
+venv/
+
+# Jupyter Notebook checkpoint
+.ipynb_checkpoints/
+
+# macOS / Linux / Windows system files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# VS Code and PyCharm
+.vscode/
+.idea/
+
+# Environment variables
+.env
+
+# Model & data artifacts
+models/
+data/
+
+# Output files
+*.pkl
+*.csv
+*.json
+*.db
+*.sqlite
+*.zip
+
+# Logs & temp
+logs/
+*.log
+
+# If using Flask or Streamlit
+instance/
+*.db
