@@ -2,15 +2,23 @@ import pandas as pd
 import torch
 import pickle
 from sentence_transformers import SentenceTransformer
+from functools import lru_cache
+
 
 def load_data(path="data/recipes_cleaned.csv"):
     df = pd.read_csv(path)
     return df["id"].tolist(), df["combined_text"].tolist()
 
-def embed_texts(texts, model_name="all-MiniLM-L6-v2"):
-    model = SentenceTransformer(model_name)
-    embeddings = model.encode(texts, convert_to_tensor=True, show_progress_bar=True)
-    return embeddings
+@lru_cache(maxsize=None)
+def get_model():
+    return SentenceTransformer("all-MiniLM-L6-v2")
+
+@lru_cache(maxsize=None)
+def cached_embed(text):
+    return torch.tensor(get_model().encode(text, convert_to_numpy=True))
+
+def embed_texts(texts):
+    return torch.stack([cached_embed(text) for text in texts])
 
 def save_embeddings(embeddings, ids):
     torch.save(embeddings, "model/recipe_embeddings.pt")

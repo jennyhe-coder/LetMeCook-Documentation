@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from src.recommend import recommend_by_id, recommend_for_user
+from src.recommend import recommend_by_id, recommend_for_user, try_update_missing_embedding
 from src.embed_with_sbert import append_embedding, remove_embeddings
 from multiprocessing import Process
 import subprocess
@@ -26,7 +26,7 @@ def run_pipeline_background():
 @app.route("/recommend/id", methods=["GET"])
 def recommend_by_recipe():
     recipe_id = request.args.get("recipeId")
-    top_k = int(request.args.get("topK", 5))
+    top_k = int(request.args.get("topK", 10))
     try:
         results = recommend_by_id(recipe_id, top_k)
         return jsonify({"recommendations": results}), 200
@@ -38,7 +38,8 @@ def recommend_for_user_route():
     data = request.get_json()
     favorites = data.get("favorites", [])
     history = data.get("history", [])
-    top_k = int(data.get("topK", 5))
+    top_k = int(data.get("topK", 10))
+    print(f"Received favorites: {favorites}, history: {history}, top_k: {top_k}")
     try:
         results = recommend_for_user(favorites, history, top_k)
         return jsonify({"recommendations": results}), 200
@@ -66,12 +67,11 @@ def check_pipeline_status():
 def add_vector():
     data = request.get_json()
     recipe_id = data.get("id")
-    text = data.get("text")
-    if not recipe_id or not text:
-        return jsonify({"error": "Missing id or text"}), 400
+    if not recipe_id:
+        return jsonify({"error": "Missing recipe ID"}), 400
     try:
-        append_embedding(recipe_id, text)
-        return jsonify({"message": "✅ Embedding added."}), 200
+        try_update_missing_embedding(recipe_id)
+        return jsonify({"message": f"✅ Embedding added/updated for ID: {recipe_id}"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
