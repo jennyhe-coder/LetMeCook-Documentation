@@ -1,11 +1,13 @@
 package com.server.letMeCook.controller;
 
 
-import com.auth0.jwt.JWT;
+import com.server.letMeCook.repository.UserRepository;
+import org.springframework.security.oauth2.jwt.Jwt;
 import com.server.letMeCook.dto.recipe.RecipeCardDTO;
 import com.server.letMeCook.dto.recipe.RecipeDTO;
 import com.server.letMeCook.dto.recipe.RecipeSearchFields;
 import com.server.letMeCook.model.DietaryPreference;
+import com.server.letMeCook.model.User;
 import com.server.letMeCook.service.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +16,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/recipes")
@@ -26,6 +30,8 @@ public class RecipeController {
 
     private final RecipeService recipeService;
     private final OpenAIService openAIService;
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     public RecipeController(RecipeService recipeService, OpenAIService openAIService) {
@@ -76,13 +82,13 @@ public class RecipeController {
     }
 
 
-
     private Set<String> mergeSet(Set<String> original, Set<String> aiSuggested) {
         Set<String> result = new HashSet<>();
         if (original != null) result.addAll(original);
         if (aiSuggested != null) result.addAll(aiSuggested);
         return result.isEmpty() ? null : result;
     }
+
     @GetMapping("/search")
     public Page<RecipeCardDTO> advancedSearch(
             @RequestParam(required = false) String keyword,
@@ -94,7 +100,7 @@ public class RecipeController {
             @RequestParam(required = false, defaultValue = "true") Boolean isPublic,
             @PageableDefault(size = 20, page = 0, sort = "title", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        if (keyword!=null && keyword.length()>20) {
+        if (keyword != null && keyword.length() > 20) {
             RecipeSearchFields fields = openAIService.extractRecipeSearchFields(keyword);
             keyword = fields.getKeyword();
             cuisines = mergeSet(cuisines, fields.getCuisines());
@@ -114,20 +120,45 @@ public class RecipeController {
         System.out.println("Dietary Preferences: " + (dietaryPreferences != null ? String.join(", ", dietaryPreferences) : "null"));
         System.out.println("Is Public: " + isPublic);
 
-        return recipeService.advancedSearch(keyword, cuisines, ingredients, allergies,categories, dietaryPreferences, isPublic, pageable);
+        return recipeService.advancedSearch(keyword, cuisines, ingredients, allergies, categories, dietaryPreferences, isPublic, pageable);
     }
 
-    @GetMapping("/recommended")
-    public List<RecipeCardDTO> recommended(@AuthenticationPrincipal JWT jwt,
-                                           @RequestParam(required = false, defaultValue = "0") int page,
-                                           @RequestParam(required = false, defaultValue = "20") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        if (jwt == null ) {
-            return recipeService.getTopView(pageable);
-        }
-        else{
-            return recipeService.getTopView(pageable);
-        }
-
+    @GetMapping("/recommended-by-id")
+    public List<RecipeCardDTO> recommendByRecipeId(@RequestParam(name = "recipeid") UUID recipeId) {
+        return recipeService.recommendedByRecipeId(recipeId);
     }
+
+
+    @GetMapping("/recommended-for-user")
+    public List<RecipeCardDTO> recommendForUser(@AuthenticationPrincipal Jwt jwt) {
+        if (jwt == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "🔐 Please log in.");
+        }
+        String email = jwt.getClaim("email");
+
+        User user = userRepository.findByEmail(email);
+
+
+        return recipeService.recommendedByUserId(user.getId());
+    }
+//    @GetMapping("/recommended-for-user")
+//    public List<RecipeCardDTO> recommendForUser(
+//            @AuthenticationPrincipal Jwt jwt,
+//            @RequestParam(required = false) UUID userId) {
+//
+//        UUID resolvedUserId;
+//
+//        if (jwt != null) {
+//            String email = jwt.getClaim("email");
+//            User user = userRepository.findByEmail(email);
+//            resolvedUserId = user.getId();
+//        } else if (userId != null) {
+//            resolvedUserId = userId;
+//        } else {
+//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "🔐 Please log in or provide userId for testing.");
+//        }
+//
+//        return recipeService.recommendedByUserId(resolvedUserId);
+//    }
+
 }

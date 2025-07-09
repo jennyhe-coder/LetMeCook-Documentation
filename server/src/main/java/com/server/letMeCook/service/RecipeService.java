@@ -4,16 +4,21 @@ import com.server.letMeCook.dto.recipe.RecipeCardDTO;
 import com.server.letMeCook.dto.recipe.RecipeDTO;
 import com.server.letMeCook.mapper.RecipeMapper;
 import com.server.letMeCook.model.*;
+import com.server.letMeCook.repository.RecipeBrowsingHistoryRepository;
+import com.server.letMeCook.repository.RecipeFavouritesRepository;
 import com.server.letMeCook.repository.RecipeRepository;
 import jakarta.persistence.*;
 import jakarta.persistence.criteria.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,10 +27,30 @@ import java.util.stream.Collectors;
 public class RecipeService {
 
     private final RecipeRepository recipeRepository;
+    private final RecommendationService recommendationService;
+    private final RecipeMapper recipeMapper;
+    @Autowired
+    private RecipeFavouritesRepository favouritesRepository;
 
     @Autowired
-    public RecipeService(RecipeRepository recipeRepository) {
+    private RecipeBrowsingHistoryRepository browsingHistoryRepository;
+
+
+    @Value("${recommendation.url}")
+    private String recommendationUrl;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Autowired
+    public RecipeService(
+            RecipeRepository recipeRepository,
+            RecommendationService recommendationService,
+            RecipeMapper recipeMapper
+    ) {
         this.recipeRepository = recipeRepository;
+        this.recommendationService = recommendationService;
+        this.recipeMapper = recipeMapper;
     }
 
     @PersistenceContext
@@ -59,6 +84,7 @@ public class RecipeService {
                 .map(RecipeMapper::toCardDTO)
                 .collect(Collectors.toList());
     }
+
 
     @Transactional(readOnly = true)
     public Page<RecipeCardDTO> advancedSearch(
@@ -288,5 +314,41 @@ public class RecipeService {
             long total = entityManager.createQuery(simpleCount).getSingleResult();
             return new PageImpl<>(results, pageable, total);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<RecipeCardDTO> recommendedByRecipeId(UUID recipeId) {
+        List<UUID> ids = recommendationService.recommendByRecipeId(recipeId, 10);
+        return recipeRepository.findAllById(ids)
+                .stream()
+                .map(RecipeMapper::toCardDTO)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<RecipeCardDTO> recommendedByUserId(UUID userId) {
+        List<UUID> favIds = favouritesRepository.findByUserIdOrderByCreatedAtDesc(userId)
+                .stream()
+                .map(fav -> fav.getRecipe().getId())
+                .toList();
+
+        List<UUID> historyIds = browsingHistoryRepository.findByUserIdOrderByViewedAtDesc(userId)
+                .stream()
+                .map(history -> history.getRecipe().getId())
+                .distinct()
+                .toList();
+        System.out.println("🟦 Favorite Recipe IDs: " + favIds);
+        System.out.println("🟨 Browsing History Recipe IDs: " + historyIds);
+        // ✅ Gọi service đã chuẩn hóa logic gọi REST
+        List<UUID> recommendedIds = recommendationService.recommendForUser(favIds, historyIds, 10);
+
+        if (recommendedIds.isEmpty()) {
+            return List.of();
+        }
+
+        return recipeRepository.findAllById(recommendedIds)
+                .stream()
+                .map(RecipeMapper::toCardDTO)
+                .toList();
     }
 }
