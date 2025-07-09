@@ -19,7 +19,7 @@ export default function RecipeDetailCard({ recipe }) {
     .single()
 
     if (recipeData) {
-      const {data: favouriteData, error: favouriteError } = await supabase
+      const {error: favouriteError } = await supabase
       .from("recipe_favourites")
       .insert({
         recipe_id: recipeData.id,
@@ -33,6 +33,8 @@ export default function RecipeDetailCard({ recipe }) {
       console.log(recipeError)
     }
   }
+  console.log("Image URL:", recipe.imageUrl || recipe.image_url);
+
 
   return (
     <div className="recipe-detail-card-container">
@@ -76,11 +78,11 @@ export default function RecipeDetailCard({ recipe }) {
 
         <div className="recipe-detail-image-column">
           <img
-            src={recipe.imageUrl}
+            src={recipe.imageUrl || recipe.image_url}
             alt={recipe.title}
             className="recipe-detail-image"
           />
-          <p className="recipe-detail-rating">★★★★★ ({recipe.rating || 250})</p>
+          <p className="recipe-detail-rating">★★★★★ ({recipe.rating || 0})</p>
         </div>
       </div>
 
