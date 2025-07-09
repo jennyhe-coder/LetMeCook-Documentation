@@ -1,11 +1,40 @@
 import React from "react";
 import "./RecipeDetailCard.css";
+import { supabase } from "../utils/supabaseClient";
+import { useAuth } from '../context/AuthProvider';
 
 export default function RecipeDetailCard({ recipe }) {
+  const { user } = useAuth();
+    
   const handlePrint = () => window.print();
 
   const capitalizeWords = (text) =>
     text.replace(/\b\w/g, (char) => char.toUpperCase());
+
+  const handleSave = async () => {
+    const {data: recipeData, error: recipeError} = await supabase
+    .from("recipe")
+    .select("*")
+    .eq("id", recipe.id)
+    .single()
+
+    if (recipeData) {
+      const {error: favouriteError } = await supabase
+      .from("recipe_favourites")
+      .insert({
+        recipe_id: recipeData.id,
+        user_id: user.id
+      })
+
+      if (favouriteError) {
+        console.log("favouriteError: ", favouriteError)
+      }
+    } else{
+      console.log(recipeError)
+    }
+  }
+  console.log("Image URL:", recipe.imageUrl || recipe.image_url);
+
 
   return (
     <div className="recipe-detail-card-container">
@@ -43,17 +72,17 @@ export default function RecipeDetailCard({ recipe }) {
               {" "}
               Print Recipe
             </button>
-            <button className="save-btn"> Save</button>
+            <button className="save-btn" onClick={handleSave}> Save</button>
           </div>
         </div>
 
         <div className="recipe-detail-image-column">
           <img
-            src={recipe.imageUrl}
+            src={recipe.imageUrl || recipe.image_url}
             alt={recipe.title}
             className="recipe-detail-image"
           />
-          <p className="recipe-detail-rating">★★★★★ ({recipe.rating || 250})</p>
+          <p className="recipe-detail-rating">★★★★★ ({recipe.rating || 0})</p>
         </div>
       </div>
 
