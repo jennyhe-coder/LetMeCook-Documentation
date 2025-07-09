@@ -18,6 +18,7 @@ import UserDashboard from "./pages/UserDashboard";
 import IndividualRecipe from "./pages/IndividualRecipe";
 import Favourites from "./pages/Favourites";
 import CreateRecipe from "./pages/CreateRecipe";
+import UserRecipe from "./pages/UserRecipe";
 
 function App() {
 
@@ -45,6 +46,7 @@ function App() {
         <Route path="/dashboard" element={<UserDashboard />} />
         <Route path="/favourites" element={<Favourites />} />
         <Route path="/create-recipe" element={<CreateRecipe />} />
+        <Route path="/user-recipe" element={<UserRecipe />} />
       </Routes>
       <Footer />
     </>

@@ -13,7 +13,7 @@ export default function RecipeList({ recipes = [] }) {
           id={recipe.id}
           title={recipe.title}
           author={recipe.authorName}
-          imageUrl={recipe.imageUrl}
+          imageUrl={recipe.imageUrl || recipe.image_url}
           cookingTime={recipe.cookingTime}
         />
       ))}
