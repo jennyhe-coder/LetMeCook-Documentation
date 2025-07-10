@@ -121,7 +121,7 @@ export default function UserDashboard() {
                 <CarouselSection
                     title="Recommended For You"
                     sectionClass="section-4"
-                    dataSource=""
+                    dataSource={`http://localhost:8080/api/recipes/recommended-by-id?userid=${user?.id}`}
                 />
             </section>
         </div>
