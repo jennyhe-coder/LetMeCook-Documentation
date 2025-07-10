@@ -42,34 +42,29 @@ public class RecommendationService {
         return Collections.emptyList();
     }
 
-
     @SuppressWarnings("unchecked")
     public List<UUID> recommendForUser(List<UUID> favorites, List<UUID> history, int topK) {
-        String url = properties.getUrl() + "/recommend/user";
-        Map<String, Object> payload = Map.of(
-                "favorites", favorites,
-                "history", history,
-                "topK", topK
-        );
-
+        String favStr = String.join(",", favorites.stream().map(UUID::toString).toList());
+        String hisStr = String.join(",", history.stream().map(UUID::toString).toList());
+        String url = String.format("%s/recommend/user?favorites=%s&history=%s&topK=%d",
+                properties.getUrl(), favStr, hisStr, topK);
         try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
-
-            ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
+            ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
 
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
                 List<List<Object>> recommendations = (List<List<Object>>) response.getBody().get("recommendations");
 
-                return recommendations.stream()
+                List<UUID> ids = recommendations.stream()
                         .map(pair -> UUID.fromString((String) pair.get(0)))
                         .toList();
+
+                System.out.println("Recommendations from Flask: " + ids);
+                return ids;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return Collections.emptyList();
     }
+
 }

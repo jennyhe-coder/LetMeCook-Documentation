@@ -2,6 +2,8 @@ package com.server.letMeCook.controller;
 
 
 import com.server.letMeCook.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.security.oauth2.jwt.Jwt;
 import com.server.letMeCook.dto.recipe.RecipeCardDTO;
 import com.server.letMeCook.dto.recipe.RecipeDTO;
@@ -16,9 +18,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 
@@ -32,7 +34,10 @@ public class RecipeController {
     private final OpenAIService openAIService;
     @Autowired
     private UserRepository userRepository;
-
+    @Value("${recommendation.url}")
+    private String recommendationUrl;
+    @Autowired
+    private RestTemplate restTemplate;
     @Autowired
     public RecipeController(RecipeService recipeService, OpenAIService openAIService) {
         this.recipeService = recipeService;
@@ -124,41 +129,43 @@ public class RecipeController {
     }
 
     @GetMapping("/recommended-by-id")
-    public List<RecipeCardDTO> recommendByRecipeId(@RequestParam(name = "recipeid") UUID recipeId) {
-        return recipeService.recommendedByRecipeId(recipeId);
-    }
+    public ResponseEntity<?> recommend(
+            @RequestParam(required = false, name = "recipeid") UUID recipeId,
+            @RequestParam(required = false, name = "userid") UUID userId) {
 
 
-    @GetMapping("/recommended-for-user")
-    public List<RecipeCardDTO> recommendForUser(@AuthenticationPrincipal Jwt jwt) {
-        if (jwt == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "🔐 Please log in.");
+        if (recipeId != null) {
+            List<RecipeCardDTO> list = recipeService.recommendedByRecipeId(recipeId);
+            return ResponseEntity.ok(list);
         }
-        String email = jwt.getClaim("email");
 
-        User user = userRepository.findByEmail(email);
+        if (userId != null) {
+            Page<RecipeCardDTO> page = recipeService.recommendedByUserId(userId);
+            return ResponseEntity.ok(page);
+        }
 
-
-        return recipeService.recommendedByUserId(user.getId());
+        return ResponseEntity.badRequest().body("");
     }
-//    @GetMapping("/recommended-for-user")
-//    public List<RecipeCardDTO> recommendForUser(
-//            @AuthenticationPrincipal Jwt jwt,
-//            @RequestParam(required = false) UUID userId) {
-//
-//        UUID resolvedUserId;
-//
-//        if (jwt != null) {
-//            String email = jwt.getClaim("email");
-//            User user = userRepository.findByEmail(email);
-//            resolvedUserId = user.getId();
-//        } else if (userId != null) {
-//            resolvedUserId = userId;
-//        } else {
-//            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "🔐 Please log in or provide userId for testing.");
-//        }
-//
-//        return recipeService.recommendedByUserId(resolvedUserId);
-//    }
+
+
+
+
+
+    @GetMapping("/flask-update-embed")
+    public ResponseEntity<?> updateEmbedFromFlask() {
+        String flaskUrl = recommendationUrl + "/update/embed";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        try {
+            restTemplate.exchange(flaskUrl, HttpMethod.POST, entity, String.class);
+            return ResponseEntity.ok("Flask update/embed triggered successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error connecting to Flask: " + e.getMessage());
+        }
+    }
+
 
 }

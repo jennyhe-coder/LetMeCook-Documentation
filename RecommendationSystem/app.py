@@ -33,15 +33,18 @@ def recommend_by_recipe():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-@app.route("/recommend/user", methods=["POST"])
+@app.route("/recommend/user", methods=["GET"])
 def recommend_for_user_route():
-    data = request.get_json()
-    favorites = data.get("favorites", [])
-    history = data.get("history", [])
-    top_k = int(data.get("topK", 10))
+    favorites = request.args.get("favorites", "")
+    history = request.args.get("history", "")
+    top_k = int(request.args.get("topK", 10))
+
+    favorites = [f for f in favorites.split(",") if f]
+    history = [h for h in history.split(",") if h]
     print(f"Received favorites: {favorites}, history: {history}, top_k: {top_k}")
     try:
         results = recommend_for_user(favorites, history, top_k)
+        print(f"Recommendations: {results}")
         return jsonify({"recommendations": results}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 400
