@@ -11,10 +11,7 @@ import jakarta.persistence.*;
 import jakarta.persistence.criteria.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -326,7 +323,7 @@ public class RecipeService {
     }
 
     @Transactional(readOnly = true)
-    public List<RecipeCardDTO> recommendedByUserId(UUID userId) {
+    public Page<RecipeCardDTO> recommendedByUserId(UUID userId) {
         List<UUID> favIds = favouritesRepository.findByUserIdOrderByCreatedAtDesc(userId)
                 .stream()
                 .map(fav -> fav.getRecipe().getId())
@@ -337,18 +334,20 @@ public class RecipeService {
                 .map(history -> history.getRecipe().getId())
                 .distinct()
                 .toList();
-        System.out.println("🟦 Favorite Recipe IDs: " + favIds);
-        System.out.println("🟨 Browsing History Recipe IDs: " + historyIds);
-        // ✅ Gọi service đã chuẩn hóa logic gọi REST
-        List<UUID> recommendedIds = recommendationService.recommendForUser(favIds, historyIds, 10);
+
+        List<UUID> recommendedIds = recommendationService.recommendForUser(favIds, historyIds, 100);
 
         if (recommendedIds.isEmpty()) {
-            return List.of();
+            return Page.empty();
         }
 
-        return recipeRepository.findAllById(recommendedIds)
+        List<RecipeCardDTO> content = recipeRepository.findAllById(recommendedIds)
                 .stream()
                 .map(RecipeMapper::toCardDTO)
                 .toList();
+
+        Pageable pageable = PageRequest.of(0, content.size() == 0 ? 1 : content.size());
+        return new PageImpl<>(content, pageable, content.size());
     }
+
 }
