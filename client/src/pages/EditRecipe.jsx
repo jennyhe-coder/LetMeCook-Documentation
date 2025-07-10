@@ -181,7 +181,6 @@ export default function EditRecipe() {
       setError("Error generating public URL: " + publicErr.message);
       return;
     }
-    console.log("public image url: ",  publicURLData.publicUrl)
     setError(null)
     setForm((prev) => ({ ...prev, image_url: publicURLData.publicUrl }));
   };
@@ -265,8 +264,6 @@ export default function EditRecipe() {
         unit: ri.unit,
       });
     }
-
-    console.log("linked ingredients: ", linkedIngredients)
 
     await supabase
         .from("recipe_ingredients")
