@@ -1,15 +1,19 @@
 import { useEffect, useRef } from "react";
-import Carousel from "./../components/Carousel";
-import { Link } from "react-router-dom";
 import SearchBar from "./../components/SearchBar-Home";
-import RecipeCard from "./../components/RecipeCard";
 import CarouselSection from "./../components/CarouselSection";
+import { useAuth } from "../context/AuthProvider";
+import { Navigate } from "react-router-dom";
 
 export default function Home() {
   const inputRef = useRef();
   useEffect(() => {
     inputRef.current?.focus({ preventScroll: true });
   }, []);
+
+  const { user } = useAuth();
+  if (user) {
+    return <Navigate to="/dashboard" />;
+  }
 
   return (
     <>
