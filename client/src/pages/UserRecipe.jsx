@@ -28,7 +28,7 @@ export default function UserRecipe() {
 
     if (userLoading) return;   
     if (!user?.id) {
-        console.log("user doesn't exist");
+        console.warn("user doesn't exist");
         return;
     }
 
@@ -43,7 +43,6 @@ export default function UserRecipe() {
         if (recipeErr) {
             console.log("Error fetching recipes: ", recipeErr);
         }else {
-            console.log(recipeData);
             setUserRecipes(recipeData);
             setTotalElements(recipeData.length);
         }
