@@ -5,6 +5,7 @@ import Modal from '../components/Modal';
 import { useNavigate } from 'react-router-dom';
 import { debounce } from 'lodash';
 import Select from 'react-select';
+import { useParams } from 'react-router-dom';
 
 const UNITS = [
   'teaspoon', 'cup', 'ounce', 'pound', 'pinch',
@@ -12,11 +13,11 @@ const UNITS = [
   'box', 'sprigs',  'mediums'
 ];
 
-export default function CreateRecipe() {
+export default function EditRecipe() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
-
+  const {id: recipeId} = useParams();
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -44,42 +45,94 @@ export default function CreateRecipe() {
   const [cuisine, setCuisine] = useState([]);
   const [categories, setCategories] = useState([]);
   
-
   useEffect(() => {
-    const fetchDropdownOptions = async () => {
-      const {data: dietaryData, error: dietaryErr} = await supabase
-        .from('dietary_pref')
-        .select('*')
-      
-      const {data: cuisineData, error: cuisineErr} = await supabase
-        .from('cuisines')
-        .select('*')
-      
-      const {data: categoryData, error: categoryErr} = await supabase
-        .from('categories')
-        .select('*')
+    const fetchRecipeData = async() => {
+        const [
+            { data: dietaryOptions },
+            { data: cuisineOptions },
+            { data: categoryOptions },
+        ] = await Promise.all([
+            supabase.from('dietary_pref').select('*'),
+            supabase.from('cuisines').select('*'),
+            supabase.from('categories').select('*')
+        ]);
 
-      if (dietaryErr){
-         console.warn("dietary_preferences not found or inaccessible", dietaryErr);
-      } else {
-        setDietaryOpt(dietaryData);
-      }
+        setDietaryOpt(dietaryOptions);
+        setCuisineOpt(cuisineOptions);
+        setCategoryOpt(categoryOptions);
 
-      if (cuisineErr) {
-        console.warn("cuisines not found or inaccessible", cuisineErr);
-      } else {
-        setCuisineOpt(cuisineData);
-      }
+        const {data, error} = await supabase 
+            .from("recipe")
+            .select("*")
+            .eq("id", recipeId)
+            .single();
+        
+        if(error) {
+            setError("Failed to fetch recipe: " + error.message);
+            return;
+        }
+    
+        setForm({
+            title: data.title,
+            description: data.description,
+            servings: data.servings,
+            is_public: data.is_public,
+            image_url: data.image_url,
+            directions: data.directions,
+            time: data.time,
+        });
 
-      if (categoryErr) {
-        console.warn("categories not found or inaccessible", categoryErr);
-      } else {
-        setCategoryOpt(categoryData);
-      }
-    };
+        const {data: ingredientsData, error: ingredientsErr} = await supabase
+            .from("recipe_ingredients")
+            .select(`ingredient_id, quantity, unit, ingredients(name)`)
+            .eq("recipe_id", recipeId);
+        if (ingredientsErr) {
+            setError("Ingredients Err: " + ingredientsErr.message);
+        }
 
-    fetchDropdownOptions()
-  }, []);
+        setRecipeIngredients(
+            ingredientsData.map((item) => ({
+                name: item.ingredients.name,
+                ingredient_id: item.ingredient_id,
+                quantity: item.quantity,
+                unit: item.unit
+            }))
+        )
+        console.log("ingredients", ingredientsData)
+
+        const {data: dietaryData} = await supabase
+            .from("recipe_dietary_pref")
+            .select("*")
+            .eq("recipe_id", recipeId);
+
+        const mappedDietaryPref = dietaryData.map((item) => {
+            const found = dietaryOptions.find(opt => opt.id === item.preference_id);
+            return found ? {value: found.id, label: found.name} : null;
+        }).filter(Boolean);
+        setDietaryPref(mappedDietaryPref);
+
+        const {data: cuisineData} = await supabase
+            .from("recipe_cuisines")
+            .select("cuisine_id")
+            .eq("recipe_id", recipeId);
+        setCuisine(cuisineData.map((item) => {
+            const found = cuisineOptions.find(opt => opt.id === item.cuisine_id);
+            return found ? {value: found.id, label: found.name} : null;
+        }).filter(Boolean));
+
+        const {data: categoryData} = await supabase
+            .from("recipe_categories")
+            .select("category_id")
+            .eq("recipe_id", recipeId);
+        setCategories(categoryData.map((item) => {
+            const found = categoryOptions.find(opt => opt.id === item.category_id);
+            return found ? {value: found.id, label: found.name} : null;
+        }).filter(Boolean));
+    }
+
+    if (recipeId) fetchRecipeData();
+  }, [recipeId]);
+
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -158,21 +211,21 @@ export default function CreateRecipe() {
 
     const { data: recipeData, error: recipeError } = await supabase
       .from("recipe")
-      .insert({
+      .update({
         ...form,
         author_id: user.id,
       })
-      .select()
-      .single();
+      .eq("id", recipeId);
 
     if (recipeError) {
-      setError("insert recipe error: " + recipeError.message);
+      setError("Update recipe error: " + recipeError.message);
       return;
     }
 
     const linkedIngredients = [];
 
     for (let ri of recipeIngredients) {
+        if (!ri.name || !ri.quantity || !ri.unit) continue;
       let ingredientId = ri.ingredient_id;
 
       if (!ingredientId) {
@@ -206,13 +259,20 @@ export default function CreateRecipe() {
       }
 
       linkedIngredients.push({
-        recipe_id: recipeData.id,
+        recipe_id: recipeId,
         ingredient_id: ingredientId,
         quantity: ri.quantity,
         unit: ri.unit,
       });
     }
 
+    console.log("linked ingredients: ", linkedIngredients)
+
+    await supabase
+        .from("recipe_ingredients")
+        .delete()
+        .eq("recipe_id", recipeId);
+    
     const { error: linkError } = await supabase
       .from("recipe_ingredients")
       .insert(linkedIngredients);
@@ -223,10 +283,11 @@ export default function CreateRecipe() {
     }
 
     if (dietaryPref.length > 0) {
+      await supabase.from("recipe_dietary_pref").delete().eq("recipe_id", recipeId);
       const {error: dietaryErr} = await supabase 
         .from("recipe_dietary_pref")
-        .insert(dietaryPref.map((item) => ({
-          recipe_id: recipeData.id,
+        .upsert(dietaryPref.map((item) => ({
+          recipe_id: recipeId,
           preference_id: item.value 
         })));
       
@@ -238,40 +299,46 @@ export default function CreateRecipe() {
     };
 
     if (cuisine.length > 0) {
-      const {error: cuisineErr} = await supabase
-        .from("recipe_cuisines")
-        .insert(cuisine.map((item) => ({
-          recipe_id: recipeData.id,
-          cuisine_id: item.value
+        await supabase.from("recipe_cuisines").delete().eq("recipe_id", recipeId);
+        const {error: cuisineErr} = await supabase
+            .from("recipe_cuisines")
+            .upsert(cuisine.map((item) => ({
+            recipe_id: recipeId,
+            cuisine_id: item.value
         })));
 
-      if (cuisineErr) {
-        setError("Cannot link cuisine to recipe: " + cuisineErr.error);
-        return;
+        if (cuisineErr) {
+            setError("Cannot link cuisine to recipe: " + cuisineErr.error);
+            return;
       };
-      setError(null)
+        setError(null)
     };
 
     if (categories.length > 0) {
-      const {error: categoryErr} = await supabase
-        .from("recipe_categories")
-        .insert(categories.map((item) => ({
-          recipe_id: recipeData.id,
-          category_id: item.value
-        })));
+        await supabase.from("recipe_categories").delete().eq("recipe_id", recipeId);
+        const {error: categoryErr} = await supabase
+            .from("recipe_categories")
+            .upsert(categories.map((item) => ({
+            recipe_id: recipeId,
+            category_id: item.value
+            })));
 
-      if (categoryErr) {
-        setError("Cannot link category with recipe: " + categoryErr.error);
-        return;
-      };
+        if (categoryErr) {
+            setError("Cannot link category with recipe: " + categoryErr.error);
+            return;
+        };
     };
     setError(null)
     setShowModal(true);
   };
+  
+  const removeIngredientRow = (index) => {
+    setRecipeIngredients((prev) => prev.filter((_,i) => i !== index));
+  }
 
   return (
     <div className="create-recipe-container">
-      <h2>Create a Recipe</h2>
+      <h2>Edit Recipe</h2>
       <form onSubmit={handleSubmit}>
         <input
           type="file"
@@ -294,18 +361,21 @@ export default function CreateRecipe() {
         <h4>Dietary Preference</h4>
         <Select 
           isMulti
+          value={dietaryPref}
           options={dietaryOpt.map((opt) => ({value: opt.id, label: opt.name}))?? []}
           onChange={(selectedOpts) => setDietaryPref(selectedOpts)}
         />
         <h4>Cuisines</h4>
         <Select 
           isMulti
+          value={cuisine}
           options={cuisineOpt.map((opt) => ({value: opt.id, label: opt.name}))?? []}
           onChange={(selectedOpts) => setCuisine(selectedOpts)}
         />
         <h4>Categories</h4>
         <Select 
           isMulti
+          value={categories}
           options={categoryOpt.map((opt) => ({value: opt.id, label: opt.name})) ?? []}
           onChange={(selectedOpts) => setCategories(selectedOpts)}
         />
@@ -379,7 +449,8 @@ export default function CreateRecipe() {
             </datalist>
 
             <input
-              type="text"
+              type="number"
+              step='0.1'
               placeholder="Quantity"
               value={ri.quantity}
               onChange={(e) => handleIngredientChange(index, 'quantity', e.target.value)}
@@ -397,6 +468,13 @@ export default function CreateRecipe() {
                 </option>
               ))}
             </select>
+            <button
+                type="button"
+                onClick={() => removeIngredientRow(index)}
+                style={{ marginLeft: '10px' }}
+                >
+                Delete
+            </button>
           </div>
         ))}
 
@@ -405,7 +483,7 @@ export default function CreateRecipe() {
         </button>
 
         <br />
-        <button type="submit">Submit Recipe</button>
+        <button type="submit">Update Recipe</button>
       </form>
 
       {error && <p style={{ color: 'red' }}>{error}</p>}
@@ -413,7 +491,7 @@ export default function CreateRecipe() {
       {showModal && (
         <Modal 
         isOpen={showModal}
-        message="Recipe submitted successfully!"
+        message="Recipe updated successfully!"
         onClose={() => {
           setShowModal(false)
           navigate("/user-recipe")
