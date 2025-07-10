@@ -1,12 +1,32 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./RecipeDetailCard.css";
 import { supabase } from "../utils/supabaseClient";
 import { useAuth } from '../context/AuthProvider';
-
+import { Navigate, useNavigate } from "react-router-dom";
+import { useState } from "react";
 export default function RecipeDetailCard({ recipe }) {
   const { user } = useAuth();
-    
+  const [authorId, setAuthorId] = useState('');
+  const navigate = useNavigate();  
   const handlePrint = () => window.print();
+
+  useEffect(() => {
+    const fetchRecipe = async() => {
+      const {data, error} = await supabase 
+        .from("recipe")
+        .select("author_id")
+        .eq("id", recipe.id)
+        .single()
+      
+      if (error) {
+        console.warn(error.message);
+        return
+      } else {
+        setAuthorId(data.author_id)
+      }
+    }
+    fetchRecipe();
+  },[])
 
   const capitalizeWords = (text) =>
     text.replace(/\b\w/g, (char) => char.toUpperCase());
@@ -33,8 +53,6 @@ export default function RecipeDetailCard({ recipe }) {
       console.log(recipeError)
     }
   }
-  console.log("Image URL:", recipe.imageUrl || recipe.image_url);
-
 
   return (
     <div className="recipe-detail-card-container">
@@ -73,12 +91,14 @@ export default function RecipeDetailCard({ recipe }) {
               Print Recipe
             </button>
             <button className="save-btn" onClick={handleSave}> Save</button>
+            {(user?.id === authorId) && 
+            <button onClick={()=> navigate(`/edit-recipe/${recipe.id}`)}> Edit </button>}
           </div>
         </div>
 
         <div className="recipe-detail-image-column">
           <img
-            src={recipe.imageUrl || recipe.image_url}
+            src={recipe.imageUrl}
             alt={recipe.title}
             className="recipe-detail-image"
           />
