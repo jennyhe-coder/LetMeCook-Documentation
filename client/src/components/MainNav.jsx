@@ -29,6 +29,8 @@ export default function MainNav() {
       "/profile",
       "/dashboard",
       "/login",
+      "/favourites",
+      "/myrecipes",
       "avatar",
       "/favourites"
     ];
@@ -154,8 +156,13 @@ export default function MainNav() {
                     </NavLink>
                   </li>
                   <li className="dropdown-nav-item">
-                    <NavLink to="/dashboard" onClick={() => setOpen(false)}>
-                      User Dashboard
+                    <NavLink to="/favourites" onClick={() => setOpen(false)}>
+                      My Favourites 
+                    </NavLink>
+                  </li>
+                  <li className="dropdown-nav-item">
+                    <NavLink to="/myrecipes" onClick={() => setOpen(false)}>
+                      My Recipes 
                     </NavLink>
                   </li>
                   <li className="dropdown-nav-item">

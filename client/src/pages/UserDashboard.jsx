@@ -4,6 +4,10 @@ import { useAuth } from "../context/AuthProvider";
 import { useNavigate } from "react-router-dom";
 import Modal from "../components/Modal";
 import CarouselSection from "./../components/CarouselSection";
+import chef from "../assets/chef.png";
+import hat from "../assets/chef-hat.png";
+import eye from "../assets/eye.png";
+import heart from "../assets/heart.png";
 
 export default function UserDashboard() {
     const {user} = useAuth();
@@ -81,29 +85,52 @@ export default function UserDashboard() {
             }}
         />
         { user && 
-        <div className="layout">
-            <div className="welcome">
-              <h2>Welcome back, <span>{user.first_name || user.email}</span>! 👋</h2>
-              <p>Here’s your personalized dashboard. Create, view, and manage your recipes easily.</p>
+        <div className="welcome-section">
+            <div className="welcome-wrapper" >
+                <div className="welcome-card">
+                    <div className="welcome-text">
+                        <h1>Welcome back, <span>{user.first_name || user.email}</span>! 👋</h1>
+                        <p>What’s cooking today? 🍳 Let’s explore something new!</p>
+                    </div>
+                    <img src={chef} alt="cooking icon" className="welcome-icon" />
+                </div>
+                <div className="stat-section">
+                    <div className="stat-card">
+                        <img src={heart} alt="heart" className="icon" />
+                        <div className="stat-text">
+                            <strong>{favourites.length}</strong>
+                            <p>Favourites</p>
+                        </div>
+                    </div>
+                    <div class="separator"></div>
+                    <div className="stat-card">
+                        <img src={eye} alt="eye" className="icon" />
+                        <div className="stat-text">
+                            <strong>{history.length}</strong>
+                            <p>Recently Viewed</p>
+                        </div>
+                    </div>
+                    <div class="separator"></div>
+                    <div className="stat-card">
+                        <img src={hat} alt="hat" className="icon" />
+                        <div className="stat-text">
+                            <strong>{recipeCreations.length}</strong>
+                            <p>Recipes Created</p>
+                        </div>
+                    </div>
+                </div>
             </div>
             <section>
                 <CarouselSection
-                    title="Your Own Recipes"
+                    title="Recommended For You"
                     sectionClass="section-1"
                     dataSource={`https://letmecook.ca/api/recipes?authorId=${user?.id}`}
-                    actionButton={
-                        <button
-                            onClick={() => navigate('/create-recipe')}
-                            className="create-button" >
-                                + Add
-                        </button>
-                    }
                 />
             </section>
             <section>
                 {/* Have to get the data source for this later */}
                 <CarouselSection
-                    title="Your Favourites"
+                    title="Recently Viewed"
                     sectionClass="section-2"
                     dataSource=""
                 />
@@ -111,7 +138,7 @@ export default function UserDashboard() {
             <section>
                 {/* Have to get the data source for this later */}
                 <CarouselSection
-                    title="Recently Viewed"
+                    title="Trending Recipes"
                     sectionClass="section-3"
                     dataSource=""
                 />
@@ -119,7 +146,7 @@ export default function UserDashboard() {
             <section>
                 {/* Have to get the data source for this later */}
                 <CarouselSection
-                    title="Recommended For You"
+                    title="Seasonal Favourites"
                     sectionClass="section-4"
                     dataSource={`http://localhost:8080/api/recipes/recommended-by-id?userid=${user?.id}`}
                 />
