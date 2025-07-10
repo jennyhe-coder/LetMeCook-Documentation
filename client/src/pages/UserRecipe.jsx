@@ -4,6 +4,7 @@ import { supabase } from "../utils/supabaseClient";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useAuth } from "../context/AuthProvider";
+import { useNavigate } from "react-router-dom";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -22,12 +23,12 @@ export default function UserRecipe() {
   const sectionRef = useRef(null);
   const { user, loading: userLoading } = useAuth();
   const [userRecipes, setUserRecipes] = useState([])
-
+  const navigate = useNavigate();
   useEffect( () => {
 
     if (userLoading) return;   
     if (!user?.id) {
-        console.log("user doesn't exist");
+        console.warn("user doesn't exist");
         return;
     }
 
@@ -42,7 +43,6 @@ export default function UserRecipe() {
         if (recipeErr) {
             console.log("Error fetching recipes: ", recipeErr);
         }else {
-            console.log(recipeData);
             setUserRecipes(recipeData);
             setTotalElements(recipeData.length);
         }
@@ -96,10 +96,13 @@ export default function UserRecipe() {
         <div className="all-recipes-desc">
         </div>
         <br />
-
         <br />
-
           <>
+            <button
+              onClick={() => navigate('/create-recipe')}
+              className="create-button">
+              + Create New Recipe
+            </button>
             <RecipeList
               recipes={userRecipes}
             />
