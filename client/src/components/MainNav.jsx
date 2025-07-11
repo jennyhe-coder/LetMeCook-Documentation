@@ -172,7 +172,7 @@ export default function MainNav() {
                   </li>
                   <li className="dropdown-nav-item">
                     <NavLink to="/user-recipe" onClick={() => setOpen(false)}>
-                      My Own Recipes
+                      My Recipes
                     </NavLink>
                   </li>
                   <li
