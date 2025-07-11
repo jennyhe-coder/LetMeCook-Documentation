@@ -157,17 +157,7 @@ export default function MainNav() {
                   </li>
                   <li className="dropdown-nav-item">
                     <NavLink to="/favourites" onClick={() => setOpen(false)}>
-                      My Favourites 
-                    </NavLink>
-                  </li>
-                  <li className="dropdown-nav-item">
-                    <NavLink to="/myrecipes" onClick={() => setOpen(false)}>
-                      My Recipes 
-                    </NavLink>
-                  </li>
-                  <li className="dropdown-nav-item">
-                    <NavLink to="/favourites" onClick={() => setOpen(false)}>
-                      Favourites
+                      My Favourites
                     </NavLink>
                   </li>
                   <li className="dropdown-nav-item">
