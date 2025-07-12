@@ -126,7 +126,7 @@ export default function UserDashboard() {
                         <CarouselSection
                             title="Recommended For You"
                             sectionClass="section-1"
-                            dataSource={`http://localhost:8080/api/recipes/recommend?userid=${user?.id}`}
+                            dataSource={`https://letmecook.ca/api/recipes/recommend?userid=${user?.id}`}
                         />
                     </section>
                     <section>
@@ -134,7 +134,7 @@ export default function UserDashboard() {
                         <CarouselSection
                             title="Recently Viewed"
                             sectionClass="section-2"
-                            dataSource={`http://localhost:8080/api/recently-viewed/${user?.id}`}
+                            dataSource={`https://letmecook.ca/api/recently-viewed/${user?.id}`}
                         />
                     </section>
                     <section>
@@ -150,7 +150,7 @@ export default function UserDashboard() {
                         <CarouselSection
                             title="Seasonal Favourites"
                             sectionClass="section-4"
-                            dataSource={`http://localhost:8080/api/recipes/recommend?userid=${user?.id}`}
+                            dataSource={`https://letmecook.ca/api/recipes/recommend?userid=${user?.id}`}
                         />
                     </section>
                 </div>
