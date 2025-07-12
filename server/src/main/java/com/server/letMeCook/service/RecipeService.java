@@ -439,10 +439,10 @@ public class RecipeService {
                 isPublic
         );
 
-        // Thêm ORDER BY, LIMIT, OFFSET
+
         String orderBy = "ORDER BY r.created_at DESC";
         if (pageable.getSort().isSorted()) {
-            // Có thể map field nếu muốn (xem ví dụ cũ), mặc định dùng created_at
+
             List<String> orders = new ArrayList<>();
             pageable.getSort().forEach(s ->
                     orders.add("r." + s.getProperty() + (s.isAscending() ? " ASC" : " DESC"))
@@ -472,7 +472,7 @@ public class RecipeService {
                 .map(RecipeMapper::toCardDTO)
                 .collect(Collectors.toList());
 
-        // Query tổng số lượng (count)
+
         String countSql = "SELECT COUNT(DISTINCT id) FROM recipe WHERE id IN (\n" + sql + "\n)";
         Query countQuery = entityManager.createNativeQuery(countSql);
         long total = ((Number) countQuery.getSingleResult()).longValue();
