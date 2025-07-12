@@ -1,4 +1,4 @@
-import  { useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "../utils/supabaseClient";
 import { useAuth } from "../context/AuthProvider";
 import { useNavigate } from "react-router-dom";
@@ -10,7 +10,7 @@ import eye from "../assets/eye.png";
 import heart from "../assets/heart.png";
 
 export default function UserDashboard() {
-    const {user} = useAuth();
+    const { user } = useAuth();
     const [favourites, setFavourites] = useState([]);
     const [history, setHistory] = useState([]);
     const [error, setError] = useState(null);
@@ -19,22 +19,22 @@ export default function UserDashboard() {
     //const [recommendations, setRecommendations] = useState([]);
     const navigate = useNavigate();
     useEffect(() => {
-            if (!user) {
-                setShowModal(true)
-            } else {
-                fetchFavourites(user.id);
-                fetchHistory(user.id);
-                fetchCreations(user.id);
-                //fetch recommendations(user.id) implement this after AI algorithm is done
-            };
-        
-    },[navigate]);
+        if (!user) {
+            setShowModal(true)
+        } else {
+            fetchFavourites(user.id);
+            fetchHistory(user.id);
+            fetchCreations(user.id);
+            //fetch recommendations(user.id) implement this after AI algorithm is done
+        };
+
+    }, [navigate]);
 
     const fetchFavourites = async (userId) => {
-        let {data, error} =  await supabase
-        .from("recipe_favourites")
-        .select("recipe_id, recipe(*)")
-        .eq("user_id", userId);
+        let { data, error } = await supabase
+            .from("recipe_favourites")
+            .select("recipe_id, recipe(*)")
+            .eq("user_id", userId);
 
         if (data) {
             setFavourites(data.map(r => r.recipe));
@@ -45,28 +45,30 @@ export default function UserDashboard() {
     };
 
     const fetchHistory = async (userId) => {
-        let {data, error} = await supabase 
-        .from("recipe_browsing_history")
-        .select("recipe_id, recipe(*)")
-        .eq("user_id", userId);
+        let { data, error } = await supabase
+            .from("recipe_browsing_history")
+            .select("recipe_id, recipe(*)")
+            .eq("user_id", userId)
+            .order("viewed_at", { ascending: false });
 
-        if (data){
-            setHistory(data.map(r => r.recipe));
-        }
         if (error) {
             setError(error.message);
+            return;
         }
+        console.log("Supabase result:", data);
+        setHistory(data ?? []);
     };
 
     const fetchCreations = async (userId) => {
-        let {data, error} = await supabase
-        .from("recipe")
-        .select("*")
-        .eq("author_id", userId)
-        .order("created_at", {ascending: false});
+        let { data, error } = await supabase
+            .from("recipe")
+            .select("*")
+            .eq("author_id", userId)
+            .order("created_at", { ascending: false });
+        console.log("history result:", history);
         if (data) {
             setRecipeCreations(data);
-        } 
+        }
         if (error) {
             setError(error.message);
         }
@@ -76,83 +78,83 @@ export default function UserDashboard() {
 
     return (
         <>
-        <Modal
-            isOpen={showModal}
-            message={"Please login first."}
-            onClose={() => {
-                setShowModal(false)
-                navigate('/login')
-            }}
-        />
-        { user && 
-        <div className="welcome-section">
-            <div className="welcome-wrapper" >
-                <div className="welcome-card">
-                    <div className="welcome-text">
-                        <h1>Welcome back, <span>{user.first_name || user.email}</span>! 👋</h1>
-                        <p>What’s cooking today? 🍳 Let’s explore something new!</p>
+            <Modal
+                isOpen={showModal}
+                message={"Please login first."}
+                onClose={() => {
+                    setShowModal(false)
+                    navigate('/login')
+                }}
+            />
+            {user &&
+                <div className="welcome-section">
+                    <div className="welcome-wrapper" >
+                        <div className="welcome-card">
+                            <div className="welcome-text">
+                                <h1>Welcome back, <span>{user.first_name || user.email}</span>! 👋</h1>
+                                <p>What’s cooking today? 🍳 Let’s explore something new!</p>
+                            </div>
+                            <img src={chef} alt="cooking icon" className="welcome-icon" />
+                        </div>
+                        <div className="stat-section">
+                            <div className="stat-card">
+                                <img src={heart} alt="heart" className="icon" />
+                                <div className="stat-text">
+                                    <strong>{favourites.length}</strong>
+                                    <p>Favourites</p>
+                                </div>
+                            </div>
+                            <div className="separator"></div>
+                            <div className="stat-card">
+                                <img src={eye} alt="eye" className="icon" />
+                                <div className="stat-text">
+                                    <strong>{history.length}</strong>
+                                    <p>Recently Viewed</p>
+                                </div>
+                            </div>
+                            <div className="separator"></div>
+                            <div className="stat-card">
+                                <img src={hat} alt="hat" className="icon" />
+                                <div className="stat-text">
+                                    <strong>{recipeCreations.length}</strong>
+                                    <p>Recipes Created</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <img src={chef} alt="cooking icon" className="welcome-icon" />
+                    <section>
+                        <CarouselSection
+                            title="Recommended For You"
+                            sectionClass="section-1"
+                            dataSource={`http://localhost:8080/api/recipes/recommend?userid=${user?.id}`}
+                        />
+                    </section>
+                    <section>
+                        {/* Have to get the data source for this later */}
+                        <CarouselSection
+                            title="Recently Viewed"
+                            sectionClass="section-2"
+                            dataSource={`http://localhost:8080/api/recently-viewed/${user?.id}`}
+                        />
+                    </section>
+                    <section>
+                        {/* Have to get the data source for this later */}
+                        <CarouselSection
+                            title="Popular Recipes"
+                            sectionClass="section-3"
+                            dataSource="https://letmecook.ca/api/recipes?sort=viewCount&size=20"
+                        />
+                    </section>
+                    <section>
+                        {/* Have to get the data source for this later */}
+                        <CarouselSection
+                            title="Seasonal Favourites"
+                            sectionClass="section-4"
+                            dataSource={`http://localhost:8080/api/recipes/recommend?userid=${user?.id}`}
+                        />
+                    </section>
                 </div>
-                <div className="stat-section">
-                    <div className="stat-card">
-                        <img src={heart} alt="heart" className="icon" />
-                        <div className="stat-text">
-                            <strong>{favourites.length}</strong>
-                            <p>Favourites</p>
-                        </div>
-                    </div>
-                    <div class="separator"></div>
-                    <div className="stat-card">
-                        <img src={eye} alt="eye" className="icon" />
-                        <div className="stat-text">
-                            <strong>{history.length}</strong>
-                            <p>Recently Viewed</p>
-                        </div>
-                    </div>
-                    <div class="separator"></div>
-                    <div className="stat-card">
-                        <img src={hat} alt="hat" className="icon" />
-                        <div className="stat-text">
-                            <strong>{recipeCreations.length}</strong>
-                            <p>Recipes Created</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <section>
-                <CarouselSection
-                    title="Recommended For You"
-                    sectionClass="section-1"
-                    dataSource={`https://letmecook.ca/api/recipes?authorId=${user?.id}`}
-                />
-            </section>
-            <section>
-                {/* Have to get the data source for this later */}
-                <CarouselSection
-                    title="Recently Viewed"
-                    sectionClass="section-2"
-                    dataSource=""
-                />
-            </section>
-            <section>
-                {/* Have to get the data source for this later */}
-                <CarouselSection
-                    title="Trending Recipes"
-                    sectionClass="section-3"
-                    dataSource=""
-                />
-            </section>
-            <section>
-                {/* Have to get the data source for this later */}
-                <CarouselSection
-                    title="Seasonal Favourites"
-                    sectionClass="section-4"
-                    dataSource={`http://localhost:8080/api/recipes/recommended-by-id?userid=${user?.id}`}
-                />
-            </section>
-        </div>
-        }
+            }
         </>
     )
 }

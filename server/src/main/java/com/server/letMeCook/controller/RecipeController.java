@@ -99,6 +99,8 @@ public class RecipeController {
         return result.isEmpty() ? null : result;
     }
 
+
+
     @GetMapping("/search")
     public Page<RecipeCardDTO> advancedSearch(
             @RequestParam(required = false) String keyword,
