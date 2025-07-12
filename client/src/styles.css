@@ -127,7 +127,7 @@ a {
 .nav-links {
   display: flex;
   flex-direction: row;
-  gap: 2rem;
+  gap: 3rem;
   align-items: flex-start;
   justify-content: flex-end;
   margin-left: auto;
@@ -787,7 +787,7 @@ p {
   padding-left: 5px;
 }
 
-.prompt-desc h1{
+.prompt-desc h1 {
   font-size: 70px;
   font-weight: bolder;
   margin-bottom: 10px;
@@ -795,13 +795,13 @@ p {
   letter-spacing: 0.5rem;
 }
 
-.prompt-desc p{
+.prompt-desc p {
   font-size: 20px;
   line-height: 2rem;
   margin: 30px 25px 50px 0px;
 }
 
-.float-img{
+.float-img {
   float: right;
   width: 470px;
   height: auto;
@@ -1283,18 +1283,34 @@ p {
   color: #666;
 }
 
+.nav-link-wrapper.relative {
+  position: relative;
+  cursor: pointer;
+}
+
 .dropdown-menu-nav {
+  position: absolute;
+  top: 120%;
+  right: 0;
+  background: #FCF8ED;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 8px 0px;
+  margin: 0;
   list-style: none;
-  margin-bottom: 0;
-  padding: 0;
-  margin-top: 16px;
-  margin-right: 0;
+  z-index: 1000;
+  width: max-content;
 }
 
 .dropdown-nav-item {
-  padding: 0.5 rem 1rem;
+  padding: 0.5rem 1rem;
   cursor: pointer;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
+  white-space: nowrap;
+}
+
+.dropdown-nav-item:last-child {
+  margin-bottom: 0;
+  /* no margin on last item */
 }
 
 .drop-item:hover {
@@ -1352,58 +1368,58 @@ p {
   background-color: #E3A636;
 }
 
-.welcome-section{
+.welcome-section {
   background: #fff4d4;
 }
 
-.welcome-wrapper{
+.welcome-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  position:relative;
+  /* justify-content: space-between; */
+  position: relative;
   padding-bottom: 4rem;
 }
 
-.welcome-card{
+.welcome-card {
   display: flex;
   align-items: center;
 }
 
-.welcome-icon{
+.welcome-icon {
   width: 400px;
-  margin-right: 100px;
+  /* margin-right: 100px; */
   margin-top: 50px;
 }
 
-.welcome-text h1{
+.welcome-text h1 {
   font-size: 3rem;
   font-weight: 600;
   margin-top: 50px;
-  margin-left: 150px;
-  color:#333
+  /* margin-left: 150px; */
+  color: #333
 }
 
-.welcome-text p{
+.welcome-text p {
   margin: 25px 0 0;
   font-size: 1.3rem;
   line-height: 1.8rem;
-  margin-left: 150px;
+  /* margin-left: 150px; */
   margin-bottom: 10px;
   color: #666;
 }
 
-.welcome-text span{
+.welcome-text span {
   color: #ff8c00;
 }
 
-.welcome-text .search-container{
-  margin: 50px 150px 70px 150px;
+.welcome-text .search-container {
+  margin: 50px 0px 70px 0px;
   max-width: 700px;
 }
 
-.stat-section{
-  position:absolute;
+.stat-section {
+  position: absolute;
   left: 50%;
   transform: translateX(-50%);
   z-index: 30;
@@ -1413,15 +1429,15 @@ p {
   background: white;
   border-radius: 15px;
   padding: 1.2rem;
-  box-shadow: 0 6px 10px rgba(0,0,0,0.05);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.05);
   width: 700px;
 }
 
-.stat-text{
+.stat-text {
   margin-left: 20px;
 }
 
-.stat-card{
+.stat-card {
   flex: 1;
   display: flex;
   align-items: center;
@@ -1430,7 +1446,7 @@ p {
   text-align: center;
 }
 
-.stat-card strong{
+.stat-card strong {
   font-size: 1.6rem;
   display: block;
   color: #ff8c00;
@@ -1442,18 +1458,18 @@ p {
   color: #555;
 }
 
-.separator{
+.separator {
   width: 2px;
   height: 70px;
   background-color: #fff4d4;
 }
 
-.icon{
+.icon {
   height: 45px;
   width: 45px;
 }
 
-.signup-section{
+.signup-section {
   justify-content: center;
   align-items: center;
   height: 400px;
@@ -1462,7 +1478,7 @@ p {
   margin: 0px auto;
 }
 
-.signup-box{
+.signup-box {
   text-align: center;
   background-color: #f9db8e;
   border-radius: 30px;
@@ -1471,13 +1487,13 @@ p {
   padding: 20px;
 }
 
-.signup-box h2{
+.signup-box h2 {
   font-size: 2.8rem;
   margin-bottom: 25px;
   margin-top: 15px;
 }
 
-.signup-box ul{
+.signup-box ul {
   margin: 0px auto 0px;
   max-width: 400px;
   text-align: left;
@@ -1485,27 +1501,27 @@ p {
   margin-bottom: 25px;
 }
 
-.signup-box li{
+.signup-box li {
   margin-bottom: 10px;
   font-size: 1.1rem;
   position: relative;
   padding-left: 25px;
 }
 
-.signup-header{
+.signup-header {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 15px;
 }
 
-.signup-header img{
+.signup-header img {
   width: 75px;
   height: auto;
   margin-top: -35px;
 }
 
-.email-section{
+.email-section {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
@@ -1513,7 +1529,7 @@ p {
   margin-bottom: 10px;
 }
 
-.email-section input{
+.email-section input {
   padding: 10px;
   border-radius: 15px;
   border: 1px solid #ffd84d;
@@ -1522,7 +1538,7 @@ p {
 
 .button {
   background-color: #dc9926;
-  color: #fff; 
+  color: #fff;
   padding: 10px 18px;
   font-size: 1.1rem;
   font-weight: bold;
@@ -1546,4 +1562,101 @@ p {
   font-weight: bold;
   text-decoration: underline;
 }
-/*------------------*/
+
+/* Container for backdrop */
+.search-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: auto;
+  z-index: 999;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* The actual modal content */
+.search-modal-content {
+  background-color: #FCF8ED;
+  /* match design system */
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding-top: 1rem;
+  padding-bottom: 2rem;
+}
+
+.search-bar-modal-wrapper {
+  width: 100%;
+  /* max-width: 769px; */
+  background: #FFFDF7;
+  border: 1px solid #1E1E1E;
+  border-radius: 5px;
+  /* margin-top: 50px; */
+  /* padding-top: 12px; */
+  /* padding-bottom: 20px; */
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Wraps close button + input box */
+.search-modal-inner {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Align close button to the right within modal */
+.search-modal-inner .close-button {
+  align-self: flex-end;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: #1E1E1E;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+}
+
+/* Search input */
+.search-bar-modal-wrapper .search-input {
+  width: 100%;
+  font-size: 20px;
+  /* padding: 0 20px; */
+  color: #1E1E1E;
+  font-family: Raleway;
+  font-weight: 600;
+  line-height: 32px;
+  resize: none;
+  overflow-y: auto;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  border: none;
+  outline: none;
+  background-color: transparent;
+  border-radius: 20px;
+  /* max-height: 160px; */
+  padding: 16px 20px !important;
+}
+
+.search-bar-modal-wrapper .search-input::placeholder {
+  color: #B6B6B6;
+  font-family: Raleway;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 32px;
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  display: flex;
+  color: inherit;
+}
+
+.nav-link-wrapper .icon-button {
+  padding-top: 3px;
+}

@@ -6,11 +6,17 @@ export default function RecipeCard({
   author,
   imageUrl,
   cookingTime,
+  isOverlay = false,
 }) {
   return (
     <Link to={`/recipes/${id}`} className="recipe-card">
       <div className="recipe-card-img-container">
-        <img src={imageUrl} alt={title} loading="lazy" className="blob-image" />
+        <img
+          src={imageUrl}
+          alt={title}
+          loading={isOverlay ? "eager" : "lazy"}
+          className="blob-image"
+        />
       </div>
       <div className="recipe-card-meta">
         <div className="top-half">

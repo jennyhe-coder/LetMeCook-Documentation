@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthProvider";
 import { supabase } from "../utils/supabaseClient";
 import { FaUserCircle } from "react-icons/fa";
+import { FaSearch, FaTimes } from "react-icons/fa";
+import SearchBarModal from "./SearchBarModal";
 
 export default function MainNav() {
   const location = useLocation();
@@ -16,6 +18,7 @@ export default function MainNav() {
   const dropdownRef = useRef();
   const avatarRef = useRef(null);
   const [avatar, setAvatar] = useState(null);
+  const [showSearchModal, setShowSearchModal] = useState(false);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -32,7 +35,7 @@ export default function MainNav() {
       "/favourites",
       "/myrecipes",
       "avatar",
-      "/favourites"
+      "/favourites",
     ];
     let activeIndex = paths.indexOf(location.pathname);
     if (user && open) {
@@ -152,24 +155,24 @@ export default function MainNav() {
                 <ul className="dropdown-menu-nav">
                   <li className="dropdown-nav-item">
                     <NavLink to="/profile" onClick={() => setOpen(false)}>
-                      Profile
+                      profile
                     </NavLink>
                   </li>
                   <li className="dropdown-nav-item">
                     <NavLink to="/favourites" onClick={() => setOpen(false)}>
-                      My Favourites
+                      my favourites
                     </NavLink>
                   </li>
                   <li className="dropdown-nav-item">
                     <NavLink to="/user-recipe" onClick={() => setOpen(false)}>
-                      My Recipes
+                      my recipes
                     </NavLink>
                   </li>
                   <li
                     className="dropdown-nav-item cursor-pointer"
                     onClick={handleLogout}
                   >
-                    Logout
+                    log out
                   </li>
                 </ul>
               )}
@@ -186,8 +189,24 @@ export default function MainNav() {
               </NavLink>
             </div>
           )}
+          <div className="nav-link-wrapper">
+            <button
+              className="icon-button"
+              onClick={() => setShowSearchModal(true)}
+            >
+              <FaSearch size={20} />
+            </button>
+          </div>
         </div>
       </nav>
+
+      {showSearchModal && (
+        <div className="search-modal">
+          <div className="search-modal-content">
+            <SearchBarModal onClose={() => setShowSearchModal(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
