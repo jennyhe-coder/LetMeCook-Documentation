@@ -50,15 +50,11 @@ public class RecommendationService {
                 properties.getUrl(), favStr, hisStr, topK);
         try {
             ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
-
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
                 List<List<Object>> recommendations = (List<List<Object>>) response.getBody().get("recommendations");
-
                 List<UUID> ids = recommendations.stream()
                         .map(pair -> UUID.fromString((String) pair.get(0)))
                         .toList();
-
-                System.out.println("Recommendations from Flask: " + ids);
                 return ids;
             }
         } catch (Exception e) {

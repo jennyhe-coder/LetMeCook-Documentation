@@ -99,7 +99,7 @@ def recommend_for_user(fav_ids, hist_ids, fav_weight=2.0, hist_weight=1.0, top_k
             weights.append(hist_weight)
 
     if not vectors:
-        raise ValueError("❌ No valid recipes found in favorites or history.")
+        return []
 
     stacked = torch.stack(vectors).to("cpu")
     weight_tensor = torch.tensor(weights, dtype=torch.float32).unsqueeze(1).to("cpu")

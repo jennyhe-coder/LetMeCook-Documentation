@@ -76,7 +76,7 @@ public class OpenAIService {
 
     - ingredients: Extract up to 5 main ingredients that are clearly stated or strongly implied.
 
-    - allergies: Include only if clearly mentioned in the prompt.
+    - exclude: Include only if clearly mentioned in the prompt.
 
     - categories: Include only if mentioned. Choose only from the following list: [%s]. Match exact or closely similar names based on the prompt.
 
@@ -101,6 +101,7 @@ public class OpenAIService {
 
         Map<String, Object> requestBody = Map.of(
                 "model", "gpt-4.1",
+                "temperature", 0,
                 "messages", List.of(
                         Map.of("role", "system", "content", "You are an AI assistant that helps extract structured recipe search fields."),
                         Map.of("role", "user", "content", instruction)

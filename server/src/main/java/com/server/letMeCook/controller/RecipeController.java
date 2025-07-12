@@ -43,6 +43,11 @@ public class RecipeController {
         this.recipeService = recipeService;
         this.openAIService = openAIService;
     }
+    @GetMapping("/all")
+    public List<RecipeDTO> getAllRecipes() {
+        return recipeService.getAllRecipesWithFullRelations();
+    }
+
 
 
     @GetMapping
@@ -105,7 +110,7 @@ public class RecipeController {
             @RequestParam(required = false, defaultValue = "true") Boolean isPublic,
             @PageableDefault(size = 20, page = 0, sort = "title", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        if (keyword != null && keyword.length() > 20) {
+        if (keyword != null && keyword.length() > 10) {
             RecipeSearchFields fields = openAIService.extractRecipeSearchFields(keyword);
             keyword = fields.getKeyword();
             cuisines = mergeSet(cuisines, fields.getCuisines());
@@ -128,12 +133,10 @@ public class RecipeController {
         return recipeService.advancedSearch(keyword, cuisines, ingredients, allergies, categories, dietaryPreferences, isPublic, pageable);
     }
 
-    @GetMapping("/recommended-by-id")
+    @GetMapping("/recommend")
     public ResponseEntity<?> recommend(
             @RequestParam(required = false, name = "recipeid") UUID recipeId,
             @RequestParam(required = false, name = "userid") UUID userId) {
-
-
         if (recipeId != null) {
             List<RecipeCardDTO> list = recipeService.recommendedByRecipeId(recipeId);
             return ResponseEntity.ok(list);
@@ -146,10 +149,6 @@ public class RecipeController {
 
         return ResponseEntity.badRequest().body("");
     }
-
-
-
-
 
     @GetMapping("/flask-update-embed")
     public ResponseEntity<?> updateEmbedFromFlask() {
