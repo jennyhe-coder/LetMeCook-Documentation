@@ -3,6 +3,8 @@ import SearchBar from "./../components/SearchBar-Home";
 import CarouselSection from "./../components/CarouselSection";
 import { useAuth } from "../context/AuthProvider";
 import { Navigate } from "react-router-dom";
+import sunnythechef from "../assets/sunnythechef.png";
+import sunnythumbsup from "../assets/sunnythumbsup.png";
 
 export default function Home() {
   const inputRef = useRef();
@@ -21,8 +23,11 @@ export default function Home() {
         <section className="prompt-section">
           <div className="layout-wrapper">
             <div className="prompt-desc">
-              Let's get cooking! Search for your favourite recipe
+              <img src={sunnythechef} alt="Sunny the Chef" class="float-img" />
+              <h1>Your AI Chef Awaits</h1>
+              <p>Meet Sunny the Chef, your egg-stra special AI assistant<br></br><br></br>Whether you're into sweet desserts, plant-based meals, or quick one-pot dinners, Sunny's always ready with a recipe tailored just for you!</p>
             </div>
+            <a href="/recipes" class="button">Start Exploring Recipes</a>
             <div className="search-container">
               <SearchBar />
             </div>
@@ -49,6 +54,31 @@ export default function Home() {
           sectionClass="section-4"
           dataSource="https://letmecook.ca/api/recipes?sort=cookTime&size=20"
         />
+        <div className="signup-section" >
+          <div className="signup-box" >
+            <div className="signup-header" >
+              <img src={sunnythumbsup} alt="Sunny with a thumbs up"/>
+              <h2>Get more from Let Me Cook</h2>
+            </div>
+            <ul>
+              <li>✓ Personalized recipe recommendations</li>
+              <li>✓ Save and rate your favorite dishes</li>
+              <li>✓ Weekly handpicked recipe inspiration</li>
+            </ul>
+            <form className="email-section" >
+              <input 
+                type="email"
+                placeholder="Your email address"
+              />
+              <button className="button"
+                type="submit">Get Started</button>
+            </form>
+            <p className="text" >
+              Already have an account?
+              <a href="/login"> Log in here</a> 
+            </p>
+          </div>
+        </div>
       </main>
     </>
   );

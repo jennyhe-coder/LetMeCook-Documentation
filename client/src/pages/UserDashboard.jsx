@@ -2,9 +2,10 @@ import { useState, useEffect } from "react";
 import { supabase } from "../utils/supabaseClient";
 import { useAuth } from "../context/AuthProvider";
 import { useNavigate } from "react-router-dom";
+import SearchBar from "./../components/SearchBar-Home";
 import Modal from "../components/Modal";
 import CarouselSection from "./../components/CarouselSection";
-import chef from "../assets/chef.png";
+import sunnywelcome from "../assets/sunnywelcome.png";
 import hat from "../assets/chef-hat.png";
 import eye from "../assets/eye.png";
 import heart from "../assets/heart.png";
@@ -93,8 +94,12 @@ export default function UserDashboard() {
                             <div className="welcome-text">
                                 <h1>Welcome back, <span>{user.first_name || user.email}</span>! 👋</h1>
                                 <p>What’s cooking today? 🍳 Let’s explore something new!</p>
-                            </div>
-                            <img src={chef} alt="cooking icon" className="welcome-icon" />
+                                <p>Your cozy corner for simple, delicious, and homey recipes is always here waiting — whether you’re planning meals for the week or just looking for some quick inspiration.</p>
+                        <div className="search-container">
+                            <SearchBar />
+                        </div>
+                    </div>
+                            <img src={sunnywelcome} alt="sunny the chef welcome" className="welcome-icon" />
                         </div>
                         <div className="stat-section">
                             <div className="stat-card">
