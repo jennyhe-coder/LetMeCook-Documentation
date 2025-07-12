@@ -358,13 +358,14 @@ h3 {
   letter-spacing: -0.62px;
 }
 
-.search-box {
+.search-container {
   width: 100%;
   max-width: 769px;
   background: #FFFDF7;
   border: 1px solid #1E1E1E;
   border-radius: 5px;
   min-height: 134px;
+  margin-top: 50px;
 }
 
 .search-inner {
@@ -786,6 +787,26 @@ p {
   padding-left: 5px;
 }
 
+.prompt-desc h1{
+  font-size: 70px;
+  font-weight: bolder;
+  margin-bottom: 10px;
+  margin-right: 30px;
+  letter-spacing: 0.5rem;
+}
+
+.prompt-desc p{
+  font-size: 20px;
+  line-height: 2rem;
+  margin: 30px 25px 50px 0px;
+}
+
+.float-img{
+  float: right;
+  width: 470px;
+  height: auto;
+}
+
 .pagination-wrapper {
   display: flex;
   flex-direction: column;
@@ -1167,7 +1188,7 @@ p {
 }
 
 .prompt-section {
-  padding-top: 200px;
+  padding-top: 100px;
   padding-bottom: 100px;
   padding-left: 6px;
 }
@@ -1336,6 +1357,10 @@ p {
 }
 
 .welcome-wrapper{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
   position:relative;
   padding-bottom: 4rem;
 }
@@ -1346,26 +1371,35 @@ p {
 }
 
 .welcome-icon{
-  width: 350px;
+  width: 400px;
   margin-right: 100px;
+  margin-top: 50px;
 }
 
 .welcome-text h1{
   font-size: 3rem;
   font-weight: 600;
-  margin-left: 100px;
+  margin-top: 50px;
+  margin-left: 150px;
   color:#333
 }
 
 .welcome-text p{
   margin: 25px 0 0;
   font-size: 1.3rem;
-  margin-left: 100px;
+  line-height: 1.8rem;
+  margin-left: 150px;
+  margin-bottom: 10px;
   color: #666;
 }
 
 .welcome-text span{
   color: #ff8c00;
+}
+
+.welcome-text .search-container{
+  margin: 50px 150px 70px 150px;
+  max-width: 700px;
 }
 
 .stat-section{
@@ -1419,5 +1453,97 @@ p {
   width: 45px;
 }
 
+.signup-section{
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+  background-color: #dc9926;
+  padding: 40px 20px;
+  margin: 0px auto;
+}
 
+.signup-box{
+  text-align: center;
+  background-color: #f9db8e;
+  border-radius: 30px;
+  border: 1px solid #333;
+  margin: 20px auto;
+  padding: 20px;
+}
+
+.signup-box h2{
+  font-size: 2.8rem;
+  margin-bottom: 25px;
+  margin-top: 15px;
+}
+
+.signup-box ul{
+  margin: 0px auto 0px;
+  max-width: 400px;
+  text-align: left;
+  list-style: none;
+  margin-bottom: 25px;
+}
+
+.signup-box li{
+  margin-bottom: 10px;
+  font-size: 1.1rem;
+  position: relative;
+  padding-left: 25px;
+}
+
+.signup-header{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+}
+
+.signup-header img{
+  width: 75px;
+  height: auto;
+  margin-top: -35px;
+}
+
+.email-section{
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.email-section input{
+  padding: 10px;
+  border-radius: 15px;
+  border: 1px solid #ffd84d;
+  margin-right: 5px;
+}
+
+.button {
+  background-color: #dc9926;
+  color: #fff; 
+  padding: 10px 18px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.button:hover {
+  background-color: #ffc400;
+}
+
+.text {
+  font-size: 0.95rem;
+  color: black;
+}
+
+.text a {
+  color: black;
+  font-weight: bold;
+  text-decoration: underline;
+}
 /*------------------*/
