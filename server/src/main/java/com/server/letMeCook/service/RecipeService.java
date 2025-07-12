@@ -7,6 +7,7 @@ import com.server.letMeCook.model.*;
 import com.server.letMeCook.repository.RecipeBrowsingHistoryRepository;
 import com.server.letMeCook.repository.RecipeFavouritesRepository;
 import com.server.letMeCook.repository.RecipeRepository;
+import com.server.letMeCook.repository.UserAllergyRepository;
 import jakarta.persistence.*;
 import jakarta.persistence.criteria.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,10 +30,10 @@ public class RecipeService {
     private final RecipeMapper recipeMapper;
     @Autowired
     private RecipeFavouritesRepository favouritesRepository;
-
     @Autowired
     private RecipeBrowsingHistoryRepository browsingHistoryRepository;
-
+    @Autowired
+    private UserAllergyRepository userAllergyRepository;
 
     @Value("${recommendation.url}")
     private String recommendationUrl;
@@ -313,6 +315,175 @@ public class RecipeService {
         }
     }
 
+
+
+    public String buildAdvancedSearchSQL(
+            Set<String> ingredients,
+            Set<String> allergies,
+            Set<String> cuisines,
+            Set<String> categories,
+            Set<String> dietaryPreferences,
+            String keyword,
+            boolean isPublic
+    ) {
+        List<String> wheres = new ArrayList<>();
+        List<String> subQueries = new ArrayList<>();
+
+        // 1. Ingredients
+        if (ingredients != null && !ingredients.isEmpty()) {
+            List<String> likeConds = ingredients.stream()
+                    .map(s -> "LOWER(i.name) LIKE '%" + s.toLowerCase().replace("'", "''") + "%'")
+                    .collect(Collectors.toList());
+            List<String> havingConds = ingredients.stream()
+                    .map(s -> "SUM(CASE WHEN LOWER(i.name) LIKE '%" + s.toLowerCase().replace("'", "''") + "%' THEN 1 ELSE 0 END) > 0")
+                    .collect(Collectors.toList());
+            subQueries.add(
+                    "SELECT ri.recipe_id FROM recipe_ingredients ri " +
+                            "JOIN ingredients i ON ri.ingredient_id = i.id " +
+                            "WHERE " + String.join(" OR ", likeConds) + " " +
+                            "GROUP BY ri.recipe_id HAVING " + String.join(" AND ", havingConds)
+            );
+        }
+        // 2. Cuisine
+        if (cuisines != null && !cuisines.isEmpty()) {
+            String cond = cuisines.stream()
+                    .map(s -> "'" + s.toLowerCase().replace("'", "''") + "'")
+                    .collect(Collectors.joining(","));
+            subQueries.add(
+                    "SELECT rc.recipe_id FROM recipe_cuisines rc " +
+                            "JOIN cuisines cu ON rc.cuisine_id = cu.id " +
+                            "WHERE LOWER(cu.name) IN (" + cond + ")"
+            );
+        }
+        // 3. Category
+        if (categories != null && !categories.isEmpty()) {
+            String cond = categories.stream()
+                    .map(s -> "'" + s.toLowerCase().replace("'", "''") + "'")
+                    .collect(Collectors.joining(","));
+            subQueries.add(
+                    "SELECT rcat.recipe_id FROM recipe_categories rcat " +
+                            "JOIN categories cat ON rcat.category_id = cat.id " +
+                            "WHERE LOWER(cat.name) IN (" + cond + ")"
+            );
+        }
+        // 4. Dietary
+        if (dietaryPreferences != null && !dietaryPreferences.isEmpty()) {
+            String cond = dietaryPreferences.stream()
+                    .map(s -> "'" + s.toLowerCase().replace("'", "''") + "'")
+                    .collect(Collectors.joining(","));
+            subQueries.add(
+                    "SELECT rdp.recipe_id FROM recipe_dietary_pref rdp " +
+                            "JOIN dietary_pref dp ON rdp.preference_id = dp.id " +
+                            "WHERE LOWER(dp.name) IN (" + cond + ")"
+            );
+        }
+        // 5. Keyword
+        if (keyword != null && !keyword.isBlank()) {
+            String[] keywords = keyword.trim().toLowerCase().split("\\s+");
+            for (String kw : keywords) {
+                String safeKw = kw.replace("'", "''");
+                subQueries.add(
+                        "SELECT r.id as recipe_id FROM recipe r " +
+                                "LEFT JOIN recipe_ingredients ri ON r.id = ri.recipe_id " +
+                                "LEFT JOIN ingredients i ON ri.ingredient_id = i.id " +
+                                "WHERE LOWER(r.title) LIKE '%" + safeKw + "%' " +
+                                "   OR LOWER(r.description) LIKE '%" + safeKw + "%' " +
+                                "   OR LOWER(i.name) LIKE '%" + safeKw + "%'"
+                );
+            }
+        }
+
+        // 6. isPublic
+        if (isPublic) {
+            subQueries.add("SELECT id as recipe_id FROM recipe WHERE is_public = TRUE");
+        }
+
+        String sql = String.join("\nINTERSECT\n", subQueries);
+
+        if (allergies != null && !allergies.isEmpty()) {
+            List<String> allergyConds = allergies.stream()
+                    .map(a -> "LOWER(i2.name) LIKE '%" + a.toLowerCase().replace("'", "''") + "%'")
+                    .collect(Collectors.toList());
+
+            String notInAllergy = "r.id NOT IN (" +
+                    "SELECT ri2.recipe_id FROM recipe_ingredients ri2 " +
+                    "JOIN ingredients i2 ON ri2.ingredient_id = i2.id " +
+                    "WHERE " + String.join(" OR ", allergyConds) +
+                    ")";
+
+            wheres.add(notInAllergy);
+        }
+
+        return sql;
+    }
+    @Transactional(readOnly = true)
+    public Page<RecipeCardDTO> advancedSearch_demo(
+            String keyword,
+            Set<String> ingredients,
+            Set<String> allergies,
+            Set<String> cuisines,
+            Set<String> categories,
+            Set<String> dietaryPreferences,
+
+            boolean isPublic,
+            Pageable pageable
+    ) {
+        // Build INTERSECT SQL
+        String sql = buildAdvancedSearchSQL(
+                ingredients,
+                allergies,
+                cuisines,
+                categories,
+                dietaryPreferences,
+                keyword,
+                isPublic
+        );
+
+
+        String orderBy = "ORDER BY r.created_at DESC";
+        if (pageable.getSort().isSorted()) {
+
+            List<String> orders = new ArrayList<>();
+            pageable.getSort().forEach(s ->
+                    orders.add("r." + s.getProperty() + (s.isAscending() ? " ASC" : " DESC"))
+            );
+            orderBy = "ORDER BY " + String.join(", ", orders);
+        }
+
+        String pagedSql =
+                "SELECT r.id FROM recipe r WHERE r.id IN (\n" +
+                        sql + "\n)\n" +
+                        orderBy + "\n" +
+                        "LIMIT " + pageable.getPageSize() + " OFFSET " + pageable.getOffset();
+
+        // Query danh sách id
+        Query nativeQuery = entityManager.createNativeQuery(pagedSql);
+        List<?> recipeIds = nativeQuery.getResultList();
+        if (recipeIds.isEmpty()) return Page.empty();
+
+        // Query detail (JPA)
+        List<UUID> idList = recipeIds.stream()
+                .map(id -> (UUID) (id instanceof UUID ? id : UUID.fromString(id.toString())))
+                .collect(Collectors.toList());
+        List<Recipe> recipes = recipeRepository.findAllById(idList);
+
+        // Map sang DTO
+        List<RecipeCardDTO> dtos = recipes.stream()
+                .map(RecipeMapper::toCardDTO)
+                .collect(Collectors.toList());
+
+
+        String countSql = "SELECT COUNT(DISTINCT id) FROM recipe WHERE id IN (\n" + sql + "\n)";
+        Query countQuery = entityManager.createNativeQuery(countSql);
+        long total = ((Number) countQuery.getSingleResult()).longValue();
+
+        return new PageImpl<>(dtos, pageable, total);
+    }
+
+
+
+
+
     @Transactional(readOnly = true)
     public List<RecipeCardDTO> recommendedByRecipeId(UUID recipeId) {
         List<UUID> ids = recommendationService.recommendByRecipeId(recipeId, 10);
@@ -327,27 +498,45 @@ public class RecipeService {
         List<UUID> favIds = favouritesRepository.findByUserIdOrderByCreatedAtDesc(userId)
                 .stream()
                 .map(fav -> fav.getRecipe().getId())
+                .limit(5)
                 .toList();
 
         List<UUID> historyIds = browsingHistoryRepository.findByUserIdOrderByViewedAtDesc(userId)
                 .stream()
                 .map(history -> history.getRecipe().getId())
                 .distinct()
+                .limit(5)
                 .toList();
 
-        List<UUID> recommendedIds = recommendationService.recommendForUser(favIds, historyIds, 100);
-
-        if (recommendedIds.isEmpty()) {
-            return Page.empty();
-        }
-
-        List<RecipeCardDTO> content = recipeRepository.findAllById(recommendedIds)
-                .stream()
+        // uuid of 50 recommendations Recipe base on 5 history browsing and 5 favourites
+        List<UUID> recommendedIds = recommendationService.recommendForUser(favIds, historyIds, 50);
+        // uuid of all user allergy ingredient
+        List<UUID> user_allergy_ingredients = userAllergyRepository.findAllAllergyIngredientIdsByUserId(userId);
+        List<Recipe> recommendedRecipes = recipeRepository.findAllWithFullRelationsByIds(recommendedIds);
+        Map<UUID, Recipe> idToRecipe = recommendedRecipes.stream()
+                .collect(Collectors.toMap(Recipe::getId, Function.identity()));
+        List<Recipe> orderedRecipes = recommendedIds.stream()
+                .map(idToRecipe::get)
+                .filter(Objects::nonNull)
+                .toList();
+        // filter with allergy
+        Set<UUID> allergySet = new HashSet<>(user_allergy_ingredients);
+        List<RecipeCardDTO> content = orderedRecipes.stream()
+                .filter(recipe -> recipe.getRecipeIngredients().stream()
+                        .map(ri -> ri.getIngredient().getId())
+                        .noneMatch(allergySet::contains))
                 .map(RecipeMapper::toCardDTO)
+                .limit(10)
                 .toList();
-
         Pageable pageable = PageRequest.of(0, content.size() == 0 ? 1 : content.size());
         return new PageImpl<>(content, pageable, content.size());
+    }
+
+    public List<RecipeDTO> getAllRecipesWithFullRelations() {
+        List<Recipe> recipes = recipeRepository.findAllWithFullRelations();
+        return recipes.stream()
+                .map(RecipeMapper::toDTO)
+                .toList();
     }
 
 }
