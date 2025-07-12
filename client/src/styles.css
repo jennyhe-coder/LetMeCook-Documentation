@@ -1331,9 +1331,93 @@ p {
   background-color: #E3A636;
 }
 
-.welcome{
-  padding: 10rem;
-  border-radius: 12px;
-  margin-bottom: 2rem;
+.welcome-section{
+  background: #fff4d4;
 }
+
+.welcome-wrapper{
+  position:relative;
+  padding-bottom: 4rem;
+}
+
+.welcome-card{
+  display: flex;
+  align-items: center;
+}
+
+.welcome-icon{
+  width: 350px;
+  margin-right: 100px;
+}
+
+.welcome-text h1{
+  font-size: 3rem;
+  font-weight: 600;
+  margin-left: 100px;
+  color:#333
+}
+
+.welcome-text p{
+  margin: 25px 0 0;
+  font-size: 1.3rem;
+  margin-left: 100px;
+  color: #666;
+}
+
+.welcome-text span{
+  color: #ff8c00;
+}
+
+.stat-section{
+  position:absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  justify-content: space-around;
+  bottom: -2.5rem;
+  background: white;
+  border-radius: 15px;
+  padding: 1.2rem;
+  box-shadow: 0 6px 10px rgba(0,0,0,0.05);
+  width: 700px;
+}
+
+.stat-text{
+  margin-left: 20px;
+}
+
+.stat-card{
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: #fff;
+  padding: 1rem 1.5rem;
+  text-align: center;
+}
+
+.stat-card strong{
+  font-size: 1.6rem;
+  display: block;
+  color: #ff8c00;
+}
+
+.stat-card p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.separator{
+  width: 2px;
+  height: 70px;
+  background-color: #fff4d4;
+}
+
+.icon{
+  height: 45px;
+  width: 45px;
+}
+
+
 /*------------------*/
