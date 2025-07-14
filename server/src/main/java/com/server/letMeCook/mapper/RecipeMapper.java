@@ -4,10 +4,12 @@ import com.server.letMeCook.dto.recipe.RecipeCardDTO;
 import com.server.letMeCook.dto.recipe.RecipeDTO;
 import com.server.letMeCook.dto.recipe.RecipeIngredientDTO;
 import com.server.letMeCook.model.*;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Component
 public class RecipeMapper {
 
     public static RecipeDTO toDTO(Recipe recipe) {

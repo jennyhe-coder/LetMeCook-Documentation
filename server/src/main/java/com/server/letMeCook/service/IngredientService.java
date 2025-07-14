@@ -18,4 +18,8 @@ public class IngredientService {
     public List<IngredientDTO> getAllIngredients() {
         return ingredientRepository.findAll().stream().map(IngredientDTO::from).collect(Collectors.toList());
     }
+
+    public List<String>getAllIngredientNames(){
+        return ingredientRepository.findAll().stream().map(Ingredient::getName).collect(Collectors.toList());
+    }
 }

@@ -1,0 +1,119 @@
+.review-form {
+  margin: 2rem 0;
+  padding: 2rem;
+  /* background: red; */
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  font-family: 'Raleway', sans-serif;
+}
+
+.form-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #1e1e1e;
+}
+
+.review-comment-input {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  font-family: 'Raleway', sans-serif;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  resize: vertical;
+}
+
+.review-ratings-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.rating-field {
+  flex: 1 1 150px;
+}
+
+.rating-label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.rating-select {
+  width: 100%;
+  padding: 6px;
+  font-family: 'Raleway', sans-serif;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.submit-button {
+  background-color: #009266;
+  color: white;
+  font-family: 'Raleway', sans-serif;
+  font-size: 1rem;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.submit-button:hover {
+  background-color: #006a4e;
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+select {
+  align-items: center;
+  border-radius: 5px;
+  border: 2px solid #1E1E1E;
+  background: #FFF;
+  padding: 5px 6px;
+  color: #1E1E1E;
+  font-family: Raleway;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  letter-spacing: -0.3px;
+  cursor: pointer;
+  min-width: 80px;
+  text-align: left;
+  min-width: 100px;
+  position: relative;
+  gap: 6px;
+}
+
+.review-form textarea {
+  width: 100%;
+  font-size: 20px;
+  padding: 12px 26px;
+  color: #1e1e1e;
+  font-family: Raleway;
+  font-weight: 600;
+  line-height: 32px;
+  resize: none;
+  overflow-y: auto;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  background-color: transparent;
+  border-radius: 5px;
+  max-height: 160px;
+  margin-top: 10px;
+  /* background: #fefaf3; */
+}
+
+.review-form button {
+  margin-top: 20px;
+}

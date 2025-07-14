@@ -34,7 +34,7 @@ const FALLBACK_RECIPE = [
   },
 ];
 
-export default function Carousel() {
+export default function Carousel({ dataSource }) {
   const carouselRef = useRef(null);
   const isDragging = useRef(false);
   const dragStartX = useRef(0);
@@ -57,7 +57,7 @@ export default function Carousel() {
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
-        const res = await fetch("https://letmecook.ca/api/recipes?size=20");
+        const res = await fetch(dataSource);
         if (!res.ok) throw new Error("Network error");
 
         const data = await res.json();
@@ -168,22 +168,27 @@ export default function Carousel() {
 
   return (
     <div className="carousel" ref={carouselRef}>
-      {loading ? (
-        <div className="carousel-loading">Loading recipes...</div>
-      ) : (
-        <div className="carousel-track">
-          {dataToRender.map((recipe, i) => (
-            <RecipeCard
-              key={`${recipe.id}-${i}`}
-              id={recipe.id}
-              title={recipe.title}
-              author={recipe.authorName}
-              imageUrl={recipe.imageUrl}
-              cookingTime={recipe.cookingTime}
-            />
-          ))}
-        </div>
-      )}
+      <div className="carousel-track">
+        {(loading ? FALLBACK_RECIPE : dataToRender).map((recipe, i) => (
+          <RecipeCard
+            key={`${recipe.id}-${i}`}
+            id={loading ? "" : recipe.id}
+            title={loading ? "Loading..." : recipe.title}
+            author={loading ? "Please wait" : recipe.authorName}
+            imageUrl={loading ? "/assets/placeholder.jpg" : recipe.imageUrl}
+            cookingTime={loading ? "..." : recipe.cookingTime}
+          />
+        ))}
+
+        {/* SEE ALL LINK */}
+        {!loading && (
+          <a href="/recipes" className="see-all-card">
+            <div className="see-all-inner">
+              <span>See All Recipes {`>>`} </span>
+            </div>
+          </a>
+        )}
+      </div>
     </div>
   );
 }

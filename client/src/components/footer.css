@@ -4,16 +4,17 @@
   color: #ece9e2;
   padding: 2rem 0 1rem;
   height: 300px;
-  border-radius: 20px 20px 0px 0px;
+  /* border-radius: 20px 20px 0px 0px; */
   /* margin-top: -100px; */
   z-index: 1;
 }
 
 /* center everything within the layout wrapper */
 .footer-inner {
+  padding-top: 180px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: start;
   gap: 1rem;
 }
 

@@ -15,4 +15,5 @@ public class RecipeCardDTO {
     private float servings;
     private String imageUrl;
     private int cookingTime;
+
 }

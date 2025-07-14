@@ -1,0 +1,10 @@
+pandas
+sqlalchemy
+pg8000
+beautifulsoup4
+scikit-learn
+flask
+dotenv
+torch
+sentence_transformers
+supabase

@@ -57,7 +57,8 @@ server:
   error:
     include-message: always
     include-binding-errors: always
-    
+recommendation:
+  url: http://localhost:5001
 logging:
   level:
     org.springframework.security: DEBUG

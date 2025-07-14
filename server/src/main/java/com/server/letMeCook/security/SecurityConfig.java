@@ -35,6 +35,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/",
+                                "/api/recently-viewed/**",
                                 "/api/auth/**",
                                 "/api/public/**",
                                 "/api/recipes/**",

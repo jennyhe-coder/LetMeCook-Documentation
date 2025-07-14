@@ -40,7 +40,7 @@ export default function SearchBar() {
         <textarea
           ref={inputRef}
           className="search-input"
-          placeholder="Type anything: “vegan Thai curry without peanuts” or “quick dinner with salmon”"
+          placeholder="Type anything: “I want Asian dish that's vegan” or “I want dinner with salmon”"
           onInput={handleInput}
           onKeyDown={handleKeyDown}
         />

@@ -1,9 +1,15 @@
 .recipe-page-container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-  font-family: 'Segoe UI', sans-serif;
+  /* max-width: 900px; */
+  /* margin: 0 auto; */
+  /* padding: 2rem 1rem; */
+  margin-top: 80px;
   color: #333;
+  font-family: Raleway;
+  margin-left: 0;
+  width: 700px;
+  padding-left: 6px;
+  min-height: 100vh;
+  text-align: left;
 }
 
 .header-section {
@@ -11,10 +17,13 @@
 }
 
 .recipe-title {
-  font-size: 2.25rem;
-  font-weight: 800;
-  margin-bottom: 0.25rem;
-  color: #222;
+  color: #1E1E1E;
+  font-family: Raleway;
+  font-size: 40px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  padding-bottom: 10px;
 }
 
 .meta-info {
@@ -24,6 +33,10 @@
   display: flex;
   flex-wrap: wrap;
   gap: 1.5rem;
+}
+
+.meta-info strong {
+  font-weight: 700;
 }
 
 .recipe-image {
@@ -37,19 +50,26 @@
 }
 
 .description {
-  font-size: 1.1rem;
-  line-height: 1.7;
+  color: #1E1E1E;
+  font-family: Raleway;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 26px;
+  /* 144.444% */
   margin-bottom: 2.5rem;
   color: #444;
 }
 
 /* Optional: Styling for loading + not-found */
-.loading, .not-found {
-  text-align: center;
+.loading,
+.not-found {
+  /* text-align: center; */
   margin-top: 4rem;
   font-size: 1.2rem;
   color: #888;
 }
+
 .image-wrapper {
   margin: 1.5rem 0;
   position: relative;
@@ -62,4 +82,56 @@
   object-fit: cover;
   border-radius: 0px;
   display: block;
+}
+
+.review-section {
+  margin-top: 3rem;
+  padding: 2rem 0;
+  border-top: 1px solid #ddd;
+}
+
+.review-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: #fefaf3;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+}
+
+.review-form textarea {
+  resize: vertical;
+  min-height: 100px;
+  padding: 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.review-form label {
+  font-weight: bold;
+}
+
+.review-form select {
+  padding: 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.review-form button {
+  align-self: flex-start;
+  padding: 0.7rem 1.2rem;
+  background-color: #1e88e5;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.review-form button:hover {
+  background-color: #1565c0;
 }
