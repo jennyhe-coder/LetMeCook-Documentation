@@ -2,7 +2,7 @@
 
 import React from "react";
 import "../styles.css";   // global site styles
-import "../about.css";     // About‐page–specific styles
+import "../about.css";    // About-page-specific styles
 
 const About = () => {
   return (
@@ -10,8 +10,6 @@ const About = () => {
       {/* Header / Navigation */}
       <header>
         <nav className="layout-wrapper main-nav">
-          <a href="/">Home</a>
-          <a href="/recipes">Recipes</a>
           <a href="/about" className="active">About Us</a>
           <a href="/privacy">Privacy Policy</a>
           <a href="/terms">Terms & Conditions</a>
@@ -61,8 +59,6 @@ const About = () => {
 
         <div className="section-line"></div>
       </main>
-
-  
     </>
   );
 };

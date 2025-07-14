@@ -1,15 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "../terms.css";        
-import "../styles.css"; 
+import "../terms.css";
+import "../styles.css";
 import Modal from "../components/Modal";
-import { useState } from "react";
+
 const Terms = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
 
   const acceptTerms = () => {
-    setShowModal(true)
+    setShowModal(true);
   };
 
   return (
@@ -17,16 +17,15 @@ const Terms = () => {
       <Modal
         isOpen={showModal}
         message={"Thank you for accepting the Terms & Conditions."}
-        onClose={ () => {
-          setShowModal(false)
-          navigate("/")
+        onClose={() => {
+          setShowModal(false);
+          navigate("/");
         }}
       />
+
       {/* Header / Navigation */}
       <header>
         <nav className="layout-wrapper main-nav">
-          <a href="/">Home</a>
-          <a href="/recipes">Recipes</a>
           <a href="/about">About Us</a>
           <a href="/privacy">Privacy Policy</a>
           <a href="/terms" className="active">Terms & Conditions</a>

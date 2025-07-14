@@ -11,6 +11,7 @@ import eye from "../assets/eye.png";
 import heart from "../assets/heart.png";
 
 export default function UserDashboard() {
+
     const { user } = useAuth();
     const [favourites, setFavourites] = useState([]);
     const [history, setHistory] = useState([]);
@@ -74,9 +75,14 @@ export default function UserDashboard() {
             setError(error.message);
         }
     }
+  }, [navigate, user]);
 
-    //const fetchRecommendation = async (userId) => {}
-
+  const fetchProfile = async (userId) => {
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", userId)
+      .single();
     return (
         <>
             <Modal
@@ -162,4 +168,3 @@ export default function UserDashboard() {
             }
         </>
     )
-}
