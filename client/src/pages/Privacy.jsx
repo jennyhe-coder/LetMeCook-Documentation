@@ -7,8 +7,6 @@ const Privacy = () => (
     {/* Header / Navigation */}
     <header>
       <nav className="layout-wrapper main-nav">
-        <a href="/">Home</a>
-        <a href="/recipes">Recipes</a>
         <a href="/about">About Us</a>
         <a href="/privacy" className="active">Privacy Policy</a>
         <a href="/terms">Terms & Conditions</a>
@@ -96,8 +94,6 @@ const Privacy = () => (
         </p>
       </section>
     </main>
-
-  
   </>
 );
 
