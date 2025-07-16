@@ -75,14 +75,7 @@ export default function UserDashboard() {
             setError(error.message);
         }
     }
-  }, [navigate, user]);
 
-  const fetchProfile = async (userId) => {
-    const { data, error } = await supabase
-      .from("users")
-      .select("*")
-      .eq("id", userId)
-      .single();
     return (
         <>
             <Modal
@@ -168,3 +161,4 @@ export default function UserDashboard() {
             }
         </>
     )
+}
