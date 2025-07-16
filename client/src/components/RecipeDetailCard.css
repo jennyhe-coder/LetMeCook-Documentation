@@ -15,7 +15,6 @@
     width: 100%;
   }
 
-  /* Optional: Remove buttons during print */
   .recipe-detail-actions {
     display: none !important;
   }
@@ -28,7 +27,7 @@
   background-color: #fefaf3;
   border: 1px solid #ccc;
   border-radius: 12px;
-  font-family: Raleway;
+  font-family: Raleway, sans-serif;
   color: #333;
   padding-left: 3rem;
 }
@@ -47,7 +46,6 @@
   flex: 2;
   width: 100%;
   height: 100%;
-  /* text-align: center; */
 }
 
 .recipe-detail-image {
@@ -79,6 +77,7 @@
   font-size: 0.95rem;
   color: #666;
   margin-bottom: 10px;
+  line-height: 1.6;
 }
 
 .recipe-detail-meta p {
@@ -98,7 +97,8 @@
 }
 
 .print-btn,
-.save-btn {
+.save-btn,
+.remove-btn {
   padding: 0.5rem 1.2rem;
   border: none;
   border-radius: 6px;
@@ -109,11 +109,21 @@
 
 .print-btn {
   background-color: #eee;
+  color: #333;
 }
 
 .save-btn {
   background-color: #f8bfc6;
   color: #fff;
+}
+
+.remove-btn {
+  background-color: #ff4d4f;
+  color: #fff;
+}
+
+.remove-btn:hover {
+  background-color: #d9363e;
 }
 
 .recipe-detail-body {
@@ -149,8 +159,4 @@
 .instruction-list li {
   margin-bottom: 0.5rem;
   text-indent: 0;
-}
-
-.recipe-detail-meta {
-  line-height: 1.6;
 }

@@ -1,65 +1,96 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./RecipeDetailCard.css";
 import { supabase } from "../utils/supabaseClient";
 import { useAuth } from '../context/AuthProvider';
-import { Navigate, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 export default function RecipeDetailCard({ recipe }) {
   const { user } = useAuth();
   const [authorId, setAuthorId] = useState('');
-  const navigate = useNavigate();  
+  const [isFavourite, setIsFavourite] = useState(false);
+  const navigate = useNavigate();
+
   const handlePrint = () => window.print();
 
   useEffect(() => {
-    const fetchRecipe = async() => {
-      const {data, error} = await supabase 
+    if (!recipe?.id) return;
+
+    const fetchRecipe = async () => {
+      const { data, error } = await supabase
         .from("recipe")
         .select("author_id")
         .eq("id", recipe.id)
-        .single()
-      
+        .single();
+
       if (error) {
         console.warn(error.message);
-        return
+        return;
+      }
+      setAuthorId(data?.author_id);
+    };
+
+    fetchRecipe();
+  }, [recipe?.id]);
+
+  useEffect(() => {
+    if (!user?.id || !recipe?.id) return;
+
+    const checkFavourite = async () => {
+      const { data, error } = await supabase
+        .from("recipe_favourites")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("recipe_id", recipe.id)
+        .single();
+
+      if (error && error.code !== "PGRST116") {
+        console.error(error);
+      }
+      setIsFavourite(!!data);
+    };
+
+    checkFavourite();
+  }, [user?.id, recipe?.id]);
+
+  const handleToggleFavourite = async () => {
+    if (!user?.id) return;
+
+    if (isFavourite) {
+      const { error } = await supabase
+        .from("recipe_favourites")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("recipe_id", recipe.id);
+
+      if (error) {
+        console.error(error);
       } else {
-        setAuthorId(data.author_id)
+        setIsFavourite(false);
+        alert("Removed from favourites!");
+      }
+    } else {
+      const { error } = await supabase
+        .from("recipe_favourites")
+        .insert({
+          recipe_id: recipe.id,
+          user_id: user.id
+        });
+
+      if (error) {
+        console.error(error);
+      } else {
+        setIsFavourite(true);
+        alert("Added to favourites!");
       }
     }
-    fetchRecipe();
-  },[])
+  };
 
   const capitalizeWords = (text) =>
-    text.replace(/\b\w/g, (char) => char.toUpperCase());
-
-  const handleSave = async () => {
-    const {data: recipeData, error: recipeError} = await supabase
-    .from("recipe")
-    .select("*")
-    .eq("id", recipe.id)
-    .single()
-
-    if (recipeData) {
-      const {error: favouriteError } = await supabase
-      .from("recipe_favourites")
-      .insert({
-        recipe_id: recipeData.id,
-        user_id: user.id
-      })
-
-      if (favouriteError) {
-        console.log("favouriteError: ", favouriteError)
-      }
-    } else{
-      console.log(recipeError)
-    }
-  }
+    text?.replace(/\b\w/g, (char) => char.toUpperCase());
 
   return (
     <div className="recipe-detail-card-container">
       <div className="recipe-detail-card">
-        {/* Left Column */}
-
-        {/* Right Column */}
         <div className="recipe-detail-info-column">
           <h1 className="recipe-detail-title">{recipe.title}</h1>
 
@@ -87,12 +118,23 @@ export default function RecipeDetailCard({ recipe }) {
 
           <div className="recipe-detail-actions">
             <button className="print-btn" onClick={handlePrint}>
-              {" "}
               Print Recipe
             </button>
-            <button className="save-btn" onClick={handleSave}> Save</button>
-            {(user?.id === authorId) && 
-            <button onClick={()=> navigate(`/edit-recipe/${recipe.id}`)}> Edit </button>}
+
+            <button
+              className={isFavourite ? "remove-btn" : "save-btn"}
+              onClick={handleToggleFavourite}
+            >
+              {isFavourite ? "Remove from Favourites" : "Save to Favourites"}
+            </button>
+
+            {user?.id === authorId && (
+              <button
+                onClick={() => navigate(`/edit-recipe/${recipe.id}`)}
+              >
+                Edit
+              </button>
+            )}
           </div>
         </div>
 
@@ -102,11 +144,12 @@ export default function RecipeDetailCard({ recipe }) {
             alt={recipe.title}
             className="recipe-detail-image"
           />
-          <p className="recipe-detail-rating">★★★★★ ({recipe.rating || 0})</p>
+          <p className="recipe-detail-rating">
+            ★★★★★ ({recipe.rating || 0})
+          </p>
         </div>
       </div>
 
-      {/* Ingredients + Instructions */}
       <div className="recipe-detail-body">
         <h2>Ingredients</h2>
         <ul className="ingredient-list">

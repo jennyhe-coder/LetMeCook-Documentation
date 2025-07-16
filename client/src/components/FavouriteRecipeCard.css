@@ -1,0 +1,37 @@
+/* src/components/FavouriteRecipeCard.css */
+
+.favourite-recipe-card {
+  border: 1px solid #eee;
+  background: #fff8e1;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  transition: box-shadow 0.3s ease;
+}
+
+.favourite-recipe-card:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.favourite-recipe-card .recipe-card-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.remove-btn {
+  margin-top: 10px;
+  background: #ff4d4f;
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.3s ease;
+}
+
+.remove-btn:hover {
+  background: #d9363e;
+}
