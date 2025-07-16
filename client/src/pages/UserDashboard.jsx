@@ -3,7 +3,6 @@ import { supabase } from "../utils/supabaseClient";
 import { useAuth } from "../context/AuthProvider";
 import { useNavigate } from "react-router-dom";
 import SearchBar from "./../components/SearchBar-Home";
-import Modal from "../components/Modal";
 import CarouselSection from "./../components/CarouselSection";
 import sunnywelcome from "../assets/sunnywelcome.png";
 import hat from "../assets/chef-hat.png";
@@ -21,16 +20,13 @@ export default function UserDashboard() {
     //const [recommendations, setRecommendations] = useState([]);
     const navigate = useNavigate();
     useEffect(() => {
-        if (!user) {
-            setShowModal(true)
-        } else {
+        if (user) {
             fetchFavourites(user.id);
             fetchHistory(user.id);
             fetchCreations(user.id);
             //fetch recommendations(user.id) implement this after AI algorithm is done
-        };
-
-    }, [navigate]);
+        }
+    }, [user]);
 
     const fetchFavourites = async (userId) => {
         let { data, error } = await supabase
@@ -78,14 +74,6 @@ export default function UserDashboard() {
 
     return (
         <>
-            <Modal
-                isOpen={showModal}
-                message={"Please login first."}
-                onClose={() => {
-                    setShowModal(false)
-                    navigate('/login')
-                }}
-            />
             {user &&
                 <div className="welcome-section">
                     <div className="welcome-wrapper" >
