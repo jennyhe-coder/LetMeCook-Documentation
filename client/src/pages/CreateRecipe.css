@@ -1,0 +1,106 @@
+.create-recipe-container {
+  max-width: 800px;
+  margin: 40px auto;
+  background: #fff8e5;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  font-family: "Raleway", sans-serif;
+  color: #333;
+}
+
+.create-recipe-container h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: #ff944d;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 1.1rem;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.form-group input[type="file"] {
+  border: none;
+  padding: 0;
+}
+
+.create-recipe-container img {
+  max-width: 200px;
+  margin-top: 10px;
+  border-radius: 10px;
+}
+
+.checkbox-group {
+  margin: 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ingredients-title {
+  margin-top: 30px;
+  margin-bottom: 10px;
+  font-size: 1.8rem;
+  color: #ff944d;
+}
+
+.ingredient-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 150px;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.add-ingredient-btn {
+  background: #ff944d;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.add-ingredient-btn:hover {
+  background: #e67e22;
+}
+
+button[type="submit"] {
+  background: #6ac045;
+  color: #fff;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+button[type="submit"]:hover {
+  background: #4da82c;
+}
+
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin-top: 20px;
+}

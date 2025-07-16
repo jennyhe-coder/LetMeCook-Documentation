@@ -1,0 +1,127 @@
+.edit-recipe-container {
+  max-width: 800px;
+  margin: 50px auto;
+  background: #fff8e5;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
+  font-family: "Raleway", sans-serif;
+  color: #333;
+}
+
+.edit-recipe-container h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  color: #ff944d;
+}
+
+.edit-recipe-container h4,
+.edit-recipe-container h3 {
+  margin-top: 20px;
+  margin-bottom: 8px;
+  font-size: 1.3rem;
+  color: #444;
+}
+
+.edit-recipe-container label {
+  font-weight: 600;
+  margin-bottom: 5px;
+  display: block;
+  font-size: 1rem;
+}
+
+.edit-recipe-container input[type="text"],
+.edit-recipe-container input[type="number"],
+.edit-recipe-container textarea,
+.edit-recipe-container select {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  box-sizing: border-box;
+}
+
+.edit-recipe-container input[type="file"] {
+  margin-top: 10px;
+}
+
+.edit-recipe-container img {
+  max-width: 180px;
+  margin-top: 15px;
+  border-radius: 10px;
+  display: block;
+}
+
+.edit-recipe-container textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.edit-recipe-container input[type="checkbox"] {
+  transform: scale(1.2);
+  margin-right: 8px;
+}
+
+.edit-recipe-container .ingredient-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 150px 100px;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.edit-recipe-container button {
+  background: #ff944d;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: background 0.3s ease;
+}
+
+.edit-recipe-container button:hover {
+  background: #e67e22;
+}
+
+.edit-recipe-container .delete-btn {
+  background: #e74c3c;
+  color: #fff;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.edit-recipe-container .delete-btn:hover {
+  background: #c0392b;
+}
+
+.edit-recipe-container .update-btn {
+  background: #6ac045;
+  color: #fff;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-top: 25px;
+  transition: background 0.3s ease;
+}
+
+.edit-recipe-container .update-btn:hover {
+  background: #4da82c;
+}
+
+.edit-recipe-container .error-message {
+  color: #e74c3c;
+  font-weight: bold;
+  margin-top: 20px;
+}
