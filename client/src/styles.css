@@ -1694,7 +1694,7 @@ p {
 .height-padding {
   display: flex;
   flex-direction: column;
-  min-height: 15vh;
+  min-height: 35vh;
 }
 
 .height-padding-profile {
