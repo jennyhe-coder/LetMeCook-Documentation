@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthProvider";
 import { supabase } from "../utils/supabaseClient";
 import { FaUserCircle } from "react-icons/fa";
+import { FaSearch, FaTimes } from "react-icons/fa";
+import SearchBarModal from "./SearchBarModal";
 
 export default function MainNav() {
   const location = useLocation();
@@ -16,6 +18,7 @@ export default function MainNav() {
   const dropdownRef = useRef();
   const avatarRef = useRef(null);
   const [avatar, setAvatar] = useState(null);
+  const [showSearchModal, setShowSearchModal] = useState(false);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -23,25 +26,25 @@ export default function MainNav() {
   };
 
   useEffect(() => {
-    const paths = [
-      "/",
-      "/recipes",
-      "/profile",
-      "/dashboard",
-      "/login",
-      "/favourites",
-      "/myrecipes",
-      "avatar",
-      "/favourites"
-    ];
-    let activeIndex = paths.indexOf(location.pathname);
-    if (user && open) {
-      activeIndex = paths.indexOf("avatar");
-    }
-    const activeEl = linkRefs.current[activeIndex];
     const indicator = indicatorRef.current;
 
+    let activeIndex = -1;
+    if (location.pathname === "/" || location.pathname === "/dashboard") {
+      activeIndex = 0; // Home
+    } else if (location.pathname === "/recipes") {
+      activeIndex = 1; // Recipes
+    }
+
+    if (user) {
+      linkRefs.current[8] = avatarRef.current;
+    }
+
+    const activeEl = linkRefs.current[activeIndex];
+
     if (activeEl && indicator) {
+      // Re-enable transition when showing/moving the indicator
+      indicator.style.transition = "left 0.3s ease, width 0.3s ease";
+
       const rect = activeEl.getBoundingClientRect();
       const parentRect = activeEl.parentNode.parentNode.getBoundingClientRect();
 
@@ -50,12 +53,18 @@ export default function MainNav() {
 
       indicator.style.left = `${offsetLeft - 6}px`;
       indicator.style.width = `${width}px`;
-    }
+    } else if (indicator) {
+      // Disable transition before hiding
+      indicator.style.transition = "none";
+      indicator.style.width = "0px";
+      indicator.style.left = "0px";
 
-    if (user) {
-      linkRefs.current[paths.length - 1] = avatarRef.current;
+      // Optional: Reset transition after one frame
+      requestAnimationFrame(() => {
+        indicator.style.transition = "left 0.3s ease, width 0.3s ease";
+      });
     }
-  }, [location.pathname, open]);
+  }, [location.pathname, open, user]);
 
   useEffect(() => {
     const handleClick = (e) => {
@@ -152,24 +161,24 @@ export default function MainNav() {
                 <ul className="dropdown-menu-nav">
                   <li className="dropdown-nav-item">
                     <NavLink to="/profile" onClick={() => setOpen(false)}>
-                      Profile
+                      profile
                     </NavLink>
                   </li>
                   <li className="dropdown-nav-item">
                     <NavLink to="/favourites" onClick={() => setOpen(false)}>
-                      My Favourites
+                      my favourites
                     </NavLink>
                   </li>
                   <li className="dropdown-nav-item">
                     <NavLink to="/user-recipe" onClick={() => setOpen(false)}>
-                      My Recipes
+                      my recipes
                     </NavLink>
                   </li>
                   <li
                     className="dropdown-nav-item cursor-pointer"
                     onClick={handleLogout}
                   >
-                    Logout
+                    log out
                   </li>
                 </ul>
               )}
@@ -186,8 +195,24 @@ export default function MainNav() {
               </NavLink>
             </div>
           )}
+          <div className="nav-link-wrapper">
+            <button
+              className="icon-button"
+              onClick={() => setShowSearchModal(true)}
+            >
+              <FaSearch size={20} />
+            </button>
+          </div>
         </div>
       </nav>
+
+      {showSearchModal && (
+        <div className="search-modal">
+          <div className="search-modal-content">
+            <SearchBarModal onClose={() => setShowSearchModal(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

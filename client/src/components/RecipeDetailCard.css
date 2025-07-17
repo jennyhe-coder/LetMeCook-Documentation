@@ -114,6 +114,18 @@
 .save-btn {
   background-color: #f8bfc6;
   color: #fff;
+  cursor: pointer;
+  border: none;
+  padding: 0.5em 1em;
+  border-radius: 4px;
+  transition: background-color 0.5s ease;
+}
+
+.save-btn.saved {
+  background-color: #1e1e1e;
+  /* neutral grey */
+  cursor: pointer;
+  color: #fff;
 }
 
 .recipe-detail-body {
@@ -153,4 +165,64 @@
 
 .recipe-detail-meta {
   line-height: 1.6;
+}
+
+.favourites-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.edit-icon {
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #333;
+  transition: color 0.2s ease;
+}
+
+.edit-icon.active {
+  color: #fff;
+}
+
+.remove-recipe-btn {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  background: #fff;
+  border: none;
+  color: black;
+  font-size: 1rem;
+  /* adjust if needed */
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+  z-index: 999;
+}
+
+.remove-recipe-btn:hover {
+  background: #1e1e1e;
+  color: white;
+}
+
+
+.recipe-card-wrapper {
+  position: relative;
+}
+
+.card-disabled-link a,
+.card-disabled-link {
+  pointer-events: none;
+  cursor: default;
+}
+
+.recipe-card-wrapper.hover-always .recipe-card {
+  transform: translate(-4px, -7px);
+  box-shadow: 4px 7px 0px 0px #FCF8ED;
+  z-index: 10;
+  overflow: visible;
 }

@@ -237,11 +237,11 @@ export default function Recipes() {
       });
   }, [filters, sort, page, setSearchParams]);
 
-  useEffect(() => {
-    if (sectionRef.current) {
-      sectionRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [page]);
+  // useEffect(() => {
+  //   if (sectionRef.current) {
+  //     sectionRef.current.scrollIntoView({ behavior: "smooth" });
+  //   }
+  // }, [page]);
 
   useEffect(() => {
     const el = sectionRef.current;
