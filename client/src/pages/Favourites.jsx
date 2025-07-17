@@ -114,11 +114,11 @@ export default function Favourites() {
     fetchFav();
   }, [user, userLoading]);
 
-  useEffect(() => {
-    if (sectionRef.current) {
-      sectionRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [page]);
+  // useEffect(() => {
+  //   if (sectionRef.current) {
+  //     sectionRef.current.scrollIntoView({ behavior: "smooth" });
+  //   }
+  // }, [page]);
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -142,14 +142,6 @@ export default function Favourites() {
     }
   }, []);
 
-  //To Do: remove recipe from favourites logic
-  //   const handleRemove = async () => {
-  //     const {error} = await supabase
-  //     .from("recipe_favourites")
-  //     .delete()
-  //     .eq("user_id", user.id)
-  //     .eq("recipe_id", idk yet)
-  //   };
   return (
     <section className="all-recipes-section" ref={sectionRef}>
       <div className="all-recipes-bg" />

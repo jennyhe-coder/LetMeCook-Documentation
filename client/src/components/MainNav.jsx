@@ -26,25 +26,25 @@ export default function MainNav() {
   };
 
   useEffect(() => {
-    const paths = [
-      "/",
-      "/recipes",
-      "/profile",
-      "/dashboard",
-      "/login",
-      "/favourites",
-      "/myrecipes",
-      "avatar",
-      "/favourites",
-    ];
-    let activeIndex = paths.indexOf(location.pathname);
-    if (user && open) {
-      activeIndex = paths.indexOf("avatar");
-    }
-    const activeEl = linkRefs.current[activeIndex];
     const indicator = indicatorRef.current;
 
+    let activeIndex = -1;
+    if (location.pathname === "/" || location.pathname === "/dashboard") {
+      activeIndex = 0; // Home
+    } else if (location.pathname === "/recipes") {
+      activeIndex = 1; // Recipes
+    }
+
+    if (user) {
+      linkRefs.current[8] = avatarRef.current;
+    }
+
+    const activeEl = linkRefs.current[activeIndex];
+
     if (activeEl && indicator) {
+      // Re-enable transition when showing/moving the indicator
+      indicator.style.transition = "left 0.3s ease, width 0.3s ease";
+
       const rect = activeEl.getBoundingClientRect();
       const parentRect = activeEl.parentNode.parentNode.getBoundingClientRect();
 
@@ -53,12 +53,18 @@ export default function MainNav() {
 
       indicator.style.left = `${offsetLeft - 6}px`;
       indicator.style.width = `${width}px`;
-    }
+    } else if (indicator) {
+      // Disable transition before hiding
+      indicator.style.transition = "none";
+      indicator.style.width = "0px";
+      indicator.style.left = "0px";
 
-    if (user) {
-      linkRefs.current[paths.length - 1] = avatarRef.current;
+      // Optional: Reset transition after one frame
+      requestAnimationFrame(() => {
+        indicator.style.transition = "left 0.3s ease, width 0.3s ease";
+      });
     }
-  }, [location.pathname, open]);
+  }, [location.pathname, open, user]);
 
   useEffect(() => {
     const handleClick = (e) => {
@@ -93,7 +99,7 @@ export default function MainNav() {
   }, [user]);
 
   const navItems = [
-    { path: "/", label: "home" },
+    { path: user ? "/dashboard" : "/", label: "home" },
     { path: "/recipes", label: "recipes" },
     // { path: "/profile", label: "profile" },
     // { path: "/dashboard", label: "dashboard" },
@@ -108,7 +114,7 @@ export default function MainNav() {
       <nav className="layout-wrapper main-nav">
         <div className="logo-section">
           <NavLink
-            to="/"
+            to={user ? "/dashboard" : "/"}
             className={({ isActive }) =>
               isActive ? "nav-link active" : "nav-link"
             }
