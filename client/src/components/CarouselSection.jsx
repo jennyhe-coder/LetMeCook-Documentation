@@ -27,7 +27,7 @@ export default function CarouselSection({
         scrollTrigger: {
           trigger: el,
           start: "top 100%",
-          toggleActions: "play reverse play reverse",
+          toggleActions: "play none none none",
         },
       }
     );

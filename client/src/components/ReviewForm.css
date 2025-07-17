@@ -30,12 +30,29 @@
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-top: 1.5rem;
+  align-items: flex-end;
 }
 
 .rating-field {
-  flex: 1 1 150px;
+  flex: 1 1 160px;
+  display: flex;
+  flex-direction: column;
 }
+
+.submit-wrapper {
+  flex: 1 1 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (min-width: 600px) {
+  .submit-wrapper {
+    flex: 1 1 160px;
+    align-self: flex-end;
+  }
+}
+
 
 .rating-label {
   display: block;
@@ -51,11 +68,20 @@
   font-size: 1rem;
   border-radius: 6px;
   border: 1px solid #ccc;
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  background-image: url("data:image/svg+xml,%3Csvg fill='black' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  background-size: 16px;
 }
 
 .submit-button {
-  background-color: #009266;
-  color: white;
+  background-color: #ddd !important;
+  color: #1e1e1e !important;
   font-family: 'Raleway', sans-serif;
   font-size: 1rem;
   padding: 10px 20px;
@@ -63,10 +89,12 @@
   border: none;
   cursor: pointer;
   transition: background 0.3s ease;
+  margin-left: auto;
+  width: 90%;
 }
 
 .submit-button:hover {
-  background-color: #006a4e;
+  background-color: #ccc !important;
 }
 
 .submit-button:disabled {

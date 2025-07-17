@@ -93,57 +93,72 @@ export default function IndividualRecipe() {
     : "";
 
   return (
-    <main className="layout-wrapper">
-      <div className="recipe-page-container" style={{ minHeight: "100vh" }}>
-        {loading ? (
-          <div className="loading">
-            <h1 className="recipe-title">Loading...</h1>
-            <div className="image-wrapper" />
-            <div className="description">
-              Please wait while the recipe loads.
+    <>
+      <main className="layout-wrapper">
+        <div className="recipe-page-container" style={{ minHeight: "100vh" }}>
+          {loading ? (
+            <div className="loading">
+              <h1 className="recipe-title">Loading...</h1>
+              <div className="image-wrapper" />
+              <div className="description">
+                Please wait while the recipe loads.
+              </div>
             </div>
-          </div>
-        ) : !recipe ? (
-          <div className="not-found">Recipe not found.</div>
-        ) : (
-          <>
-            <section className="header-section">
-              <h1 className="recipe-title">{recipe.title}</h1>
-              <div className="meta-info">
-                <p>
-                  <strong>Recipe by {recipe.authorName || "Anonymous"}</strong>
-                </p>
-                <br />
-                <p>{formattedDate}</p>
-              </div>
-              <div className="image-wrapper">
-                <img
-                  src={recipe.imageUrl}
-                  alt={recipe.title}
-                  className="recipe-image"
+          ) : !recipe ? (
+            <div className="not-found">Recipe not found.</div>
+          ) : (
+            <>
+              <section className="header-section">
+                <h1 className="recipe-title">{recipe.title}</h1>
+                <div className="meta-info">
+                  <p>
+                    <strong>
+                      Recipe by {recipe.authorName || "Anonymous"}
+                    </strong>
+                  </p>
+                  <br />
+                  <p>{formattedDate}</p>
+                </div>
+                <div className="image-wrapper">
+                  <img
+                    src={recipe.imageUrl}
+                    alt={recipe.title}
+                    className="recipe-image"
+                  />
+                </div>
+                <div
+                  className="description"
+                  dangerouslySetInnerHTML={{ __html: recipe.description }}
                 />
-              </div>
-              <div
-                className="description"
-                dangerouslySetInnerHTML={{ __html: recipe.description }}
-              />
-            </section>
+              </section>
 
-            <RecipeDetailCard recipe={recipe} />
+              <RecipeDetailCard recipe={recipe} />
 
-            <section className="review-section">
-              <h2 className="section-heading">User Reviews</h2>
-              {user && (
-                <ReviewForm
-                  recipeId={recipe.id}
-                  onReviewSubmitted={refreshReviews}
-                />
-              )}
-              <ReviewList recipeId={recipe.id} refreshTrigger={refreshFlag} />
-            </section>
-          </>
-        )}
-      </div>
-    </main>
+              <section className="review-section">
+                <h2 className="section-heading">User Reviews</h2>
+                {user && (
+                  <ReviewForm
+                    recipeId={recipe.id}
+                    onReviewSubmitted={refreshReviews}
+                  />
+                )}
+                <ReviewList recipeId={recipe.id} refreshTrigger={refreshFlag} />
+              </section>
+            </>
+          )}
+        </div>
+      </main>
+      <br />
+      <br />
+      <br />
+      <br />
+      <section>
+        <CarouselSection
+          title="Similar Recipes"
+          sectionClass="section-1"
+          dataSource={`https://letmecook.ca/api/recipes/recommend?recipeid=${id}`}
+        />
+      </section>
+    </>
   );
 }

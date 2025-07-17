@@ -86,11 +86,14 @@ const ReviewForm = ({ recipeId, onReviewSubmitted }) => {
           cols={50}
           required
         />
-        <div>
+        <div className="review-ratings-group">
           {["cost", "time", "difficulty", "overall"].map((cat) => (
-            <div key={cat}>
-              <label>{cat.charAt(0).toUpperCase() + cat.slice(1)} : </label>
+            <div className="rating-field" key={cat}>
+              <label className="rating-label">
+                {cat.charAt(0).toUpperCase() + cat.slice(1)}:
+              </label>
               <select
+                className="rating-select"
                 value={ratings[cat]}
                 onChange={(e) => handleRatingChange(cat, e.target.value)}
                 required
@@ -104,10 +107,17 @@ const ReviewForm = ({ recipeId, onReviewSubmitted }) => {
               </select>
             </div>
           ))}
+
+          <div className="rating-field submit-wrapper">
+            <button
+              type="submit"
+              className="submit-button"
+              disabled={submitting}
+            >
+              {submitting ? "Submitting..." : "Submit Review"}
+            </button>
+          </div>
         </div>
-        <button type="submit" disabled={submitting}>
-          {submitting ? "Submitting..." : "Submit Review"}
-        </button>
       </form>
     </div>
   );
