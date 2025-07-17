@@ -15,6 +15,10 @@ export default function IndividualRecipe() {
   const [refreshFlag, setRefreshFlag] = useState(false);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [id]);
+
+  useEffect(() => {
     const fetchAll = async () => {
       try {
         const response = await fetch(`https://letmecook.ca/api/recipes/${id}`);
