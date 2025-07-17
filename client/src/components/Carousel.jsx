@@ -61,11 +61,25 @@ export default function Carousel({ dataSource }) {
         if (!res.ok) throw new Error("Network error");
 
         const data = await res.json();
-        if (!Array.isArray(data.content) || data.content.length === 0) {
-          throw new Error("Invalid or empty data");
+        console.log("API response:", data); // helpful debug
+
+        let recipeList = [];
+
+        if (Array.isArray(data)) {
+          // Case: recipes directly in response
+          recipeList = data;
+        } else if (Array.isArray(data.content)) {
+          // Case: recipes in `content` field
+          recipeList = data.content;
+        } else {
+          throw new Error("Unexpected API response structure");
         }
 
-        setRecipes(data.content);
+        if (recipeList.length === 0) {
+          throw new Error("Empty recipe list");
+        }
+
+        setRecipes(recipeList);
       } catch (err) {
         console.error("Failed to fetch recipes:", err);
         setError(true);
