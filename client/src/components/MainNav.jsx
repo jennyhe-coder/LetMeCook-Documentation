@@ -19,6 +19,7 @@ export default function MainNav() {
   const avatarRef = useRef(null);
   const [avatar, setAvatar] = useState(null);
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const [disableHover, setDisableHover] = useState(false);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -144,44 +145,75 @@ export default function MainNav() {
           ))}
 
           {user ? (
-            <div className="nav-link-wrapper relative" ref={dropdownRef}>
-              <div
-                ref={avatarRef}
-                className="cursor-pointer"
-                onClick={() => setOpen((prev) => !prev)}
-              >
-                {avatar ? (
-                  <img src={avatar} alt="avatar" className="avatar-icon-nav" />
-                ) : (
-                  <FaUserCircle size={28} />
-                )}
-              </div>
+            <div
+              className={`nav-link-wrapper relative group ${
+                disableHover ? "disable-hover" : ""
+              }`}
+              ref={dropdownRef}
+              onMouseEnter={() => setDisableHover(false)}
+            >
+              <div className="avatar-dropdown-wrapper">
+                <div ref={avatarRef} className="cursor-pointer avatar-wrapper">
+                  {avatar ? (
+                    <img
+                      src={avatar}
+                      alt="avatar"
+                      className="avatar-icon-nav"
+                    />
+                  ) : (
+                    <FaUserCircle size={28} />
+                  )}
+                </div>
 
-              {open && (
                 <ul className="dropdown-menu-nav">
                   <li className="dropdown-nav-item">
-                    <NavLink to="/profile" onClick={() => setOpen(false)}>
+                    <NavLink
+                      to="/profile"
+                      className="dropdown-nav-link"
+                      onClick={() => {
+                        setDisableHover(true);
+                        setTimeout(() => setDisableHover(false), 300);
+                      }}
+                    >
                       profile
                     </NavLink>
                   </li>
                   <li className="dropdown-nav-item">
-                    <NavLink to="/favourites" onClick={() => setOpen(false)}>
+                    <NavLink
+                      to="/favourites"
+                      className="dropdown-nav-link"
+                      onClick={() => {
+                        setDisableHover(true);
+                        setTimeout(() => setDisableHover(false), 300);
+                      }}
+                    >
                       my favourites
                     </NavLink>
                   </li>
                   <li className="dropdown-nav-item">
-                    <NavLink to="/user-recipe" onClick={() => setOpen(false)}>
+                    <NavLink
+                      to="/user-recipe"
+                      className="dropdown-nav-link"
+                      onClick={() => {
+                        setDisableHover(true);
+                        setTimeout(() => setDisableHover(false), 300);
+                      }}
+                    >
                       my recipes
                     </NavLink>
                   </li>
                   <li
-                    className="dropdown-nav-item cursor-pointer"
-                    onClick={handleLogout}
+                    className="dropdown-nav-item dropdown-nav-link cursor-pointer"
+                    onClick={() => {
+                      setDisableHover(true);
+                      setTimeout(() => setDisableHover(false), 300);
+                      handleLogout();
+                    }}
                   >
                     log out
                   </li>
                 </ul>
-              )}
+              </div>
             </div>
           ) : (
             <div className="nav-link-wrapper">
@@ -195,6 +227,7 @@ export default function MainNav() {
               </NavLink>
             </div>
           )}
+
           <div className="nav-link-wrapper">
             <button
               className="icon-button"

@@ -1290,15 +1290,22 @@ p {
 
 .dropdown-menu-nav {
   position: absolute;
-  top: 120%;
+  top: 100%;
   right: 0;
   background: #FCF8ED;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 8px 0px;
   margin: 0;
   list-style: none;
-  z-index: 1000;
   width: max-content;
+  border-radius: 6px;
+  border: 1px solid #eee;
+  display: none;
+  z-index: 2;
+}
+
+.group:hover:not(.disable-hover) .dropdown-menu-nav {
+  display: block;
 }
 
 .dropdown-nav-item {
@@ -1306,6 +1313,11 @@ p {
   cursor: pointer;
   margin-bottom: 8px;
   white-space: nowrap;
+}
+
+.dropdown-nav-link {
+  display: block;
+  /* makes entire area clickable */
 }
 
 .dropdown-nav-item:last-child {
@@ -1317,12 +1329,30 @@ p {
   background-color: #f3f4f6;
 }
 
+.avatar-dropdown-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+/* Adds invisible hover buffer around avatar */
+.avatar-dropdown-wrapper::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  bottom: -12px;
+  left: -18px;
+  right: -12px;
+  z-index: 1;
+}
+
 .avatar-icon-nav {
   width: 28px;
   height: 28px;
   border-radius: 50%;
   object-fit: cover;
   display: block;
+  position: relative;
+  z-index: 9999;
 }
 
 /*------------------*/
@@ -1659,4 +1689,16 @@ p {
 
 .nav-link-wrapper .icon-button {
   padding-top: 3px;
+}
+
+.height-padding {
+  display: flex;
+  flex-direction: column;
+  min-height: 35vh;
+}
+
+.height-padding-profile {
+  display: flex;
+  flex-direction: column;
+  min-height: 60px;
 }
