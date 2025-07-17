@@ -1,10 +1,11 @@
 import { useEffect, useRef } from "react";
+import { Route } from "react-router-dom";
 import SearchBar from "./../components/SearchBar-Home";
 import CarouselSection from "./../components/CarouselSection";
-import { useAuth } from "../context/AuthProvider";
-import { Navigate } from "react-router-dom";
+import PrivateRoute from "../components/PrivateRoute";
 import sunnythechef from "../assets/sunnythechef.png";
 import sunnythumbsup from "../assets/sunnythumbsup.png";
+import UserDashboard from "./UserDashboard";
 
 export default function Home() {
   const inputRef = useRef();
@@ -12,10 +13,11 @@ export default function Home() {
     inputRef.current?.focus({ preventScroll: true });
   }, []);
 
-  const { user } = useAuth();
-  if (user) {
-    return <Navigate to="/dashboard" />;
-  }
+  <Route path="/dashboard" element={
+    <PrivateRoute>
+      <UserDashboard/>
+    </PrivateRoute>
+  } />
 
   return (
     <>

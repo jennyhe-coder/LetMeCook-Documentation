@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 import SearchBar from "./../components/SearchBar-Home";
-import Modal from "../components/Modal";
 import CarouselSection from "./../components/CarouselSection";
 import sunnywelcome from "../assets/sunnywelcome.png";
 import hat from "../assets/chef-hat.png";
@@ -45,6 +44,7 @@ export default function UserDashboard() {
       setError(error.message);
     }
   };
+
 
   const fetchHistory = async (userId) => {
     let { data, error } = await supabase
@@ -178,4 +178,5 @@ export default function UserDashboard() {
       )}
     </>
   );
+
 }

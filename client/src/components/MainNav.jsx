@@ -93,7 +93,7 @@ export default function MainNav() {
   }, [user]);
 
   const navItems = [
-    { path: "/", label: "home" },
+    { path: user ? "/dashboard" : "/", label: "home" },
     { path: "/recipes", label: "recipes" },
     // { path: "/profile", label: "profile" },
     // { path: "/dashboard", label: "dashboard" },
@@ -108,7 +108,7 @@ export default function MainNav() {
       <nav className="layout-wrapper main-nav">
         <div className="logo-section">
           <NavLink
-            to="/"
+            to={user ? "/dashboard" : "/"}
             className={({ isActive }) =>
               isActive ? "nav-link active" : "nav-link"
             }
