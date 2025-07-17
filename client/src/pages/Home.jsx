@@ -3,8 +3,6 @@ import { Route } from "react-router-dom";
 import SearchBar from "./../components/SearchBar-Home";
 import CarouselSection from "./../components/CarouselSection";
 import PrivateRoute from "../components/PrivateRoute";
-import { useAuth } from "../context/AuthProvider";
-import { Navigate } from "react-router-dom";
 import sunnythechef from "../assets/sunnythechef.png";
 import sunnythumbsup from "../assets/sunnythumbsup.png";
 import UserDashboard from "./UserDashboard";
