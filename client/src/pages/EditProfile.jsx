@@ -7,7 +7,6 @@ import Modal from '../components/Modal';
 import '../EditProfile.css';
 import { debounce } from 'lodash';
 
-
 const DIETARY_OPTIONS = [
   'Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free', 'Nut-Free',
   'Halal', 'Kosher', 'Paleo', 'Keto', 'Low-Carb'
@@ -69,33 +68,32 @@ export default function EditProfile() {
   }, [user]);
 
   const debouncedSearch = useRef(debounce(async (input) => {
-      if (!input) return;
-      const { data, error } = await supabase
-        .from('ingredients')
-        .select('*')
-        .ilike('name', `%${input}%`)
-        .limit(10);
+    if (!input) return;
+    const { data, error } = await supabase
+      .from('ingredients')
+      .select('*')
+      .ilike('name', `%${input}%`)
+      .limit(10);
 
-      if (!error) {
-        console.log("Fetched ingredients:", data);
-        setIngredientsResults(data.map(ingredient => ({
-          id: ingredient.id,
-          name: ingredient.name,
-          ...ingredient
-        })));
-      } else {
-        console.error("Ingredient search error:", error.message);
-      }
-    }, 300)).current;
+    if (!error) {
+      setIngredientsResults(data.map(ingredient => ({
+        id: ingredient.id,
+        name: ingredient.name,
+        ...ingredient
+      })));
+    } else {
+      console.error("Ingredient search error:", error.message);
+    }
+  }, 300)).current;
 
-    useEffect(() => {
-      debouncedSearch(ingredientSearch);
-    }, [ingredientSearch]);
+  useEffect(() => {
+    debouncedSearch(ingredientSearch);
+  }, [ingredientSearch]);
 
-    const handleChange = (e) => {
-      const { name, value } = e.target;
-      setForm({ ...form, [name]: value });
-    };
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+  };
 
   const handleCookingLvl = (e) => {
     setForm({ ...form, cooking_skill: e.target.value });
@@ -178,7 +176,7 @@ export default function EditProfile() {
   return (
     <div className="edit-profile-container">
       <h1>Edit Profile</h1>
-      <form onSubmit={handleSubmit} 
+      <form onSubmit={handleSubmit}
         onKeyDown={(e) => {
           if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
             e.preventDefault();
@@ -270,6 +268,10 @@ export default function EditProfile() {
             value: ingredient.id,
             label: ingredient.name
           }))}
+          menuPortalTarget={document.body}
+          styles={{
+            menuPortal: base => ({ ...base, zIndex: 9999 }),
+          }}
         />
 
         {error && <p style={{ color: 'red' }}>{error}</p>}
