@@ -1,65 +1,67 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./RecipeDetailCard.css";
 import { supabase } from "../utils/supabaseClient";
-import { useAuth } from '../context/AuthProvider';
-import { Navigate, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useAuth } from "../context/AuthProvider";
+import { useNavigate, Link } from "react-router-dom";
+
 export default function RecipeDetailCard({ recipe }) {
   const { user } = useAuth();
-  const [authorId, setAuthorId] = useState('');
-  const navigate = useNavigate();  
-  const handlePrint = () => window.print();
+  const [authorId, setAuthorId] = useState("");
+  const [isSaved, setIsSaved] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchRecipe = async() => {
-      const {data, error} = await supabase 
+    const fetchRecipe = async () => {
+      const { data, error } = await supabase
         .from("recipe")
         .select("author_id")
         .eq("id", recipe.id)
-        .single()
-      
-      if (error) {
-        console.warn(error.message);
-        return
-      } else {
-        setAuthorId(data.author_id)
+        .single();
+
+      if (!error && data) {
+        setAuthorId(data.author_id);
       }
-    }
+    };
+
+    const checkIfSaved = async () => {
+      if (!user) return;
+      const { data, error } = await supabase
+        .from("recipe_favourites")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("recipe_id", recipe.id)
+        .single();
+
+      if (data) setIsSaved(true);
+    };
+
     fetchRecipe();
-  },[])
+    checkIfSaved();
+  }, [recipe.id, user]);
 
   const capitalizeWords = (text) =>
     text.replace(/\b\w/g, (char) => char.toUpperCase());
 
   const handleSave = async () => {
-    const {data: recipeData, error: recipeError} = await supabase
-    .from("recipe")
-    .select("*")
-    .eq("id", recipe.id)
-    .single()
+    if (isSaved || !user) return;
 
-    if (recipeData) {
-      const {error: favouriteError } = await supabase
-      .from("recipe_favourites")
-      .insert({
-        recipe_id: recipeData.id,
-        user_id: user.id
-      })
+    const { error } = await supabase.from("recipe_favourites").insert({
+      recipe_id: recipe.id,
+      user_id: user.id,
+    });
 
-      if (favouriteError) {
-        console.log("favouriteError: ", favouriteError)
-      }
-    } else{
-      console.log(recipeError)
+    if (!error) {
+      setIsSaved(true);
+    } else {
+      console.log("Error saving to favourites:", error.message);
     }
-  }
+  };
+
+  const handlePrint = () => window.print();
 
   return (
     <div className="recipe-detail-card-container">
       <div className="recipe-detail-card">
-        {/* Left Column */}
-
-        {/* Right Column */}
         <div className="recipe-detail-info-column">
           <h1 className="recipe-detail-title">{recipe.title}</h1>
 
@@ -87,12 +89,28 @@ export default function RecipeDetailCard({ recipe }) {
 
           <div className="recipe-detail-actions">
             <button className="print-btn" onClick={handlePrint}>
-              {" "}
               Print Recipe
             </button>
-            <button className="save-btn" onClick={handleSave}> Save</button>
-            {(user?.id === authorId) && 
-            <button onClick={()=> navigate(`/edit-recipe/${recipe.id}`)}> Edit </button>}
+
+            {isSaved ? (
+              <Link
+                to="/favourites"
+                className="save-btn saved"
+                // title="View favourite recipes"
+              >
+                Saved to Favourites
+              </Link>
+            ) : (
+              <button className="save-btn" onClick={handleSave}>
+                Save
+              </button>
+            )}
+
+            {user?.id === authorId && (
+              <button onClick={() => navigate(`/edit-recipe/${recipe.id}`)}>
+                Edit
+              </button>
+            )}
           </div>
         </div>
 
@@ -106,7 +124,6 @@ export default function RecipeDetailCard({ recipe }) {
         </div>
       </div>
 
-      {/* Ingredients + Instructions */}
       <div className="recipe-detail-body">
         <h2>Ingredients</h2>
         <ul className="ingredient-list">

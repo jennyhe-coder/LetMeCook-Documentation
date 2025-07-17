@@ -9,7 +9,7 @@ export default function CarouselSection({
   sectionClass = "",
   title = "",
   dataSource,
-  actionButton = null
+  actionButton = null,
 }) {
   const sectionRef = useRef();
 
