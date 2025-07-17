@@ -5,11 +5,12 @@ import Modal from '../components/Modal';
 import { useNavigate } from 'react-router-dom';
 import { debounce } from 'lodash';
 import Select from 'react-select';
+import '../pages/CreateRecipe.css';
 
 const UNITS = [
   'teaspoon', 'cup', 'ounce', 'pound', 'pinch',
   'Tbsps', 'serving', 'kilo', 'cloves', 'package',
-  'box', 'sprigs',  'mediums'
+  'box', 'sprigs', 'mediums'
 ];
 
 export default function CreateRecipe() {
@@ -43,42 +44,27 @@ export default function CreateRecipe() {
   const [dietaryPref, setDietaryPref] = useState([]);
   const [cuisine, setCuisine] = useState([]);
   const [categories, setCategories] = useState([]);
-  
 
   useEffect(() => {
     const fetchDropdownOptions = async () => {
-      const {data: dietaryData, error: dietaryErr} = await supabase
+      const { data: dietaryData, error: dietaryErr } = await supabase
         .from('dietary_pref')
-        .select('*')
-      
-      const {data: cuisineData, error: cuisineErr} = await supabase
+        .select('*');
+
+      const { data: cuisineData, error: cuisineErr } = await supabase
         .from('cuisines')
-        .select('*')
-      
-      const {data: categoryData, error: categoryErr} = await supabase
+        .select('*');
+
+      const { data: categoryData, error: categoryErr } = await supabase
         .from('categories')
-        .select('*')
+        .select('*');
 
-      if (dietaryErr){
-         console.warn("dietary_preferences not found or inaccessible", dietaryErr);
-      } else {
-        setDietaryOpt(dietaryData);
-      }
-
-      if (cuisineErr) {
-        console.warn("cuisines not found or inaccessible", cuisineErr);
-      } else {
-        setCuisineOpt(cuisineData);
-      }
-
-      if (categoryErr) {
-        console.warn("categories not found or inaccessible", categoryErr);
-      } else {
-        setCategoryOpt(categoryData);
-      }
+      if (!dietaryErr) setDietaryOpt(dietaryData);
+      if (!cuisineErr) setCuisineOpt(cuisineData);
+      if (!categoryErr) setCategoryOpt(categoryData);
     };
 
-    fetchDropdownOptions()
+    fetchDropdownOptions();
   }, []);
 
   const handleChange = (e) => {
@@ -90,13 +76,16 @@ export default function CreateRecipe() {
   };
 
   const addIngredientRow = () => {
-    setRecipeIngredients([...recipeIngredients, { name: '', ingredient_id: null, quantity: '', unit: '' }]);
+    setRecipeIngredients([
+      ...recipeIngredients,
+      { name: '', ingredient_id: null, quantity: '', unit: '' }
+    ]);
   };
 
   const handleIngredientChange = (index, field, value) => {
     const updated = [...recipeIngredients];
     updated[index][field] = value;
-    updated[index]['ingredient_id'] = null; 
+    updated[index]['ingredient_id'] = null;
     setRecipeIngredients(updated);
   };
 
@@ -128,8 +117,8 @@ export default function CreateRecipe() {
       setError("Error generating public URL: " + publicErr.message);
       return;
     }
-    console.log("public image url: ",  publicURLData.publicUrl)
-    setError(null)
+
+    setError(null);
     setForm((prev) => ({ ...prev, image_url: publicURLData.publicUrl }));
   };
 
@@ -200,7 +189,7 @@ export default function CreateRecipe() {
             setError("Cannot insert ingredients: " + insertError.message);
             return;
           }
-          setError(null)
+          setError(null);
           ingredientId = newIngredient.id;
         }
       }
@@ -223,22 +212,22 @@ export default function CreateRecipe() {
     }
 
     if (dietaryPref.length > 0) {
-      const {error: dietaryErr} = await supabase 
+      const { error: dietaryErr } = await supabase
         .from("recipe_dietary_pref")
         .insert(dietaryPref.map((item) => ({
           recipe_id: recipeData.id,
-          preference_id: item.value 
+          preference_id: item.value
         })));
-      
+
       if (dietaryErr) {
-        setError("Cannot link dietary pref with recipe: " + dietaryErr.message)
+        setError("Cannot link dietary pref with recipe: " + dietaryErr.message);
         return;
-      };
-      setError(null)
-    };
+      }
+      setError(null);
+    }
 
     if (cuisine.length > 0) {
-      const {error: cuisineErr} = await supabase
+      const { error: cuisineErr } = await supabase
         .from("recipe_cuisines")
         .insert(cuisine.map((item) => ({
           recipe_id: recipeData.id,
@@ -246,14 +235,14 @@ export default function CreateRecipe() {
         })));
 
       if (cuisineErr) {
-        setError("Cannot link cuisine to recipe: " + cuisineErr.error);
+        setError("Cannot link cuisine to recipe: " + cuisineErr.message);
         return;
-      };
-      setError(null)
-    };
+      }
+      setError(null);
+    }
 
     if (categories.length > 0) {
-      const {error: categoryErr} = await supabase
+      const { error: categoryErr } = await supabase
         .from("recipe_categories")
         .insert(categories.map((item) => ({
           recipe_id: recipeData.id,
@@ -261,11 +250,11 @@ export default function CreateRecipe() {
         })));
 
       if (categoryErr) {
-        setError("Cannot link category with recipe: " + categoryErr.error);
+        setError("Cannot link category with recipe: " + categoryErr.message);
         return;
-      };
-    };
-    setError(null)
+      }
+    }
+    setError(null);
     setShowModal(true);
   };
 
@@ -273,88 +262,124 @@ export default function CreateRecipe() {
     <div className="create-recipe-container">
       <h2>Create a Recipe</h2>
       <form onSubmit={handleSubmit}>
-        <input
-          type="file"
-          accept="image/*"
-          ref={fileInputRef}
-          onChange={handleImgUpload}
-        />
-        {form.image_url && (
-          <img src={form.image_url} alt="food-image" />
-        )}
-        <h4>Title</h4>
-        <input
-          type="text"
-          name="title"
-          value={form.title}
-          onChange={handleChange}
-          placeholder="Title"
-          required
-        />
-        <h4>Dietary Preference</h4>
-        <Select 
-          isMulti
-          options={dietaryOpt.map((opt) => ({value: opt.id, label: opt.name}))?? []}
-          onChange={(selectedOpts) => setDietaryPref(selectedOpts)}
-        />
-        <h4>Cuisines</h4>
-        <Select 
-          isMulti
-          options={cuisineOpt.map((opt) => ({value: opt.id, label: opt.name}))?? []}
-          onChange={(selectedOpts) => setCuisine(selectedOpts)}
-        />
-        <h4>Categories</h4>
-        <Select 
-          isMulti
-          options={categoryOpt.map((opt) => ({value: opt.id, label: opt.name})) ?? []}
-          onChange={(selectedOpts) => setCategories(selectedOpts)}
-        />
-        <h4>Description</h4>
-        <textarea
-          name="description"
-          value={form.description}
-          onChange={handleChange}
-          placeholder="Description"
-        />
-        <h4>Servings</h4>
-        <input
-          type="number"
-          name="servings"
-          value={form.servings}
-          onChange={handleChange}
-          placeholder="Servings"
-          min={1}
-        />
-        <h4>Cooking Time</h4>
-        <input
-          type="number"
-          name="time"
-          value={form.time}
-          onChange={handleChange}
-          placeholder="Time (min)"
-          min={1}
-        />
-        <h4>Direction</h4>
-        <textarea
-          name="directions"
-          value={form.directions}
-          onChange={handleChange}
-          placeholder="Directions"
-        />
+        <div className="form-group">
+          <label>Recipe Image</label>
+          <input
+            type="file"
+            accept="image/*"
+            ref={fileInputRef}
+            onChange={handleImgUpload}
+          />
+          {form.image_url && (
+            <img src={form.image_url} alt="food preview" />
+          )}
+        </div>
 
-        <label>
+        <div className="form-group">
+          <label htmlFor="title">Title</label>
+          <input
+            type="text"
+            name="title"
+            value={form.title}
+            onChange={handleChange}
+            placeholder="Title"
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Dietary Preference</label>
+          <Select
+            isMulti
+            options={dietaryOpt.map((opt) => ({
+              value: opt.id,
+              label: opt.name
+            })) ?? []}
+            onChange={(selectedOpts) => setDietaryPref(selectedOpts)}
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Cuisines</label>
+          <Select
+            isMulti
+            options={cuisineOpt.map((opt) => ({
+              value: opt.id,
+              label: opt.name
+            })) ?? []}
+            onChange={(selectedOpts) => setCuisine(selectedOpts)}
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Categories</label>
+          <Select
+            isMulti
+            options={categoryOpt.map((opt) => ({
+              value: opt.id,
+              label: opt.name
+            })) ?? []}
+            onChange={(selectedOpts) => setCategories(selectedOpts)}
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Description</label>
+          <textarea
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            placeholder="Description"
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Servings</label>
+          <input
+            type="number"
+            name="servings"
+            value={form.servings}
+            onChange={handleChange}
+            placeholder="Servings"
+            min={1}
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Cooking Time (minutes)</label>
+          <input
+            type="number"
+            name="time"
+            value={form.time}
+            onChange={handleChange}
+            placeholder="Time (min)"
+            min={1}
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Directions</label>
+          <textarea
+            name="directions"
+            value={form.directions}
+            onChange={handleChange}
+            placeholder="Directions"
+          />
+        </div>
+
+        <div className="checkbox-group">
           <input
             type="checkbox"
             name="is_public"
             checked={form.is_public}
             onChange={handleChange}
           />
-          Make this recipe public
-        </label>
+          <label>Make this recipe public</label>
+        </div>
 
-        <h3>Ingredients</h3>
+        <h3 className="ingredients-title">Ingredients</h3>
         {recipeIngredients.map((ri, index) => (
-          <div key={index} style={{ marginBottom: '1rem' }}>
+          <div className="ingredient-row" key={index}>
             <input
               type="text"
               placeholder="Ingredient name"
@@ -370,10 +395,6 @@ export default function CreateRecipe() {
                 <option
                   key={s.id}
                   value={s.name}
-                  onClick={() => {
-                    handleIngredientChange(index, 'ingredient_id', s.id);
-                    handleIngredientChange(index, 'name', s.name);
-                  }}
                 />
               ))}
             </datalist>
@@ -382,13 +403,16 @@ export default function CreateRecipe() {
               type="text"
               placeholder="Quantity"
               value={ri.quantity}
-              onChange={(e) => handleIngredientChange(index, 'quantity', e.target.value)}
+              onChange={(e) =>
+                handleIngredientChange(index, 'quantity', e.target.value)
+              }
             />
             <select
-              placeholder="Unit"
               name="unit"
               value={ri.unit}
-              onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)}
+              onChange={(e) =>
+                handleIngredientChange(index, 'unit', e.target.value)
+              }
             >
               <option value=''>Select Unit</option>
               {UNITS.map((unit) => (
@@ -400,25 +424,30 @@ export default function CreateRecipe() {
           </div>
         ))}
 
-        <button type="button" onClick={addIngredientRow}>
+        <button
+          type="button"
+          className="add-ingredient-btn"
+          onClick={addIngredientRow}
+        >
           Add Ingredient
         </button>
 
-        <br />
+        <br /><br />
+
         <button type="submit">Submit Recipe</button>
+
+        {error && <p className="error-message">{error}</p>}
       </form>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-
       {showModal && (
-        <Modal 
-        isOpen={showModal}
-        message="Recipe submitted successfully!"
-        onClose={() => {
-          setShowModal(false)
-          navigate("/user-recipe")
-        }}>
-        </Modal>
+        <Modal
+          isOpen={showModal}
+          message="Recipe submitted successfully!"
+          onClose={() => {
+            setShowModal(false);
+            navigate("/user-recipe");
+          }}
+        />
       )}
     </div>
   );
