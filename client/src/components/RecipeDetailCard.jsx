@@ -102,15 +102,18 @@ export default function RecipeDetailCard({ recipe }) {
             )}
 
             {isSaved ? (
-              <Link
-                to="/favourites"
-                className="save-btn saved"
-                // title="View favourite recipes"
-              >
+              <Link to="/favourites" className="save-btn saved">
                 Saved to Favourites
               </Link>
             ) : (
-              <button className="save-btn" onClick={handleSave}>
+              <button
+                className={`save-btn ${!user ? "disabled-btn" : ""}`}
+                onClick={handleSave}
+                disabled={!user}
+                title={
+                  !user ? "Log in to save this recipe" : "Save this recipe"
+                }
+              >
                 Save
               </button>
             )}
