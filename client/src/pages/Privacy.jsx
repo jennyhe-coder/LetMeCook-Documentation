@@ -4,16 +4,6 @@ import "../privacy.css";     // page-specific styles
 
 const Privacy = () => (
   <>
-    {/* Header / Navigation */}
-    <header>
-      <nav className="layout-wrapper main-nav">
-        <a href="/about">About Us</a>
-        <a href="/privacy" className="active">Privacy Policy</a>
-        <a href="/terms">Terms & Conditions</a>
-        <a href="/contact">Contact</a>
-      </nav>
-    </header>
-
     {/* Main Content */}
     <main>
       <section className="layout-wrapper privacy-container">
