@@ -3,9 +3,9 @@ import { useAuth } from '../context/AuthProvider';
 import { supabase } from '../utils/supabaseClient';
 import Modal from '../components/Modal';
 import { useNavigate, useParams } from 'react-router-dom';
-import { debounce } from 'lodash';
+import { debounce, set } from 'lodash';
 import Select from 'react-select';
-import './EditRecipe.css'; 
+import './RecipeForm.css';
 
 
 const UNITS = [
@@ -19,6 +19,7 @@ export default function EditRecipe() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const { id: recipeId } = useParams();
+  const [formError, setFormError] = useState(null);
 
   const [form, setForm] = useState({
     title: '',
@@ -38,7 +39,9 @@ export default function EditRecipe() {
   const [ingredientSuggestions, setIngredientSuggestions] = useState([]);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
-
+  const [modalMessage, setModalMessage] = useState('');
+  const [shouldRedirect, setShouldRedirect] = useState(false);
+  const [modalType, setModalType] = useState(null);
   const [dietaryOpt, setDietaryOpt] = useState([]);
   const [cuisineOpt, setCuisineOpt] = useState([]);
   const [categoryOpt, setCategoryOpt] = useState([]);
@@ -209,6 +212,10 @@ export default function EditRecipe() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!hasSomeIngredient()) {
+      setError("Please add at least one ingredient.");
+      return;
+    }
     const { error: recipeError } = await supabase
       .from("recipe")
       .update({
@@ -296,70 +303,73 @@ export default function EditRecipe() {
       );
     }
 
+    setModalMessage("Recipe updated successfully!");
     setShowModal(true);
+    setModalType("success");
+    setShouldRedirect(true);
   };
 
   const removeIngredientRow = (index) => {
     setRecipeIngredients((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const hasSomeIngredient = () => {
+    return recipeIngredients.some(ri => ri.name && ri.quantity && ri.unit);
+  }
+
+  const confirmDelete = () => {
+    setModalType("confirm-delete");
+    setModalMessage("Are you sure you want to delete this recipe?");
+    setShowModal(true);
+  };
+
+  const handleDelete = async () => {
+
+    const { error } = await supabase
+      .from("recipe")
+      .delete()
+      .eq("id", recipeId);
+
+    if (error) {
+      setError("Delete recipe error: " + error.message);
+      return;
+    }
+
+    setModalMessage("Recipe deleted successfully.");
+    setModalType("success");
+    setShowModal(true);
+    setShouldRedirect(true);
+  };
+
   return (
-    <div className="edit-recipe-container">
+    <div className="create-recipe-container">
       <h2>Edit Recipe</h2>
       <form onSubmit={handleSubmit}>
-        <input
+        <div className='form-group'>
+          <input
           type="file"
           accept="image/*"
           ref={fileInputRef}
           onChange={handleImgUpload}
-        />
-        {form.image_url && (
-          <img src={form.image_url} alt="food-image" />
-        )}
+          />
+          {form.image_url && (
+            <img src={form.image_url} alt="food-image" />
+          )}
+        </div>
+        
+        <div className='form-group'>
+          <h4>Title</h4>
+          <input
+            type="text"
+            name="title"
+            value={form.title}
+            onChange={handleChange}
+            placeholder="Title"
+            required
+          />
+        </div>
 
-        <h4>Title</h4>
-        <input
-          type="text"
-          name="title"
-          value={form.title}
-          onChange={handleChange}
-          placeholder="Title"
-          required
-        />
-
-        <h4>Dietary Preference</h4>
-        <Select
-          isMulti
-          value={dietaryPref}
-          options={dietaryOpt.map((opt) => ({
-            value: opt.id,
-            label: opt.name
-          }))}
-          onChange={setDietaryPref}
-        />
-
-        <h4>Cuisines</h4>
-        <Select
-          isMulti
-          value={cuisine}
-          options={cuisineOpt.map((opt) => ({
-            value: opt.id,
-            label: opt.name
-          }))}
-          onChange={setCuisine}
-        />
-
-        <h4>Categories</h4>
-        <Select
-          isMulti
-          value={categories}
-          options={categoryOpt.map((opt) => ({
-            value: opt.id,
-            label: opt.name
-          }))}
-          onChange={setCategories}
-        />
-
+       <div className='form-group'>
         <h4>Description</h4>
         <textarea
           name="description"
@@ -367,7 +377,57 @@ export default function EditRecipe() {
           onChange={handleChange}
           placeholder="Description"
         />
+       </div>
+        
+        <div className='form-group'>
+          <h4>Dietary Preference</h4>
+          <Select
+            isMulti
+            value={dietaryPref}
+            options={dietaryOpt.map((opt) => ({
+              value: opt.id,
+              label: opt.name
+            }))}
+            onChange={setDietaryPref}
+          />
+        </div>
+        <div className='form-group'>
+          <h4>Cuisines</h4>
+          <Select
+            isMulti
+            value={cuisine}
+            options={cuisineOpt.map((opt) => ({
+              value: opt.id,
+              label: opt.name
+            }))}
+            onChange={setCuisine}
+          />
+        </div>
 
+        <div className='form-group'>
+          <h4>Categories</h4>
+          <Select
+            isMulti
+            value={categories}
+            options={categoryOpt.map((opt) => ({
+            value: opt.id,
+            label: opt.name
+          }))}
+          onChange={setCategories}
+        />
+        </div>
+        <div className='form-group'>
+          <h4>Direction</h4>
+          <textarea
+            name="directions"
+            value={form.directions}
+            onChange={handleChange}
+            placeholder="Directions"
+            type="text"
+            required
+          />
+        </div>
+        <div className='form-group'>
         <h4>Servings</h4>
         <input
           type="number"
@@ -377,7 +437,8 @@ export default function EditRecipe() {
           placeholder="Servings"
           min={1}
         />
-
+        </div>
+        <div className='form-group'>
         <h4>Cooking Time</h4>
         <input
           type="number"
@@ -387,15 +448,20 @@ export default function EditRecipe() {
           placeholder="Time (min)"
           min={1}
         />
-
+        </div>
+        <div className='form-group'>
         <h4>Direction</h4>
         <textarea
           name="directions"
           value={form.directions}
           onChange={handleChange}
           placeholder="Directions"
+          type='text'
+          required
         />
-
+        </div>
+        
+        <div className='form-group'>
         <label>
           <input
             type="checkbox"
@@ -405,6 +471,7 @@ export default function EditRecipe() {
           />
           Make this recipe public
         </label>
+        </div>
 
         <h3>Ingredients</h3>
         {recipeIngredients.map((ri, index) => (
@@ -448,25 +515,28 @@ export default function EditRecipe() {
 
             <button
               type="button"
+              className="delete-ingredient-btn"
               onClick={() => removeIngredientRow(index)}
-              className="delete-btn"
             >
               Delete
             </button>
           </div>
         ))}
-
         <button
           type="button"
           onClick={addIngredientRow}
-          className="update-btn"
+          className="add-ingredient-btn"
         >
           Add Ingredient
         </button>
 
         <br /><br />
-        <button type="submit" className="update-btn">
+        <button type="submit" className="btn btn-success">
           Update Recipe
+        </button>
+
+        <button type="button" className="edit-delete-recipe-btn" onClick={confirmDelete}>
+          Delete Recipe
         </button>
 
         {error && <p className="error-message">{error}</p>}
@@ -475,10 +545,16 @@ export default function EditRecipe() {
       {showModal && (
         <Modal
           isOpen={showModal}
-          message="Recipe updated successfully!"
+          message={modalMessage}
+          showConfirmButtons={modalType === "confirm-delete"}
+          onConfirm={modalType === "confirm-delete" ? handleDelete : undefined}
           onClose={() => {
             setShowModal(false);
-            navigate("/user-recipe");
+            if (modalType === 'success' && shouldRedirect) {
+              navigate("/user-recipe");
+            }
+            setShouldRedirect(false);
+            setModalType(null);
           }}
         />
       )}

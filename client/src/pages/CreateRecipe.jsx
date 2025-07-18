@@ -5,7 +5,7 @@ import Modal from '../components/Modal';
 import { useNavigate } from 'react-router-dom';
 import { debounce } from 'lodash';
 import Select from 'react-select';
-import '../pages/CreateRecipe.css';
+import './RecipeForm.css';
 
 const UNITS = [
   'teaspoon', 'cup', 'ounce', 'pound', 'pinch',
@@ -17,7 +17,6 @@ export default function CreateRecipe() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
-
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -129,6 +128,12 @@ export default function CreateRecipe() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+      
+    if (!hasSomeIngredient()) {
+      setError("Please add at least one ingredient.");
+      return;
+    }
+
     const { data: recipeData, error: recipeError } = await supabase
       .from("recipe")
       .insert({
@@ -242,6 +247,10 @@ export default function CreateRecipe() {
     setShowModal(true);
   };
 
+  const hasSomeIngredient = () => {
+    return recipeIngredients.some(ri => ri.name && ri.quantity && ri.unit);
+  }
+
   return (
     <div className="create-recipe-container">
       <h2>Create a Recipe</h2>
@@ -289,7 +298,7 @@ export default function CreateRecipe() {
 
         <div className="form-group">
           <label>Directions</label>
-          <textarea name="directions" value={form.directions} onChange={handleChange} />
+          <textarea name="directions" value={form.directions} onChange={handleChange} type='text' required/>
         </div>
 
         <div className="checkbox-group">

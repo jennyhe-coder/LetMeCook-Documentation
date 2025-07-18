@@ -141,3 +141,17 @@ button[type="submit"]:hover {
   font-weight: 600;
   margin-top: 20px;
 }
+
+.edit-delete-recipe-btn {
+  background: #fa5252;
+  color: white;
+  padding: 12px 28px;
+  margin-left: 405px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background 0.3s ease;
+}
