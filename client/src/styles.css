@@ -1694,13 +1694,13 @@ p {
 .height-padding {
   display: flex;
   flex-direction: column;
-  min-height: 35vh;
+  min-height: 26vh;
 }
 
 .height-padding-profile {
   display: flex;
   flex-direction: column;
-  min-height: 60px;
+  min-height: 156px;
 }
 
 .height-padding-2 {
