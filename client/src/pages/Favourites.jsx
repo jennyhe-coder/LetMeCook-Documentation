@@ -103,7 +103,12 @@ export default function Favourites() {
         const sorted = recipeData.sort(
           (a, b) => favRecipeIds.indexOf(a.id) - favRecipeIds.indexOf(b.id)
         );
-        setFavRecipes(sorted);
+        setFavRecipes(
+          sorted.map((r) => ({
+            ...r,
+            cookingTime: r.time,
+          }))
+        );
         setTotalElements(sorted.length);
         setTotalPages(Math.ceil(sorted.length / RESULTS_PER_PAGE));
       }

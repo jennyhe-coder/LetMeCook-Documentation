@@ -45,7 +45,12 @@ export default function UserRecipe() {
       if (recipeErr) {
         console.log("Error fetching recipes: ", recipeErr);
       } else {
-        setUserRecipes(recipeData);
+        setUserRecipes(
+          recipeData.map((r) => ({
+            ...r,
+            cookingTime: r.time,
+          }))
+        );
         setTotalElements(recipeData.length);
       }
       setLoading(false);
