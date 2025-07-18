@@ -1,12 +1,20 @@
 package com.server.letMeCook.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.server.letMeCook.dto.recipe.RecipeSearchFields;
-import io.github.cdimascio.dotenv.Dotenv;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.http.*;
-import java.util.*;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.server.letMeCook.dto.recipe.RecipeSearchFields;
+
+import io.github.cdimascio.dotenv.Dotenv;
 
 @Service
 public class OpenAIService {
@@ -65,25 +73,47 @@ public class OpenAIService {
         String instruction = String.format("""
     Based on the following user prompt, extract and return a valid JSON object with the following fields:
     
-    - keyword: A short and clean phrase that represents the **dish name only**.
-      - ⚠️ Remove any generic or instructional phrases such as: "I want", "Let me", "Give me", "Show me", "Find", "Get me", "Can you", "How to make", etc.
-      - ⚠️ Also remove any words already used in cuisines, ingredients, categories, or dietary preferences.
-      - ✅ Example:
-        Prompt: "I want a spicy Vietnamese soup with noodles."
-        Keyword: "Noodle Soup"
+    - keyword: A short and clean phrase for searching dish titles or description. Remove stopwords and keep only meaningful words.
+      - ⚠️ Remove generic phrases: "I want", "Let me", "Give me", "Show me", "Find", "Get me", "Can you", "How to make", etc.
+      - ⚠️ Remove stopwords: "the", "a", "an", "with", "for", "and", "or", "but", etc.
+      - ⚠️ Remove generic food words: "dishes", "meal", "food", "recipe", "cooking", etc.
+      - ⚠️ Remove words already used in cuisines, ingredients, categories, or dietary preferences.
+      - ⚠️ Can be null/empty if no meaningful words remain after filtering.
+      - ✅ Examples:
+        "I want a spicy Vietnamese soup with noodles" → keyword: "spicy soup"
+        "Give me dishes with avocado without chicken" → keyword: null
+        "Show me Italian pasta recipes" → keyword: "pasta"
+        "Find me some food with tomatoes" → keyword: null
     
     - cuisines: Include only if explicitly mentioned in the prompt. Choose only from the following list: [%s]
 
     - ingredients: Extract up to 5 main ingredients that are clearly stated or strongly implied.
 
-    - exclude: Include only if clearly mentioned in the prompt.
+    - allergies: Include specific INGREDIENT NAMES that should be avoided. This includes:
+      - Ingredient names the user is allergic to
+      - Ingredients to exclude/avoid (words like "without", "no", "avoid", "exclude")
+      - ✅ Examples: "allergic to peanuts" → allergies: ["peanuts"], "without chicken" → allergies: ["chicken"], "no dairy" → allergies: ["dairy"]
+      - ❌ Do NOT include dietary preferences like "gluten-free", "vegan", "dairy-free" here
 
     - categories: Include only if mentioned. Choose only from the following list: [%s]. Match exact or closely similar names based on the prompt.
 
     - dietaryPreferences: Include only if mentioned. Choose only from the following list: [%s]. Match exact or closely similar names based on the prompt.
 
-    Only include values that are explicitly present in the user prompt.
-    Return only a valid raw JSON object. Do not include any markdown, explanation, or extra text.
+    IMPORTANT RULES:
+    - Only include values that are explicitly present in the user prompt
+    - Use null for fields that are not mentioned
+    - For "allergies" field, include ingredient names to avoid (both allergies and exclusions)
+    - Return only a valid raw JSON object with NO markdown, explanation, or extra text
+    
+    Example response format:
+    {
+      "keyword": null,
+      "cuisines": null,
+      "ingredients": ["avocado"],
+      "allergies": ["chicken"],
+      "categories": null,
+      "dietaryPreferences": null
+    }
 
     Prompt: %s
     """,
@@ -92,12 +122,6 @@ public class OpenAIService {
                 String.join(", ", dietNames),
                 prompt.toLowerCase()
         );
-
-
-
-
-
-
 
         Map<String, Object> requestBody = Map.of(
                 "model", "gpt-4.1",
