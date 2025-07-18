@@ -1,26 +1,54 @@
 package com.server.letMeCook.service;
 
-import com.server.letMeCook.dto.recipe.RecipeCardDTO;
-import com.server.letMeCook.dto.recipe.RecipeDTO;
-import com.server.letMeCook.mapper.RecipeMapper;
-import com.server.letMeCook.model.*;
-import com.server.letMeCook.repository.RecipeBrowsingHistoryRepository;
-import com.server.letMeCook.repository.RecipeFavouritesRepository;
-import com.server.letMeCook.repository.RecipeRepository;
-import com.server.letMeCook.repository.UserAllergyRepository;
-import jakarta.persistence.*;
-import jakarta.persistence.criteria.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.*;
-import org.springframework.http.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import com.server.letMeCook.dto.recipe.RecipeCardDTO;
+import com.server.letMeCook.dto.recipe.RecipeDTO;
+import com.server.letMeCook.mapper.RecipeMapper;
+import com.server.letMeCook.model.Category;
+import com.server.letMeCook.model.Cuisine;
+import com.server.letMeCook.model.DietaryPreference;
+import com.server.letMeCook.model.Ingredient;
+import com.server.letMeCook.model.Recipe;
+import com.server.letMeCook.model.RecipeIngredient;
+import com.server.letMeCook.model.User;
+import com.server.letMeCook.repository.RecipeBrowsingHistoryRepository;
+import com.server.letMeCook.repository.RecipeFavouritesRepository;
+import com.server.letMeCook.repository.RecipeRepository;
+import com.server.letMeCook.repository.UserAllergyRepository;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 
 @Service
 public class RecipeService {
@@ -84,7 +112,6 @@ public class RecipeService {
                 .collect(Collectors.toList());
     }
 
-
     @Transactional(readOnly = true)
     public Page<RecipeCardDTO> advancedSearch(
             String keyword,
@@ -100,68 +127,127 @@ public class RecipeService {
         CriteriaQuery<Recipe> query = cb.createQuery(Recipe.class);
         Root<Recipe> root = query.from(Recipe.class);
 
-        Join<Recipe, User> authorJoin = null;
-        if (keyword != null && !keyword.isBlank()) {
-            authorJoin = root.join("author", JoinType.LEFT);
-        }
-
-        Join<Recipe, Cuisine> cuisineJoin = root.join("cuisines", JoinType.LEFT);
-        Join<Recipe, Category> categoryJoin = root.join("categories", JoinType.LEFT);
-        Join<Recipe, RecipeIngredient> riJoin = root.join("recipeIngredients", JoinType.LEFT);
-        Join<RecipeIngredient, Ingredient> ingredientJoin = riJoin.join("ingredient", JoinType.LEFT);
-        Join<Recipe, DietaryPreference> dpJoin = root.join("dietaryPreferences", JoinType.LEFT);
-
         List<Predicate> predicates = new ArrayList<>();
         List<Predicate> havingPredicates = new ArrayList<>();
         boolean hasGroupBy = false;
 
-        if (keyword != null && !keyword.isBlank()) {
-            String pattern = "%" + keyword.toLowerCase() + "%";
-            Predicate titleLike = cb.like(cb.lower(root.get("title")), pattern);
-            Predicate authorLike = cb.or(
-                    cb.like(cb.lower(authorJoin.get("firstName")), pattern),
-                    cb.like(cb.lower(authorJoin.get("lastName")), pattern)
-            );
-            Predicate descriptionLike = cb.like(cb.lower(root.get("description")), pattern);
-            predicates.add(cb.or(titleLike, authorLike, descriptionLike));
-        }
-
+        // Base predicate for public recipes
         predicates.add(cb.equal(root.get("isPublic"), isPublic));
 
-        if (cuisines != null && !cuisines.isEmpty()) {
-            predicates.add(cb.lower(cuisineJoin.get("name")).in(cuisines.stream().map(String::toLowerCase).toList()));
-            havingPredicates.add(cb.equal(cb.countDistinct(cuisineJoin.get("name")), (long) cuisines.size()));
-            hasGroupBy = true;
+        // 1. KEYWORD SEARCH - Count elements, require all keywords to appear at least once
+        if (keyword != null && !keyword.isBlank()) {
+            String[] keywords = keyword.trim().toLowerCase().split("\\s+");
+
+            Join<Recipe, User> authorJoin = root.join("author", JoinType.LEFT);
+
+            // Create subquery to count keyword occurrences
+            Subquery<Long> keywordCountSubquery = query.subquery(Long.class);
+            Root<Recipe> keywordRoot = keywordCountSubquery.from(Recipe.class);
+            Join<Recipe, User> keywordAuthorJoin = keywordRoot.join("author", JoinType.LEFT);
+
+            // Create CASE WHEN for each keyword
+            List<Expression<Long>> keywordExpressions = new ArrayList<>();
+            for (String kw : keywords) {
+                String pattern = "%" + kw + "%";
+
+                Predicate titleMatch = cb.like(cb.lower(keywordRoot.get("title")), pattern);
+                Predicate descriptionMatch = cb.like(cb.lower(keywordRoot.get("description")), pattern);
+                Predicate authorFirstNameMatch = cb.like(cb.lower(keywordAuthorJoin.get("firstName")), pattern);
+                Predicate authorLastNameMatch = cb.like(cb.lower(keywordAuthorJoin.get("lastName")), pattern);
+
+                Predicate anyMatch = cb.or(titleMatch, descriptionMatch, authorFirstNameMatch, authorLastNameMatch);
+
+                Expression<Long> keywordCount = cb.<Long>selectCase()
+                        .when(anyMatch, 1L)
+                        .otherwise(0L);
+                keywordExpressions.add(keywordCount);
+            }
+
+            // Total number of keywords found
+            Expression<Long> totalKeywordCount = keywordExpressions.stream()
+                    .reduce(cb.literal(0L), (acc, expr) -> cb.sum(acc, expr));
+
+            keywordCountSubquery.select(totalKeywordCount);
+            keywordCountSubquery.where(cb.equal(keywordRoot.get("id"), root.get("id")));
+
+            // Require all keywords to appear (total >= number of keywords)
+            predicates.add(cb.greaterThanOrEqualTo(keywordCountSubquery, (long) keywords.length));
         }
 
-        if (ingredients != null && !ingredients.isEmpty()) {
-            predicates.add(cb.lower(ingredientJoin.get("name")).in(ingredients.stream().map(String::toLowerCase).toList()));
-            havingPredicates.add(cb.greaterThanOrEqualTo(cb.countDistinct(ingredientJoin.get("name")), 1L));
-            hasGroupBy = true;
-        }
-
+        // 2. CATEGORIES - Use OR operator
         if (categories != null && !categories.isEmpty()) {
-            predicates.add(cb.lower(categoryJoin.get("name")).in(categories.stream().map(String::toLowerCase).toList()));
-            havingPredicates.add(cb.equal(cb.countDistinct(categoryJoin.get("name")), (long) categories.size()));
+            Join<Recipe, Category> categoryJoin = root.join("categories", JoinType.LEFT);
+            predicates.add(cb.lower(categoryJoin.get("name")).in(
+                    categories.stream().map(String::toLowerCase).collect(Collectors.toList())
+            ));
             hasGroupBy = true;
         }
 
+        // 3. CUISINES - Use OR operator
+        if (cuisines != null && !cuisines.isEmpty()) {
+            Join<Recipe, Cuisine> cuisineJoin = root.join("cuisines", JoinType.LEFT);
+            predicates.add(cb.lower(cuisineJoin.get("name")).in(
+                    cuisines.stream().map(String::toLowerCase).collect(Collectors.toList())
+            ));
+            hasGroupBy = true;
+        }
+
+        // 4. INGREDIENTS - Require ALL ingredients to match
+        if (ingredients != null && !ingredients.isEmpty()) {
+            Join<Recipe, RecipeIngredient> riJoin = root.join("recipeIngredients", JoinType.LEFT);
+            Join<RecipeIngredient, Ingredient> ingredientJoin = riJoin.join("ingredient", JoinType.LEFT);
+
+            // Create OR condition for all ingredients with LIKE pattern matching
+            List<Predicate> ingredientPredicates = new ArrayList<>();
+            for (String ingredient : ingredients) {
+                String pattern = "%" + ingredient.toLowerCase() + "%";
+                ingredientPredicates.add(cb.like(cb.lower(ingredientJoin.get("name")), pattern));
+            }
+            predicates.add(cb.or(ingredientPredicates.toArray(new Predicate[0])));
+
+            // Count distinct ingredients matched - REQUIRE ALL
+            Expression<Long> distinctIngredientMatches = cb.countDistinct(
+                    cb.<String>selectCase()
+                            .when(cb.or(ingredientPredicates.toArray(new Predicate[0])), ingredientJoin.get("name"))
+                            .otherwise(cb.nullLiteral(String.class))
+            );
+
+            // REQUIRE: number of distinct ingredient matches >= number of ingredients in input
+            havingPredicates.add(cb.greaterThanOrEqualTo(distinctIngredientMatches, (long) ingredients.size()));
+            hasGroupBy = true;
+        }
+
+        // 5. DIETARY PREFERENCES - Require all dietary preferences to be present
         if (dietaryPreferences != null && !dietaryPreferences.isEmpty()) {
-            predicates.add(cb.lower(dpJoin.get("name")).in(dietaryPreferences.stream().map(String::toLowerCase).toList()));
+            Join<Recipe, DietaryPreference> dpJoin = root.join("dietaryPreferences", JoinType.LEFT);
+            predicates.add(cb.lower(dpJoin.get("name")).in(
+                    dietaryPreferences.stream().map(String::toLowerCase).collect(Collectors.toList())
+            ));
             havingPredicates.add(cb.equal(cb.countDistinct(dpJoin.get("name")), (long) dietaryPreferences.size()));
             hasGroupBy = true;
         }
 
+        // 6. ALLERGIES - Exclude recipes containing ANY allergen (original logic - OR)
         if (allergies != null && !allergies.isEmpty()) {
-            Expression<Long> allergenCount = cb.sum(
-                    cb.<Long>selectCase()
-                            .when(cb.lower(ingredientJoin.get("name")).in(allergies.stream().map(String::toLowerCase).toList()), 1L)
-                            .otherwise(0L)
-            );
-            havingPredicates.add(cb.lessThanOrEqualTo(allergenCount, (long) Math.floor(allergies.size() / 2.0)));
-            hasGroupBy = true;
+            Subquery<UUID> allergySubquery = query.subquery(UUID.class);
+            Root<Recipe> allergyRoot = allergySubquery.from(Recipe.class);
+            Join<Recipe, RecipeIngredient> allergyRIJoin = allergyRoot.join("recipeIngredients", JoinType.LEFT);
+            Join<RecipeIngredient, Ingredient> allergyIngredientJoin = allergyRIJoin.join("ingredient", JoinType.LEFT);
+
+            // Create OR condition for all allergies with LIKE pattern matching
+            List<Predicate> allergyPredicates = new ArrayList<>();
+            for (String allergy : allergies) {
+                String pattern = "%" + allergy.toLowerCase() + "%";
+                allergyPredicates.add(cb.like(cb.lower(allergyIngredientJoin.get("name")), pattern));
+            }
+
+            allergySubquery.select(allergyRoot.get("id"));
+            allergySubquery.where(cb.or(allergyPredicates.toArray(new Predicate[0])));
+
+            predicates.add(cb.not(root.get("id").in(allergySubquery)));
         }
 
+        // Build query
         query.select(root).where(predicates.toArray(new Predicate[0])).distinct(true);
 
         if (hasGroupBy) {
@@ -171,6 +257,7 @@ public class RecipeService {
             }
         }
 
+        // Sorting
         Map<String, String> sortFieldMap = Map.of(
                 "title", "title",
                 "createdat", "createdAt",
@@ -191,6 +278,7 @@ public class RecipeService {
             query.orderBy(orders);
         }
 
+        // Execute query with pagination
         TypedQuery<Recipe> typedQuery = entityManager.createQuery(query);
         typedQuery.setFirstResult((int) pageable.getOffset());
         typedQuery.setMaxResults(pageable.getPageSize());
@@ -200,288 +288,150 @@ public class RecipeService {
                 .map(RecipeMapper::toCardDTO)
                 .collect(Collectors.toList());
 
-        // Count logic simplified for keyword-only search
-        if (
-                (cuisines == null || cuisines.isEmpty()) &&
-                        (ingredients == null || ingredients.isEmpty()) &&
-                        (categories == null || categories.isEmpty()) &&
-                        (dietaryPreferences == null || dietaryPreferences.isEmpty()) &&
-                        (allergies == null || allergies.isEmpty())
-        ) {
-            CriteriaQuery<Long> simpleCount = cb.createQuery(Long.class);
-            Root<Recipe> simpleCountRoot = simpleCount.from(Recipe.class);
-            Join<Recipe, User> simpleAuthorJoin = null;
-            if (keyword != null && !keyword.isBlank()) {
-                simpleAuthorJoin = simpleCountRoot.join("author", JoinType.LEFT);
-            }
-            List<Predicate> countPreds = new ArrayList<>();
-            if (keyword != null && !keyword.isBlank()) {
-                String pattern = "%" + keyword.toLowerCase() + "%";
-                Predicate titleLike = cb.like(cb.lower(simpleCountRoot.get("title")), pattern);
-                Predicate authorLike = cb.or(
-                        cb.like(cb.lower(simpleAuthorJoin.get("firstName")), pattern),
-                        cb.like(cb.lower(simpleAuthorJoin.get("lastName")), pattern)
-                );
-                Predicate descriptionLike = cb.like(cb.lower(simpleCountRoot.get("description")), pattern);
-                countPreds.add(cb.or(titleLike, authorLike, descriptionLike));
-            }
-            countPreds.add(cb.equal(simpleCountRoot.get("isPublic"), isPublic));
-            simpleCount.select(cb.countDistinct(simpleCountRoot));
-            simpleCount.where(countPreds.toArray(new Predicate[0]));
-            long total = entityManager.createQuery(simpleCount).getSingleResult();
-            return new PageImpl<>(results, pageable, total);
-        }
+        // Count total results
+        long total = countAdvancedSearchResults(keyword, cuisines, ingredients, allergies, categories, dietaryPreferences, isPublic);
 
-        // Else fallback to group/having count
-        CriteriaQuery<Recipe> countBaseQuery = cb.createQuery(Recipe.class);
-        Root<Recipe> countRoot = countBaseQuery.from(Recipe.class);
-        Join<Recipe, User> countAuthorJoin = null;
-        if (keyword != null && !keyword.isBlank()) {
-            countAuthorJoin = countRoot.join("author", JoinType.LEFT);
-        }
-        Join<Recipe, Cuisine> countCuisineJoin = countRoot.join("cuisines", JoinType.LEFT);
-        Join<Recipe, Category> countCategoryJoin = countRoot.join("categories", JoinType.LEFT);
-        Join<Recipe, RecipeIngredient> countRIJoin = countRoot.join("recipeIngredients", JoinType.LEFT);
-        Join<RecipeIngredient, Ingredient> countIngredientJoin = countRIJoin.join("ingredient", JoinType.LEFT);
-        Join<Recipe, DietaryPreference> countDPJoin = countRoot.join("dietaryPreferences", JoinType.LEFT);
-
-        List<Predicate> countPredicates = new ArrayList<>();
-        List<Predicate> countHavingPredicates = new ArrayList<>();
-        boolean countHasGroupBy = false;
-
-        if (keyword != null && !keyword.isBlank()) {
-            String pattern = "%" + keyword.toLowerCase() + "%";
-            Predicate titleLike = cb.like(cb.lower(countRoot.get("title")), pattern);
-            Predicate authorLike = cb.or(
-                    cb.like(cb.lower(countAuthorJoin.get("firstName")), pattern),
-                    cb.like(cb.lower(countAuthorJoin.get("lastName")), pattern)
-            );
-            Predicate descriptionLike = cb.like(cb.lower(countRoot.get("description")), pattern);
-            countPredicates.add(cb.or(titleLike, authorLike, descriptionLike));
-        }
-
-        countPredicates.add(cb.equal(countRoot.get("isPublic"), isPublic));
-
-        if (cuisines != null && !cuisines.isEmpty()) {
-            countPredicates.add(cb.lower(countCuisineJoin.get("name")).in(cuisines.stream().map(String::toLowerCase).toList()));
-            countHavingPredicates.add(cb.equal(cb.countDistinct(countCuisineJoin.get("name")), (long) cuisines.size()));
-            countHasGroupBy = true;
-        }
-
-        if (ingredients != null && !ingredients.isEmpty()) {
-            countPredicates.add(cb.lower(countIngredientJoin.get("name")).in(ingredients.stream().map(String::toLowerCase).toList()));
-            countHavingPredicates.add(cb.greaterThanOrEqualTo(cb.countDistinct(countIngredientJoin.get("name")), 1L));
-            countHasGroupBy = true;
-        }
-
-        if (categories != null && !categories.isEmpty()) {
-            countPredicates.add(cb.lower(countCategoryJoin.get("name")).in(categories.stream().map(String::toLowerCase).toList()));
-            countHavingPredicates.add(cb.equal(cb.countDistinct(countCategoryJoin.get("name")), (long) categories.size()));
-            countHasGroupBy = true;
-        }
-
-        if (dietaryPreferences != null && !dietaryPreferences.isEmpty()) {
-            countPredicates.add(cb.lower(countDPJoin.get("name")).in(dietaryPreferences.stream().map(String::toLowerCase).toList()));
-            countHavingPredicates.add(cb.equal(cb.countDistinct(countDPJoin.get("name")), (long) dietaryPreferences.size()));
-            countHasGroupBy = true;
-        }
-
-        if (allergies != null && !allergies.isEmpty()) {
-            Expression<Long> allergenCount = cb.sum(
-                    cb.<Long>selectCase()
-                            .when(cb.lower(countIngredientJoin.get("name")).in(allergies.stream().map(String::toLowerCase).toList()), 1L)
-                            .otherwise(0L)
-            );
-            countHavingPredicates.add(cb.lessThanOrEqualTo(allergenCount, (long) Math.floor(allergies.size() / 2.0)));
-            countHasGroupBy = true;
-        }
-
-        countBaseQuery.select(countRoot).where(countPredicates.toArray(new Predicate[0])).distinct(true);
-
-        if (countHasGroupBy) {
-            countBaseQuery.groupBy(countRoot.get("id"));
-            if (!countHavingPredicates.isEmpty()) {
-                countBaseQuery.having(cb.and(countHavingPredicates.toArray(new Predicate[0])));
-            }
-            long total = entityManager.createQuery(countBaseQuery).getResultList().size();
-            return new PageImpl<>(results, pageable, total);
-        } else {
-            CriteriaQuery<Long> simpleCount = cb.createQuery(Long.class);
-            Root<Recipe> simpleCountRoot = simpleCount.from(Recipe.class);
-            simpleCount.select(cb.countDistinct(simpleCountRoot));
-            simpleCount.where(countPredicates.toArray(new Predicate[0]));
-            long total = entityManager.createQuery(simpleCount).getSingleResult();
-            return new PageImpl<>(results, pageable, total);
-        }
+        return new PageImpl<>(results, pageable, total);
     }
 
-
-
-    public String buildAdvancedSearchSQL(
+    private long countAdvancedSearchResults(
+            String keyword,
+            Set<String> cuisines,
             Set<String> ingredients,
             Set<String> allergies,
-            Set<String> cuisines,
             Set<String> categories,
             Set<String> dietaryPreferences,
-            String keyword,
-            boolean isPublic
-    ) {
-        List<String> wheres = new ArrayList<>();
-        List<String> subQueries = new ArrayList<>();
+            boolean isPublic) {
 
-        // 1. Ingredients
-        if (ingredients != null && !ingredients.isEmpty()) {
-            List<String> likeConds = ingredients.stream()
-                    .map(s -> "LOWER(i.name) LIKE '%" + s.toLowerCase().replace("'", "''") + "%'")
-                    .collect(Collectors.toList());
-            List<String> havingConds = ingredients.stream()
-                    .map(s -> "SUM(CASE WHEN LOWER(i.name) LIKE '%" + s.toLowerCase().replace("'", "''") + "%' THEN 1 ELSE 0 END) > 0")
-                    .collect(Collectors.toList());
-            subQueries.add(
-                    "SELECT ri.recipe_id FROM recipe_ingredients ri " +
-                            "JOIN ingredients i ON ri.ingredient_id = i.id " +
-                            "WHERE " + String.join(" OR ", likeConds) + " " +
-                            "GROUP BY ri.recipe_id HAVING " + String.join(" AND ", havingConds)
-            );
-        }
-        // 2. Cuisine
-        if (cuisines != null && !cuisines.isEmpty()) {
-            String cond = cuisines.stream()
-                    .map(s -> "'" + s.toLowerCase().replace("'", "''") + "'")
-                    .collect(Collectors.joining(","));
-            subQueries.add(
-                    "SELECT rc.recipe_id FROM recipe_cuisines rc " +
-                            "JOIN cuisines cu ON rc.cuisine_id = cu.id " +
-                            "WHERE LOWER(cu.name) IN (" + cond + ")"
-            );
-        }
-        // 3. Category
-        if (categories != null && !categories.isEmpty()) {
-            String cond = categories.stream()
-                    .map(s -> "'" + s.toLowerCase().replace("'", "''") + "'")
-                    .collect(Collectors.joining(","));
-            subQueries.add(
-                    "SELECT rcat.recipe_id FROM recipe_categories rcat " +
-                            "JOIN categories cat ON rcat.category_id = cat.id " +
-                            "WHERE LOWER(cat.name) IN (" + cond + ")"
-            );
-        }
-        // 4. Dietary
-        if (dietaryPreferences != null && !dietaryPreferences.isEmpty()) {
-            String cond = dietaryPreferences.stream()
-                    .map(s -> "'" + s.toLowerCase().replace("'", "''") + "'")
-                    .collect(Collectors.joining(","));
-            subQueries.add(
-                    "SELECT rdp.recipe_id FROM recipe_dietary_pref rdp " +
-                            "JOIN dietary_pref dp ON rdp.preference_id = dp.id " +
-                            "WHERE LOWER(dp.name) IN (" + cond + ")"
-            );
-        }
-        // 5. Keyword
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<Recipe> root = countQuery.from(Recipe.class);
+
+        List<Predicate> predicates = new ArrayList<>();
+        List<Predicate> havingPredicates = new ArrayList<>();
+        boolean hasGroupBy = false;
+
+        predicates.add(cb.equal(root.get("isPublic"), isPublic));
+
+        // Keyword search logic (same as above)
         if (keyword != null && !keyword.isBlank()) {
             String[] keywords = keyword.trim().toLowerCase().split("\\s+");
+
+            Subquery<Long> keywordCountSubquery = countQuery.subquery(Long.class);
+            Root<Recipe> keywordRoot = keywordCountSubquery.from(Recipe.class);
+            Join<Recipe, User> keywordAuthorJoin = keywordRoot.join("author", JoinType.LEFT);
+
+            List<Expression<Long>> keywordExpressions = new ArrayList<>();
             for (String kw : keywords) {
-                String safeKw = kw.replace("'", "''");
-                subQueries.add(
-                        "SELECT r.id as recipe_id FROM recipe r " +
-                                "LEFT JOIN recipe_ingredients ri ON r.id = ri.recipe_id " +
-                                "LEFT JOIN ingredients i ON ri.ingredient_id = i.id " +
-                                "WHERE LOWER(r.title) LIKE '%" + safeKw + "%' " +
-                                "   OR LOWER(r.description) LIKE '%" + safeKw + "%' " +
-                                "   OR LOWER(i.name) LIKE '%" + safeKw + "%'"
-                );
+                String pattern = "%" + kw + "%";
+
+                Predicate titleMatch = cb.like(cb.lower(keywordRoot.get("title")), pattern);
+                Predicate descriptionMatch = cb.like(cb.lower(keywordRoot.get("description")), pattern);
+                Predicate authorFirstNameMatch = cb.like(cb.lower(keywordAuthorJoin.get("firstName")), pattern);
+                Predicate authorLastNameMatch = cb.like(cb.lower(keywordAuthorJoin.get("lastName")), pattern);
+
+                Predicate anyMatch = cb.or(titleMatch, descriptionMatch, authorFirstNameMatch, authorLastNameMatch);
+
+                Expression<Long> keywordCount = cb.<Long>selectCase()
+                        .when(anyMatch, 1L)
+                        .otherwise(0L);
+                keywordExpressions.add(keywordCount);
             }
+
+            Expression<Long> totalKeywordCount = keywordExpressions.stream()
+                    .reduce(cb.literal(0L), (acc, expr) -> cb.sum(acc, expr));
+
+            keywordCountSubquery.select(totalKeywordCount);
+            keywordCountSubquery.where(cb.equal(keywordRoot.get("id"), root.get("id")));
+
+            predicates.add(cb.greaterThanOrEqualTo(keywordCountSubquery, (long) keywords.length));
         }
 
-        // 6. isPublic
-        if (isPublic) {
-            subQueries.add("SELECT id as recipe_id FROM recipe WHERE is_public = TRUE");
+        // Categories (OR logic)
+        if (categories != null && !categories.isEmpty()) {
+            Join<Recipe, Category> categoryJoin = root.join("categories", JoinType.LEFT);
+            predicates.add(cb.lower(categoryJoin.get("name")).in(
+                    categories.stream().map(String::toLowerCase).collect(Collectors.toList())
+            ));
+            hasGroupBy = true;
         }
 
-        String sql = String.join("\nINTERSECT\n", subQueries);
-
-        if (allergies != null && !allergies.isEmpty()) {
-            List<String> allergyConds = allergies.stream()
-                    .map(a -> "LOWER(i2.name) LIKE '%" + a.toLowerCase().replace("'", "''") + "%'")
-                    .collect(Collectors.toList());
-
-            String notInAllergy = "r.id NOT IN (" +
-                    "SELECT ri2.recipe_id FROM recipe_ingredients ri2 " +
-                    "JOIN ingredients i2 ON ri2.ingredient_id = i2.id " +
-                    "WHERE " + String.join(" OR ", allergyConds) +
-                    ")";
-
-            wheres.add(notInAllergy);
+        // Cuisines (OR logic)
+        if (cuisines != null && !cuisines.isEmpty()) {
+            Join<Recipe, Cuisine> cuisineJoin = root.join("cuisines", JoinType.LEFT);
+            predicates.add(cb.lower(cuisineJoin.get("name")).in(
+                    cuisines.stream().map(String::toLowerCase).collect(Collectors.toList())
+            ));
+            hasGroupBy = true;
         }
 
-        return sql;
-    }
-    @Transactional(readOnly = true)
-    public Page<RecipeCardDTO> advancedSearch_demo(
-            String keyword,
-            Set<String> ingredients,
-            Set<String> allergies,
-            Set<String> cuisines,
-            Set<String> categories,
-            Set<String> dietaryPreferences,
+        // Ingredients (ALL must match - AND logic)
+        if (ingredients != null && !ingredients.isEmpty()) {
+            Join<Recipe, RecipeIngredient> riJoin = root.join("recipeIngredients", JoinType.LEFT);
+            Join<RecipeIngredient, Ingredient> ingredientJoin = riJoin.join("ingredient", JoinType.LEFT);
 
-            boolean isPublic,
-            Pageable pageable
-    ) {
-        // Build INTERSECT SQL
-        String sql = buildAdvancedSearchSQL(
-                ingredients,
-                allergies,
-                cuisines,
-                categories,
-                dietaryPreferences,
-                keyword,
-                isPublic
-        );
+            List<Predicate> ingredientPredicates = new ArrayList<>();
+            for (String ingredient : ingredients) {
+                String pattern = "%" + ingredient.toLowerCase() + "%";
+                ingredientPredicates.add(cb.like(cb.lower(ingredientJoin.get("name")), pattern));
+            }
+            predicates.add(cb.or(ingredientPredicates.toArray(new Predicate[0])));
 
-
-        String orderBy = "ORDER BY r.created_at DESC";
-        if (pageable.getSort().isSorted()) {
-
-            List<String> orders = new ArrayList<>();
-            pageable.getSort().forEach(s ->
-                    orders.add("r." + s.getProperty() + (s.isAscending() ? " ASC" : " DESC"))
+            Expression<Long> distinctIngredientMatches = cb.countDistinct(
+                    cb.<String>selectCase()
+                            .when(cb.or(ingredientPredicates.toArray(new Predicate[0])), ingredientJoin.get("name"))
+                            .otherwise(cb.nullLiteral(String.class))
             );
-            orderBy = "ORDER BY " + String.join(", ", orders);
+
+            havingPredicates.add(cb.greaterThanOrEqualTo(distinctIngredientMatches, (long) ingredients.size()));
+            hasGroupBy = true;
         }
 
-        String pagedSql =
-                "SELECT r.id FROM recipe r WHERE r.id IN (\n" +
-                        sql + "\n)\n" +
-                        orderBy + "\n" +
-                        "LIMIT " + pageable.getPageSize() + " OFFSET " + pageable.getOffset();
+        // Dietary preferences (AND logic)
+        if (dietaryPreferences != null && !dietaryPreferences.isEmpty()) {
+            Join<Recipe, DietaryPreference> dpJoin = root.join("dietaryPreferences", JoinType.LEFT);
+            predicates.add(cb.lower(dpJoin.get("name")).in(
+                    dietaryPreferences.stream().map(String::toLowerCase).collect(Collectors.toList())
+            ));
+            havingPredicates.add(cb.equal(cb.countDistinct(dpJoin.get("name")), (long) dietaryPreferences.size()));
+            hasGroupBy = true;
+        }
 
-        // Query danh sách id
-        Query nativeQuery = entityManager.createNativeQuery(pagedSql);
-        List<?> recipeIds = nativeQuery.getResultList();
-        if (recipeIds.isEmpty()) return Page.empty();
+        // Allergies (exclude recipes with ANY allergens - OR logic)
+        if (allergies != null && !allergies.isEmpty()) {
+            Subquery<UUID> allergySubquery = countQuery.subquery(UUID.class);
+            Root<Recipe> allergyRoot = allergySubquery.from(Recipe.class);
+            Join<Recipe, RecipeIngredient> allergyRIJoin = allergyRoot.join("recipeIngredients", JoinType.LEFT);
+            Join<RecipeIngredient, Ingredient> allergyIngredientJoin = allergyRIJoin.join("ingredient", JoinType.LEFT);
 
-        // Query detail (JPA)
-        List<UUID> idList = recipeIds.stream()
-                .map(id -> (UUID) (id instanceof UUID ? id : UUID.fromString(id.toString())))
-                .collect(Collectors.toList());
-        List<Recipe> recipes = recipeRepository.findAllById(idList);
+            List<Predicate> allergyPredicates = new ArrayList<>();
+            for (String allergy : allergies) {
+                String pattern = "%" + allergy.toLowerCase() + "%";
+                allergyPredicates.add(cb.like(cb.lower(allergyIngredientJoin.get("name")), pattern));
+            }
 
-        // Map sang DTO
-        List<RecipeCardDTO> dtos = recipes.stream()
-                .map(RecipeMapper::toCardDTO)
-                .collect(Collectors.toList());
+            allergySubquery.select(allergyRoot.get("id"));
+            allergySubquery.where(cb.or(allergyPredicates.toArray(new Predicate[0])));
 
+            predicates.add(cb.not(root.get("id").in(allergySubquery)));
+        }
 
-        String countSql = "SELECT COUNT(DISTINCT id) FROM recipe WHERE id IN (\n" + sql + "\n)";
-        Query countQuery = entityManager.createNativeQuery(countSql);
-        long total = ((Number) countQuery.getSingleResult()).longValue();
+        if (hasGroupBy) {
+            countQuery.select(cb.countDistinct(root.get("id")));
+            countQuery.where(predicates.toArray(new Predicate[0]));
+            countQuery.groupBy(root.get("id"));
+            if (!havingPredicates.isEmpty()) {
+                countQuery.having(cb.and(havingPredicates.toArray(new Predicate[0])));
+            }
 
-        return new PageImpl<>(dtos, pageable, total);
+            // For GROUP BY queries, we need to count the results
+            return entityManager.createQuery(countQuery).getResultList().size();
+        } else {
+            countQuery.select(cb.countDistinct(root.get("id")));
+            countQuery.where(predicates.toArray(new Predicate[0]));
+            return entityManager.createQuery(countQuery).getSingleResult();
+        }
     }
-
-
-
 
 
     @Transactional(readOnly = true)
@@ -538,5 +488,4 @@ public class RecipeService {
                 .map(RecipeMapper::toDTO)
                 .toList();
     }
-
 }
