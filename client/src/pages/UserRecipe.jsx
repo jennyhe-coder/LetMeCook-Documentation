@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useAuth } from "../context/AuthProvider";
 import { useNavigate } from "react-router-dom";
+import { FaEdit } from "react-icons/fa";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -24,6 +25,8 @@ export default function UserRecipe() {
   const { user, loading: userLoading } = useAuth();
   const [userRecipes, setUserRecipes] = useState([]);
   const navigate = useNavigate();
+  const [editMode, setEditMode] = useState(false);
+
   useEffect(() => {
     if (userLoading) return;
     if (!user?.id) {
@@ -78,6 +81,26 @@ export default function UserRecipe() {
     }
   }, []);
 
+  const handleRemove = async (recipeId) => {
+    if (!user?.id) return;
+
+    const { error } = await supabase
+      .from("recipe")
+      .delete()
+      .eq("id", recipeId)
+      .eq("author_id", user.id);
+
+    if (error) {
+      console.error("Failed to delete recipe:", error.message);
+      return;
+    }
+
+    const updatedList = userRecipes.filter((r) => r.id !== recipeId);
+    setUserRecipes(updatedList);
+    setTotalElements(updatedList.length);
+    setTotalPages(Math.ceil(updatedList.length / RESULTS_PER_PAGE));
+  };
+
   //To Do: remove recipe from favourites logic
   //   const handleRemove = async () => {
   //     const {error} = await supabase
@@ -90,11 +113,20 @@ export default function UserRecipe() {
     <section className="all-recipes-section" ref={sectionRef}>
       <div className="all-recipes-bg" />
       <div className="layout-wrapper">
-        <h3>Recipes</h3>
+        <div className="favourites-header">
+          <h3>My Recipes</h3>
+          <FaEdit
+            size={24}
+            className={`edit-icon ${editMode ? "active" : ""}`}
+            title={editMode ? "Exit Edit Mode" : "Edit Recipes"}
+            onClick={() => setEditMode(!editMode)}
+          />
+        </div>
+
         <br />
         <div className="all-recipes-desc"></div>
         <br />
-        <br />
+        {/* <br /> */}
         <>
           <button
             onClick={() => navigate("/create-recipe")}
@@ -102,7 +134,11 @@ export default function UserRecipe() {
           >
             + Create New Recipe
           </button>
-          <RecipeList recipes={userRecipes} />
+          <RecipeList
+            recipes={userRecipes}
+            editMode={editMode}
+            onRemove={handleRemove}
+          />
 
           {!loading && (
             <div className="pagination-wrapper">

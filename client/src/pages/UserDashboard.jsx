@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "../utils/supabaseClient";
 import { useAuth } from "../context/AuthProvider";
 import { Link } from "react-router-dom";
@@ -10,6 +10,11 @@ import hat from "../assets/chef-hat.png";
 import eye from "../assets/eye.png";
 import heart from "../assets/heart.png";
 
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
+
 export default function UserDashboard() {
   const { user } = useAuth();
   const [favourites, setFavourites] = useState([]);
@@ -17,6 +22,28 @@ export default function UserDashboard() {
   const [error, setError] = useState(null);
   const [recipeCreations, setRecipeCreations] = useState([]);
   const [firstName, setFirstName] = useState("");
+
+  const welcomeRef = useRef();
+
+  useEffect(() => {
+    const el = welcomeRef.current;
+
+    gsap.fromTo(
+      el,
+      { opacity: 1, y: 100 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: el,
+          start: "top 90%",
+          toggleActions: "play none none none",
+        },
+      }
+    );
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -87,7 +114,7 @@ export default function UserDashboard() {
   return (
     <>
       {user && (
-        <div className="welcome-section">
+        <div ref={welcomeRef} className="welcome-section">
           <div className="welcome-wrapper">
             <div className="welcome-card layout-wrapper">
               <div className="welcome-text">
@@ -120,7 +147,7 @@ export default function UserDashboard() {
                 </div>
               </Link>
 
-              <div className="separator"></div>
+              {/* <div className="separator"></div>
 
               <div className="stat-card">
                 <img src={eye} alt="eye" className="icon" />
@@ -128,7 +155,7 @@ export default function UserDashboard() {
                   <strong>{history.length}</strong>
                   <p>Recently Viewed</p>
                 </div>
-              </div>
+              </div> */}
 
               <div className="separator"></div>
 
