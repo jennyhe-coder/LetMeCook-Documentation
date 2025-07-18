@@ -40,7 +40,7 @@ export default function SearchBarModal({ onClose }) {
               <textarea
                 ref={inputRef}
                 className="search-input"
-                placeholder="Search anything..."
+                placeholder="Search with Sunny AI"
                 onKeyDown={handleKeyDown}
                 rows={1}
               />
