@@ -98,7 +98,8 @@
 }
 
 .print-btn,
-.save-btn {
+.save-btn,
+.edit-recipe-btn {
   padding: 0.5rem 1.2rem;
   border: none;
   border-radius: 6px;
@@ -119,6 +120,10 @@
   padding: 0.5em 1em;
   border-radius: 4px;
   transition: background-color 0.5s ease;
+}
+
+.edit-recipe-btn {
+  background-color: #eee;
 }
 
 .save-btn.saved {

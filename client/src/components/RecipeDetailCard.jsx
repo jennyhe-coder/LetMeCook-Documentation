@@ -92,6 +92,15 @@ export default function RecipeDetailCard({ recipe }) {
               Print Recipe
             </button>
 
+            {user?.id === authorId && (
+              <button
+                className="edit-recipe-btn"
+                onClick={() => navigate(`/edit-recipe/${recipe.id}`)}
+              >
+                Edit
+              </button>
+            )}
+
             {isSaved ? (
               <Link
                 to="/favourites"
@@ -103,12 +112,6 @@ export default function RecipeDetailCard({ recipe }) {
             ) : (
               <button className="save-btn" onClick={handleSave}>
                 Save
-              </button>
-            )}
-
-            {user?.id === authorId && (
-              <button onClick={() => navigate(`/edit-recipe/${recipe.id}`)}>
-                Edit
               </button>
             )}
           </div>

@@ -6,6 +6,7 @@ import { supabase } from "../utils/supabaseClient";
 import { FaUserCircle } from "react-icons/fa";
 import { FaSearch, FaTimes } from "react-icons/fa";
 import SearchBarModal from "./SearchBarModal";
+import logo from "../assets/navbarlogo.png";
 
 export default function MainNav() {
   const location = useLocation();
@@ -121,8 +122,7 @@ export default function MainNav() {
             }
           >
             <div className="logo-container" ref={logoRef}>
-              <div className="logo"></div>
-              <span>let me cook</span>
+              <img src={logo} alt="nav bar logo" className="logo" />
             </div>
           </NavLink>
         </div>
