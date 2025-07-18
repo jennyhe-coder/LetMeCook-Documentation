@@ -27,6 +27,7 @@
 
 .modal-btn {
     margin-top: 1rem;
+    margin-right: 1rem;
     background: #333;
     color: white;
     border: none;
@@ -34,3 +35,4 @@
     border-radius: 5px;
     cursor: pointer;
 }
+

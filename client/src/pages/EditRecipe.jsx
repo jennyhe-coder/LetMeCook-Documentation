@@ -39,7 +39,9 @@ export default function EditRecipe() {
   const [ingredientSuggestions, setIngredientSuggestions] = useState([]);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
-
+  const [modalMessage, setModalMessage] = useState('');
+  const [shouldRedirect, setShouldRedirect] = useState(false);
+  const [modalType, setModalType] = useState(null);
   const [dietaryOpt, setDietaryOpt] = useState([]);
   const [cuisineOpt, setCuisineOpt] = useState([]);
   const [categoryOpt, setCategoryOpt] = useState([]);
@@ -301,7 +303,10 @@ export default function EditRecipe() {
       );
     }
 
+    setModalMessage("Recipe updated successfully!");
     setShowModal(true);
+    setModalType("success");
+    setShouldRedirect(true);
   };
 
   const removeIngredientRow = (index) => {
@@ -311,6 +316,30 @@ export default function EditRecipe() {
   const hasSomeIngredient = () => {
     return recipeIngredients.some(ri => ri.name && ri.quantity && ri.unit);
   }
+
+  const confirmDelete = () => {
+    setModalType("confirm-delete");
+    setModalMessage("Are you sure you want to delete this recipe?");
+    setShowModal(true);
+  };
+
+  const handleDelete = async () => {
+
+    const { error } = await supabase
+      .from("recipe")
+      .delete()
+      .eq("id", recipeId);
+
+    if (error) {
+      setError("Delete recipe error: " + error.message);
+      return;
+    }
+
+    setModalMessage("Recipe deleted successfully.");
+    setModalType("success");
+    setShowModal(true);
+    setShouldRedirect(true);
+  };
 
   return (
     <div className="create-recipe-container">
@@ -388,12 +417,12 @@ export default function EditRecipe() {
         />
         </div>
         <div className='form-group'>
-          <h4>Description</h4>
+          <h4>Direction</h4>
           <textarea
-            name="description"
-            value={form.description}
+            name="directions"
+            value={form.directions}
             onChange={handleChange}
-            placeholder="Description"
+            placeholder="Directions"
             type="text"
             required
           />
@@ -431,6 +460,7 @@ export default function EditRecipe() {
           required
         />
         </div>
+        
         <div className='form-group'>
         <label>
           <input
@@ -505,16 +535,26 @@ export default function EditRecipe() {
           Update Recipe
         </button>
 
+        <button type="button" className="edit-delete-recipe-btn" onClick={confirmDelete}>
+          Delete Recipe
+        </button>
+
         {error && <p className="error-message">{error}</p>}
       </form>
 
       {showModal && (
         <Modal
           isOpen={showModal}
-          message="Recipe updated successfully!"
+          message={modalMessage}
+          showConfirmButtons={modalType === "confirm-delete"}
+          onConfirm={modalType === "confirm-delete" ? handleDelete : undefined}
           onClose={() => {
             setShowModal(false);
-            navigate("/user-recipe");
+            if (modalType === 'success' && shouldRedirect) {
+              navigate("/user-recipe");
+            }
+            setShouldRedirect(false);
+            setModalType(null);
           }}
         />
       )}
