@@ -5,8 +5,7 @@ import Modal from '../components/Modal';
 import { useNavigate, useParams } from 'react-router-dom';
 import { debounce } from 'lodash';
 import Select from 'react-select';
-import './EditRecipe.css'; 
-
+import './EditRecipe.css';
 
 const UNITS = [
   'teaspoon', 'cup', 'ounce', 'pound', 'pinch',
@@ -155,6 +154,10 @@ export default function EditRecipe() {
     setRecipeIngredients(updated);
   };
 
+  const removeIngredientRow = (index) => {
+    setRecipeIngredients((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleImgUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -191,13 +194,11 @@ export default function EditRecipe() {
   const debouncedSearch = useRef(
     debounce(async (input) => {
       if (!input) return;
-
       const { data } = await supabase
         .from('ingredients')
         .select('*')
         .ilike('name', `%${input}%`)
         .limit(10);
-
       setIngredientSuggestions(data || []);
     }, 300)
   ).current;
@@ -209,206 +210,85 @@ export default function EditRecipe() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const { error: recipeError } = await supabase
-      .from("recipe")
+    const { error: updateError } = await supabase
+      .from('recipe')
       .update({
-        ...form,
-        author_id: user.id,
+        title: form.title,
+        description: form.description,
+        servings: form.servings,
+        is_public: form.is_public,
+        image_url: form.image_url,
+        directions: form.directions,
+        time: form.time
       })
-      .eq("id", recipeId);
+      .eq('id', recipeId);
 
-    if (recipeError) {
-      setError("Update recipe error: " + recipeError.message);
+    if (updateError) {
+      setError("Update failed: " + updateError.message);
       return;
     }
 
-    const linkedIngredients = [];
-
-    for (let ri of recipeIngredients) {
-      if (!ri.name || !ri.quantity || !ri.unit) continue;
-
-      let ingredientId = ri.ingredient_id;
-
-      if (!ingredientId) {
-        const { data: existing } = await supabase
-          .from("ingredients")
-          .select("*")
-          .ilike("name", ri.name)
-          .maybeSingle();
-
-        if (existing) {
-          ingredientId = existing.id;
-        } else {
-          const { data: newIngredient } = await supabase
-            .from("ingredients")
-            .insert({ name: ri.name })
-            .select()
-            .single();
-
-          ingredientId = newIngredient.id;
-        }
-      }
-
-      linkedIngredients.push({
-        recipe_id: recipeId,
-        ingredient_id: ingredientId,
-        quantity: ri.quantity,
-        unit: ri.unit,
-      });
-    }
-
-    await supabase
-      .from("recipe_ingredients")
-      .delete()
-      .eq("recipe_id", recipeId);
-
-    await supabase
-      .from("recipe_ingredients")
-      .insert(linkedIngredients);
-
-    if (dietaryPref.length > 0) {
-      await supabase.from("recipe_dietary_pref").delete().eq("recipe_id", recipeId);
-      await supabase.from("recipe_dietary_pref").upsert(
-        dietaryPref.map(item => ({
-          recipe_id: recipeId,
-          preference_id: item.value
-        }))
-      );
-    }
-
-    if (cuisine.length > 0) {
-      await supabase.from("recipe_cuisines").delete().eq("recipe_id", recipeId);
-      await supabase.from("recipe_cuisines").upsert(
-        cuisine.map(item => ({
-          recipe_id: recipeId,
-          cuisine_id: item.value
-        }))
-      );
-    }
-
-    if (categories.length > 0) {
-      await supabase.from("recipe_categories").delete().eq("recipe_id", recipeId);
-      await supabase.from("recipe_categories").upsert(
-        categories.map(item => ({
-          recipe_id: recipeId,
-          category_id: item.value
-        }))
-      );
-    }
-
     setShowModal(true);
-  };
-
-  const removeIngredientRow = (index) => {
-    setRecipeIngredients((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
     <div className="edit-recipe-container">
       <h2>Edit Recipe</h2>
       <form onSubmit={handleSubmit}>
-        <input
-          type="file"
-          accept="image/*"
-          ref={fileInputRef}
-          onChange={handleImgUpload}
-        />
-        {form.image_url && (
-          <img src={form.image_url} alt="food-image" />
-        )}
+        <div className="form-group">
+          <label>Recipe Image</label>
+          <input type="file" accept="image/*" ref={fileInputRef} onChange={handleImgUpload} />
+          {form.image_url && <img src={form.image_url} alt="food preview" />}
+        </div>
 
-        <h4>Title</h4>
-        <input
-          type="text"
-          name="title"
-          value={form.title}
-          onChange={handleChange}
-          placeholder="Title"
-          required
-        />
+        <div className="form-group">
+          <label>Title</label>
+          <input name="title" value={form.title} onChange={handleChange} required />
+        </div>
 
-        <h4>Dietary Preference</h4>
-        <Select
-          isMulti
-          value={dietaryPref}
-          options={dietaryOpt.map((opt) => ({
-            value: opt.id,
-            label: opt.name
-          }))}
-          onChange={setDietaryPref}
-        />
+        <div className="form-group">
+          <label>Dietary Preference</label>
+          <Select isMulti options={dietaryOpt.map(opt => ({ value: opt.id, label: opt.name }))} value={dietaryPref} onChange={setDietaryPref} />
+        </div>
 
-        <h4>Cuisines</h4>
-        <Select
-          isMulti
-          value={cuisine}
-          options={cuisineOpt.map((opt) => ({
-            value: opt.id,
-            label: opt.name
-          }))}
-          onChange={setCuisine}
-        />
+        <div className="form-group">
+          <label>Cuisines</label>
+          <Select isMulti options={cuisineOpt.map(opt => ({ value: opt.id, label: opt.name }))} value={cuisine} onChange={setCuisine} />
+        </div>
 
-        <h4>Categories</h4>
-        <Select
-          isMulti
-          value={categories}
-          options={categoryOpt.map((opt) => ({
-            value: opt.id,
-            label: opt.name
-          }))}
-          onChange={setCategories}
-        />
+        <div className="form-group">
+          <label>Categories</label>
+          <Select isMulti options={categoryOpt.map(opt => ({ value: opt.id, label: opt.name }))} value={categories} onChange={setCategories} />
+        </div>
 
-        <h4>Description</h4>
-        <textarea
-          name="description"
-          value={form.description}
-          onChange={handleChange}
-          placeholder="Description"
-        />
+        <div className="form-group">
+          <label>Description</label>
+          <textarea name="description" value={form.description} onChange={handleChange} />
+        </div>
 
-        <h4>Servings</h4>
-        <input
-          type="number"
-          name="servings"
-          value={form.servings}
-          onChange={handleChange}
-          placeholder="Servings"
-          min={1}
-        />
+        <div className="form-group">
+          <label>Servings</label>
+          <input type="number" name="servings" min={1} value={form.servings} onChange={handleChange} />
+        </div>
 
-        <h4>Cooking Time</h4>
-        <input
-          type="number"
-          name="time"
-          value={form.time}
-          onChange={handleChange}
-          placeholder="Time (min)"
-          min={1}
-        />
+        <div className="form-group">
+          <label>Cooking Time (minutes)</label>
+          <input type="number" name="time" min={1} value={form.time} onChange={handleChange} />
+        </div>
 
-        <h4>Direction</h4>
-        <textarea
-          name="directions"
-          value={form.directions}
-          onChange={handleChange}
-          placeholder="Directions"
-        />
+        <div className="form-group">
+          <label>Directions</label>
+          <textarea name="directions" value={form.directions} onChange={handleChange} />
+        </div>
 
-        <label>
-          <input
-            type="checkbox"
-            name="is_public"
-            checked={form.is_public}
-            onChange={handleChange}
-          />
-          Make this recipe public
-        </label>
+        <div className="checkbox-group">
+          <input type="checkbox" name="is_public" checked={form.is_public} onChange={handleChange} />
+          <label>Make this recipe public</label>
+        </div>
 
-        <h3>Ingredients</h3>
+        <h3 className="ingredients-title">Ingredients</h3>
         {recipeIngredients.map((ri, index) => (
-          <div key={index} className="ingredient-row">
+          <div className="ingredient-row" key={index}>
             <input
               type="text"
               placeholder="Ingredient name"
@@ -426,8 +306,7 @@ export default function EditRecipe() {
             </datalist>
 
             <input
-              type="number"
-              step="0.1"
+              type="text"
               placeholder="Quantity"
               value={ri.quantity}
               onChange={(e) => handleIngredientChange(index, 'quantity', e.target.value)}
@@ -438,37 +317,28 @@ export default function EditRecipe() {
               value={ri.unit}
               onChange={(e) => handleIngredientChange(index, 'unit', e.target.value)}
             >
-              <option value="">Select Unit</option>
+              <option value=''>Select Unit</option>
               {UNITS.map((unit) => (
-                <option key={unit} value={unit}>
-                  {unit}
-                </option>
+                <option key={unit} value={unit}>{unit}</option>
               ))}
             </select>
 
             <button
               type="button"
+              className="delete-ingredient-btn"
               onClick={() => removeIngredientRow(index)}
-              className="delete-btn"
             >
               Delete
             </button>
           </div>
         ))}
 
-        <button
-          type="button"
-          onClick={addIngredientRow}
-          className="update-btn"
-        >
+        <button type="button" className="add-ingredient-btn" onClick={addIngredientRow}>
           Add Ingredient
         </button>
 
         <br /><br />
-        <button type="submit" className="update-btn">
-          Update Recipe
-        </button>
-
+        <button type="submit">Update Recipe</button>
         {error && <p className="error-message">{error}</p>}
       </form>
 
