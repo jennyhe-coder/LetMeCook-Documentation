@@ -11,6 +11,7 @@ export default function RecipeDetailCard({ recipe }) {
   const navigate = useNavigate();
 
   useEffect(() => {
+    setIsSaved(false); // Reset before checking
     const fetchRecipe = async () => {
       const { data, error } = await supabase
         .from("recipe")
@@ -25,7 +26,7 @@ export default function RecipeDetailCard({ recipe }) {
 
     const checkIfSaved = async () => {
       if (!user) return;
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("recipe_favourites")
         .select("*")
         .eq("user_id", user.id)
@@ -35,8 +36,10 @@ export default function RecipeDetailCard({ recipe }) {
       if (data) setIsSaved(true);
     };
 
-    fetchRecipe();
-    checkIfSaved();
+    if (recipe?.id) {
+      fetchRecipe();
+      checkIfSaved();
+    }
   }, [recipe.id, user]);
 
   const capitalizeWords = (text) =>
