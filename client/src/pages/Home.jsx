@@ -62,9 +62,9 @@ export default function Home() {
           dataSource="https://letmecook.ca/api/recipes?dietaryPreferences=vegan&size=20"
         />
         <CarouselSection
-          title="Quick & Easy Meals"
+          title="Gluten Free"
           sectionClass="section-4"
-          dataSource="https://letmecook.ca/api/recipes?sort=cookTime&size=20"
+          dataSource="https://letmecook.ca/api/recipes?dietaryPreferences=gluten+free&size=20"
         />
         <div className="signup-section">
           <div className="signup-box">

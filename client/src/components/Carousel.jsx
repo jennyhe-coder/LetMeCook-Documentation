@@ -195,13 +195,13 @@ export default function Carousel({ dataSource }) {
         ))}
 
         {/* SEE ALL LINK */}
-        {!loading && (
+        {/* {!loading && (
           <a href="/recipes" className="see-all-card">
             <div className="see-all-inner">
               <span>See All Recipes {`>>`} </span>
             </div>
           </a>
-        )}
+        )} */}
       </div>
     </div>
   );
