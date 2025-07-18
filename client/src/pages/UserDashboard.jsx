@@ -150,7 +150,7 @@ export default function UserDashboard() {
           <section>
             {/* Have to get the data source for this later */}
             <CarouselSection
-              title="Popular Recipes"
+              title="Trending Now"
               sectionClass="section-3"
               dataSource="https://letmecook.ca/api/recipes?sort=viewCount&size=20"
             />
