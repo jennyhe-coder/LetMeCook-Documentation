@@ -7,7 +7,12 @@ export default function RecipeList({
   onRemove,
 }) {
   if (recipes.length === 0) {
-    return <div className="recipe-empty">No recipes to display.</div>;
+    return (
+      <div className="recipe-empty">
+        <br />
+        No recipes to display.
+      </div>
+    );
   }
 
   return (

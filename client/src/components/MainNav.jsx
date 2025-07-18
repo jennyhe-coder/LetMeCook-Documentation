@@ -101,8 +101,8 @@ export default function MainNav() {
   }, [user]);
 
   const navItems = [
-    { path: user ? "/dashboard" : "/", label: "home" },
-    { path: "/recipes", label: "recipes" },
+    { path: user ? "/dashboard" : "/", label: "Home" },
+    { path: "/recipes", label: "Recipes" },
     // { path: "/profile", label: "profile" },
     // { path: "/dashboard", label: "dashboard" },
   ];
@@ -175,7 +175,7 @@ export default function MainNav() {
                         setTimeout(() => setDisableHover(false), 300);
                       }}
                     >
-                      profile
+                      Profile
                     </NavLink>
                   </li>
                   <li className="dropdown-nav-item">
@@ -187,7 +187,7 @@ export default function MainNav() {
                         setTimeout(() => setDisableHover(false), 300);
                       }}
                     >
-                      my favourites
+                      My Favourites
                     </NavLink>
                   </li>
                   <li className="dropdown-nav-item">
@@ -199,7 +199,7 @@ export default function MainNav() {
                         setTimeout(() => setDisableHover(false), 300);
                       }}
                     >
-                      my recipes
+                      My Recipes
                     </NavLink>
                   </li>
                   <li
@@ -210,7 +210,7 @@ export default function MainNav() {
                       handleLogout();
                     }}
                   >
-                    log out
+                    Log Out
                   </li>
                 </ul>
               </div>
@@ -223,7 +223,7 @@ export default function MainNav() {
                   isActive ? "nav-link active" : "nav-link"
                 }
               >
-                login
+                Login
               </NavLink>
             </div>
           )}
