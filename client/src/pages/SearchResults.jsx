@@ -252,7 +252,7 @@ export default function SearchResults() {
           <h3>Results</h3>
           <SortDropdown sort={sort} setSort={setSort} />
         </div>
-        <br />
+        {/* <br /> */}
 
         {results.length === 0 && !loading ? (
           <p>No results found.</p>
