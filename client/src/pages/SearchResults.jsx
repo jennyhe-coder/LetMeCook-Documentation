@@ -255,7 +255,10 @@ export default function SearchResults() {
         {/* <br /> */}
 
         {results.length === 0 && !loading ? (
-          <p>No results found.</p>
+          <>
+            <br />
+            <p>No results found.</p>
+          </>
         ) : (
           <>
             <RecipeList

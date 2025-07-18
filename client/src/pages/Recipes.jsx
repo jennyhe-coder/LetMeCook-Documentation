@@ -117,7 +117,10 @@ export default function Recipes() {
         />
         {/* <br /> */}
         {results.length === 0 && !loading ? (
-          <p>No recipes found.</p>
+          <>
+            <br />
+            <p>No results found.</p>
+          </>
         ) : (
           <>
             <RecipeList
