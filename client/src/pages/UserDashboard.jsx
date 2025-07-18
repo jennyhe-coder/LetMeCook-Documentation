@@ -16,17 +16,29 @@ export default function UserDashboard() {
   const [history, setHistory] = useState([]);
   const [error, setError] = useState(null);
   const [recipeCreations, setRecipeCreations] = useState([]);
+  const [firstName, setFirstName] = useState("");
 
   useEffect(() => {
     if (user) {
+      const getName = async () => {
+        const { data, error } = await supabase
+          .from("users")
+          .select("first_name")
+          .eq("id", user.id)
+          .single();
+
+        if (!error && data) {
+          setFirstName(data.first_name);
+        }
+      };
+
+      getName();
       fetchFavourites(user.id);
       fetchHistory(user.id);
       fetchCreations(user.id);
       //fetch recommendations(user.id) implement this after AI algorithm is done
     }
   }, [user]);
-
-  console.log("User: ", user);
 
   const fetchFavourites = async (userId) => {
     let { data, error } = await supabase
@@ -53,7 +65,6 @@ export default function UserDashboard() {
       setError(error.message);
       return;
     }
-    console.log("Supabase result:", data);
     setHistory(data ?? []);
   };
 
@@ -63,7 +74,6 @@ export default function UserDashboard() {
       .select("*")
       .eq("author_id", userId)
       .order("created_at", { ascending: false });
-    console.log("history result:", history);
     if (data) {
       setRecipeCreations(data);
     }
@@ -82,7 +92,7 @@ export default function UserDashboard() {
             <div className="welcome-card layout-wrapper">
               <div className="welcome-text">
                 <h1>
-                  Welcome back, <span>{user.user_metadata.first_name || user.email}</span>! 👋
+                  Welcome back, <span>{firstName || user.email}</span>! 👋
                 </h1>
                 <p>What’s cooking today? 🍳 Let’s explore something new!</p>
                 <p>
