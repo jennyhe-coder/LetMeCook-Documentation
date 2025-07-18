@@ -7,16 +7,6 @@ import "../about.css";    // About-page-specific styles
 const About = () => {
   return (
     <>
-      {/* Header / Navigation */}
-      <header>
-        <nav className="layout-wrapper main-nav">
-          <a href="/about" className="active">About Us</a>
-          <a href="/privacy">Privacy Policy</a>
-          <a href="/terms">Terms & Conditions</a>
-          <a href="/contact">Contact</a>
-        </nav>
-      </header>
-
       {/* Main Content */}
       <main>
         <section className="layout-wrapper about-container">

@@ -22,17 +22,7 @@ const Terms = () => {
           navigate("/");
         }}
       />
-
-      {/* Header / Navigation */}
-      <header>
-        <nav className="layout-wrapper main-nav">
-          <a href="/about">About Us</a>
-          <a href="/privacy">Privacy Policy</a>
-          <a href="/terms" className="active">Terms & Conditions</a>
-          <a href="/contact">Contact</a>
-        </nav>
-      </header>
-
+      
       {/* Main Terms Card */}
       <main>
         <section className="layout-wrapper terms-container">
