@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "../utils/supabaseClient";
 import { useAuth } from "../context/AuthProvider";
-import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 import SearchBar from "./../components/SearchBar-Home";
@@ -17,9 +16,7 @@ export default function UserDashboard() {
   const [history, setHistory] = useState([]);
   const [error, setError] = useState(null);
   const [recipeCreations, setRecipeCreations] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  //const [recommendations, setRecommendations] = useState([]);
-  const navigate = useNavigate();
+
   useEffect(() => {
     if (user) {
       fetchFavourites(user.id);
@@ -28,6 +25,8 @@ export default function UserDashboard() {
       //fetch recommendations(user.id) implement this after AI algorithm is done
     }
   }, [user]);
+
+  console.log("User: ", user);
 
   const fetchFavourites = async (userId) => {
     let { data, error } = await supabase
@@ -83,7 +82,7 @@ export default function UserDashboard() {
             <div className="welcome-card layout-wrapper">
               <div className="welcome-text">
                 <h1>
-                  Welcome back, <span>{user.first_name || user.email}</span>! 👋
+                  Welcome back, <span>{user.user_metadata.first_name || user.email}</span>! 👋
                 </h1>
                 <p>What’s cooking today? 🍳 Let’s explore something new!</p>
                 <p>
