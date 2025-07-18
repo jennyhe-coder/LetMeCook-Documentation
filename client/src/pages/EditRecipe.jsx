@@ -417,14 +417,13 @@ export default function EditRecipe() {
         />
         </div>
         <div className='form-group'>
-          <h4>Direction</h4>
+          <h4>Description</h4>
           <textarea
-            name="directions"
-            value={form.directions}
+            name="description"
+            value={form.description}
             onChange={handleChange}
-            placeholder="Directions"
+            placeholder="Description"
             type="text"
-            required
           />
         </div>
         <div className='form-group'>
