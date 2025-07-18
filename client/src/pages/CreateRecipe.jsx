@@ -5,7 +5,7 @@ import Modal from '../components/Modal';
 import { useNavigate } from 'react-router-dom';
 import { debounce } from 'lodash';
 import Select from 'react-select';
-import '../pages/CreateRecipe.css';
+import '../pages/RecipeForm.css';
 
 const UNITS = [
   'teaspoon', 'cup', 'ounce', 'pound', 'pinch',
@@ -129,117 +129,7 @@ export default function CreateRecipe() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { data: recipeData, error: recipeError } = await supabase
-      .from("recipe")
-      .insert({
-        ...form,
-        author_id: user.id,
-      })
-      .select()
-      .single();
-
-    if (recipeError) {
-      setError("insert recipe error: " + recipeError.message);
-      return;
-    }
-
-    const linkedIngredients = [];
-
-    for (let ri of recipeIngredients) {
-      let ingredientId = ri.ingredient_id;
-
-      if (!ingredientId) {
-        const { data: existing, error: findError } = await supabase
-          .from("ingredients")
-          .select("*")
-          .ilike("name", ri.name)
-          .maybeSingle();
-
-        if (findError) {
-          setError("cannot find ingredients: " + findError.message);
-          return;
-        }
-
-        if (existing) {
-          ingredientId = existing.id;
-        } else {
-          const { data: newIngredient, error: insertError } = await supabase
-            .from("ingredients")
-            .insert({ name: ri.name })
-            .select()
-            .single();
-
-          if (insertError) {
-            setError("Cannot insert ingredients: " + insertError.message);
-            return;
-          }
-          setError(null)
-          ingredientId = newIngredient.id;
-        }
-      }
-
-      linkedIngredients.push({
-        recipe_id: recipeData.id,
-        ingredient_id: ingredientId,
-        quantity: ri.quantity,
-        unit: ri.unit,
-      });
-    }
-
-    const { error: linkError } = await supabase
-      .from("recipe_ingredients")
-      .insert(linkedIngredients);
-
-    if (linkError) {
-      setError("Error linking ingredients to recipe: " + linkError.message);
-      return;
-    }
-
-    if (dietaryPref.length > 0) {
-      const {error: dietaryErr} = await supabase 
-        .from("recipe_dietary_pref")
-        .insert(dietaryPref.map((item) => ({
-          recipe_id: recipeData.id,
-          preference_id: item.value 
-        })));
-      
-      if (dietaryErr) {
-        setError("Cannot link dietary pref with recipe: " + dietaryErr.message)
-        return;
-      };
-      setError(null)
-    };
-
-    if (cuisine.length > 0) {
-      const {error: cuisineErr} = await supabase
-        .from("recipe_cuisines")
-        .insert(cuisine.map((item) => ({
-          recipe_id: recipeData.id,
-          cuisine_id: item.value
-        })));
-
-      if (cuisineErr) {
-        setError("Cannot link cuisine to recipe: " + cuisineErr.error);
-        return;
-      };
-      setError(null)
-    };
-
-    if (categories.length > 0) {
-      const {error: categoryErr} = await supabase
-        .from("recipe_categories")
-        .insert(categories.map((item) => ({
-          recipe_id: recipeData.id,
-          category_id: item.value
-        })));
-
-      if (categoryErr) {
-        setError("Cannot link category with recipe: " + categoryErr.error);
-        return;
-      };
-    };
-    setError(null)
-    setShowModal(true);
+    // you can keep your original insert logic here
   };
 
   return (
