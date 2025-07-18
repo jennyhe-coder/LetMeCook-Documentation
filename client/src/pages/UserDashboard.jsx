@@ -139,7 +139,6 @@ export default function UserDashboard() {
             />
           </section>
           <section>
-            {/* Have to get the data source for this later */}
             <CarouselSection
               title="Recently Viewed"
               sectionClass="section-2"
@@ -147,7 +146,6 @@ export default function UserDashboard() {
             />
           </section>
           <section>
-            {/* Have to get the data source for this later */}
             <CarouselSection
               title="Trending Now"
               sectionClass="section-3"
@@ -155,11 +153,10 @@ export default function UserDashboard() {
             />
           </section>
           <section>
-            {/* Have to get the data source for this later */}
             <CarouselSection
-              title="Seasonal Favourites"
+              title="Quick & Easy Meals"
               sectionClass="section-4"
-              dataSource={`https://letmecook.ca/api/recipes/recommend?userid=${user?.id}`}
+              dataSource="https://letmecook.ca/api/recipes?sort=cookTime&size=20"
             />
           </section>
         </div>

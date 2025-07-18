@@ -102,13 +102,12 @@ img {
   flex-direction: row;
 } */
 
-/* .logo {
-  padding-top: 5px;
-  padding-right: 3px;
-  padding-left: 1px;
-  transform: scale(1.05);
-  transform-origin: center center;
-} */
+.logo {
+  display: block;
+  width: 140px;
+  margin-top: -50px;
+  margin-left: -20px;
+} 
 
 a {
   text-decoration: none;
@@ -1400,6 +1399,7 @@ p {
 
 .welcome-section {
   background: #fff4d4;
+  margin-top: 62px;
 }
 
 .welcome-wrapper {
