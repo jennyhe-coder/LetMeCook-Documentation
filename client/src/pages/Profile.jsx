@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../utils/supabaseClient";
 import { useAuth } from "../context/AuthProvider";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../Profile.css";
 
 export default function Profile() {
@@ -10,12 +10,14 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [allergyNames, setAllergyNames] = useState([]);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProfile = async () => {
       if (!user) {
         setLoading(false);
         setProfile(null);
+        navigate('/unauthorized');
         return;
       }
 

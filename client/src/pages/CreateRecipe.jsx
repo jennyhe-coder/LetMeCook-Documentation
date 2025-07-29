@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { use, useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthProvider';
 import { supabase } from '../utils/supabaseClient';
 import Modal from '../components/Modal';
@@ -57,6 +57,13 @@ export default function CreateRecipe() {
     fetchDropdownOptions();
   }, []);
 
+  useEffect(() => {
+    if (!user) {
+      navigate('/unauthorized');
+      return;
+    }
+  }, [user]);
+  
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));

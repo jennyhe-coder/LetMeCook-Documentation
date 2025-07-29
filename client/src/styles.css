@@ -1710,3 +1710,22 @@ p {
   flex-direction: column;
   min-height: 25vh;
 }
+
+.error-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 50px;
+}
+.error-page img{
+  max-width: 50%;
+  height: auto;
+}
+
+.error-page h1 {
+  font-size: 70px;
+  color: #28200d;
+  margin-top: 50px;
+}

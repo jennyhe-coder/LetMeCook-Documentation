@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useAuth } from "../context/AuthProvider";
 import { FaEdit } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -25,9 +26,18 @@ export default function Favourites() {
   const [favRecipes, setFavRecipes] = useState([]);
   const [editMode, setEditMode] = useState(false);
 
+  const navigate = useNavigate();
+
   const handleReorder = (newOrder) => {
     setFavRecipes(newOrder);
   };
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/unauthorized');
+      return;
+    }
+  }, [user, navigate]);
 
   const handleRemove = async (recipeId) => {
     if (!user?.id) return;

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../utils/supabaseClient";
 import { useAuth } from "../context/AuthProvider";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"
 
 import SearchBar from "./../components/SearchBar-Home";
 import CarouselSection from "./../components/CarouselSection";
@@ -23,6 +23,7 @@ export default function UserDashboard() {
   const [recipeCreations, setRecipeCreations] = useState([]);
   const [firstName, setFirstName] = useState("");
 
+  const navigate = useNavigate();
   const welcomeRef = useRef();
 
   useEffect(() => {
@@ -64,6 +65,8 @@ export default function UserDashboard() {
       fetchHistory(user.id);
       fetchCreations(user.id);
       //fetch recommendations(user.id) implement this after AI algorithm is done
+    } else {
+      navigate("/");
     }
   }, [user]);
 

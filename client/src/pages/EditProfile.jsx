@@ -35,7 +35,10 @@ export default function EditProfile() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      navigate('/unauthorized');
+      return;
+    }
 
     (async () => {
       const { data, error } = await supabase
