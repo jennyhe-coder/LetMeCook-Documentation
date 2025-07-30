@@ -10,8 +10,9 @@ import './RecipeForm.css';
 const UNITS = [
   'teaspoon', 'cup', 'ounce', 'pound', 'pinch',
   'Tbsps', 'serving', 'kilo', 'cloves', 'package',
-  'box', 'sprigs', 'mediums'
+  'box', 'sprigs', 'mediums',  'qty', 'stick', 'slice', 'bunch', 'can', 'jar'
 ];
+
 
 export default function CreateRecipe() {
   const { user } = useAuth();
@@ -158,6 +159,8 @@ export default function CreateRecipe() {
     const linkedIngredients = [];
 
     for (let ri of recipeIngredients) {
+      if (!ri.name || !ri.quantity) continue;
+
       let ingredientId = ri.ingredient_id;
 
       if (!ingredientId) {
@@ -255,7 +258,7 @@ export default function CreateRecipe() {
   };
 
   const hasSomeIngredient = () => {
-    return recipeIngredients.some(ri => ri.name && ri.quantity && ri.unit);
+    return recipeIngredients.some(ri => ri.name && ri.quantity);
   }
 
   return (
