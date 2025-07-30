@@ -28,6 +28,12 @@ export default function UserRecipe() {
   const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
+    if (!user) {
+      navigate('/unauthorized');
+      return;
+    }
+  }, [user, navigate]);
+  useEffect(() => {
     if (userLoading) return;
     if (!user?.id) {
       console.warn("user doesn't exist");

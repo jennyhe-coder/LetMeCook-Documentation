@@ -50,6 +50,8 @@ export default function EditRecipe() {
   const [cuisine, setCuisine] = useState([]);
   const [categories, setCategories] = useState([]);
 
+  const [isAuthorized, setIsAuthorized] = useState(true);
+
   useEffect(() => {
     const fetchRecipeData = async () => {
       const [
@@ -74,6 +76,11 @@ export default function EditRecipe() {
 
       if (error) {
         setError("Failed to fetch recipe: " + error.message);
+        return;
+      }
+
+      if (user?.id && data.author_id !== user.id) {
+        setIsAuthorized(false);
         return;
       }
 
@@ -340,6 +347,13 @@ export default function EditRecipe() {
     setShowModal(true);
     setShouldRedirect(true);
   };
+
+
+  useEffect(() => {
+    if (!isAuthorized) {
+      navigate('/forbidden');
+    }
+  }, [isAuthorized, navigate]);
 
   return (
     <div className="create-recipe-container">

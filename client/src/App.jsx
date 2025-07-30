@@ -20,6 +20,9 @@ import Favourites from "./pages/Favourites";
 import CreateRecipe from "./pages/CreateRecipe";
 import UserRecipe from "./pages/UserRecipe";
 import EditRecipe from "./pages/EditRecipe";
+import Err401 from "./pages/Err401";
+import Err404 from "./pages/Err404";
+import Err403 from "./pages/Err403";
 
 function App() {
 
@@ -49,6 +52,9 @@ function App() {
         <Route path="/create-recipe" element={<CreateRecipe />} />
         <Route path="/user-recipe" element={<UserRecipe />} />
         <Route path="/edit-recipe/:id" element={<EditRecipe />} />
+        <Route path="/unauthorized" element={<Err401 />} />
+        <Route path="/forbidden" element={<Err403 />} />
+        <Route path="*" element={<Err404 />} />
       </Routes>
       <Footer />
     </>
