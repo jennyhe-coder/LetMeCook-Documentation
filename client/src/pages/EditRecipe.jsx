@@ -11,7 +11,7 @@ import './RecipeForm.css';
 const UNITS = [
   'teaspoon', 'cup', 'ounce', 'pound', 'pinch',
   'Tbsps', 'serving', 'kilo', 'cloves', 'package',
-  'box', 'sprigs', 'mediums'
+  'box', 'sprigs', 'mediums',  'qty', 'stick', 'slice', 'bunch', 'can', 'jar'
 ];
 
 export default function EditRecipe() {
@@ -19,7 +19,6 @@ export default function EditRecipe() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const { id: recipeId } = useParams();
-  const [formError, setFormError] = useState(null);
 
   const [form, setForm] = useState({
     title: '',
@@ -239,7 +238,7 @@ export default function EditRecipe() {
     const linkedIngredients = [];
 
     for (let ri of recipeIngredients) {
-      if (!ri.name || !ri.quantity || !ri.unit) continue;
+      if (!ri.name || !ri.quantity) continue;
 
       let ingredientId = ri.ingredient_id;
 
@@ -321,7 +320,7 @@ export default function EditRecipe() {
   };
 
   const hasSomeIngredient = () => {
-    return recipeIngredients.some(ri => ri.name && ri.quantity && ri.unit);
+    return recipeIngredients.some(ri => ri.name && ri.quantity);
   }
 
   const confirmDelete = () => {
