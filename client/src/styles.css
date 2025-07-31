@@ -1729,3 +1729,12 @@ p {
   color: #28200d;
   margin-top: 50px;
 }
+
+.camera-icon {
+  position: absolute;
+  right: 5px;
+  top: 80%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #888;
+}
