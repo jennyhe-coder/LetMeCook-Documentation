@@ -1,21 +1,22 @@
-/* src/pages/about.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
 /* Container “card” for all About content */
 .about-container {
-  background-color: #ffffff;            /* white card */
-  max-width: 800px;                     /* limit width */
-  margin: 3rem auto;                    /* vertical + centered */
-  padding: 2.5rem 2rem;                 /* comfortable padding */
-  border-radius: 12px;                  /* rounded corners */
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08); /* soft drop shadow */
-  color: #28200d;                       /* matching text color */
+  background-color: #ffffff;
+  max-width: 800px;
+  margin: 3rem auto;
+  padding: 2.5rem 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  color: #28200d;
+  font-family: 'Inter', sans-serif;
 }
 
 /* Main Heading */
 .about-container h2 {
-  font-size: 2.75rem;                   /* 44px */
+  font-size: 2.75rem;
   font-weight: 700;
-  color: #b9341f;                       /* coral accent */
+  color: #b9341f;
   text-align: center;
   margin-bottom: 1.5rem;
   letter-spacing: 1px;
@@ -23,7 +24,7 @@
 
 /* Sub-Headings */
 .about-container h3 {
-  font-size: 2rem;                      /* 32px */
+  font-size: 2rem;
   font-weight: 600;
   color: #28200d;
   margin-top: 2.5rem;
@@ -34,7 +35,7 @@
 
 /* Paragraphs */
 .about-container p {
-  font-size: 1.125rem;                  /* 18px */
+  font-size: 1.125rem;
   line-height: 1.75;
   margin-bottom: 1.5rem;
   text-align: justify;
@@ -54,7 +55,7 @@
   justify-content: center;
   gap: 2rem;
   padding: 1rem 0;
-  background: transparent;              /* let global footer bg show */
+  background: transparent;
 }
 
 .footer-links a {
@@ -72,7 +73,7 @@
 /* Small Copyright */
 .footer-links + .layout-wrapper p {
   text-align: center;
-  font-size: 0.875rem;                  /* 14px */
+  font-size: 0.875rem;
   color: #666;
   margin-bottom: 2rem;
 }
@@ -95,4 +96,21 @@
   .about-container p {
     font-size: 1rem;
   }
+}
+
+/* Back to Top styles (matching Terms and Privacy) */
+.back-to-top {
+  text-align: right;
+  margin-top: 3rem;
+}
+
+.back-to-top a {
+  font-size: 0.95rem;
+  color: #b9341f;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.back-to-top a:hover {
+  text-decoration: underline;
 }

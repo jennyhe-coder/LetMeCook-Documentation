@@ -91,6 +91,10 @@ export default function Contact() {
           We do not share your contact details with third parties. Our site employs secure encryption protocols to protect
           your data during transmission and storage.
         </p>
+        <div className="back-to-top">
+  <a href="#">↑ Back to Top</a>
+</div>
+
       </section>
     </main>
   );
