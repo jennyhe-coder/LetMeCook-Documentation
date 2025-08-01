@@ -1,37 +1,41 @@
-/* Card container */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
 .privacy-container {
   background: #fff;
   max-width: 800px;
   margin: 3rem auto;
   padding: 2.5rem 2rem;
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.08);
   color: #28200d;
-  line-height: 1.6;
+  line-height: 1.75;
+  font-family: 'Inter', sans-serif;
 }
 
 /* Main heading */
 .privacy-container h2 {
-  font-size: 2.5rem;
+  font-size: 2.75rem;
   font-weight: 700;
   color: #b9341f;
   text-align: center;
   margin-bottom: 1.5rem;
+  letter-spacing: 1px;
 }
 
 /* Subheadings */
 .privacy-container h3 {
-  font-size: 1.75rem;
+  font-size: 2rem;
   font-weight: 600;
-  margin-top: 2rem;
+  color: #28200d;
+  margin-top: 2.5rem;
   margin-bottom: 0.75rem;
+  padding-bottom: 0.25rem;
   border-bottom: 2px solid #d3cdc1;
-  padding-bottom: 0.5rem;
 }
 
 /* Paragraphs */
 .privacy-container p {
-  font-size: 1rem;
+  font-size: 1.125rem;
   margin-bottom: 1.5rem;
   text-align: justify;
 }
@@ -43,4 +47,41 @@
 }
 .privacy-container li {
   margin-bottom: 0.5rem;
+  font-size: 1.125rem;
+}
+
+/* Back to Top */
+.back-to-top {
+  text-align: right;
+  margin-top: 3rem;
+}
+.back-to-top a {
+  font-size: 1rem;
+  color: #b9341f;
+  text-decoration: none;
+  font-weight: 600;
+}
+.back-to-top a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .privacy-container {
+    margin: 2rem 1rem;
+    padding: 2rem 1rem;
+  }
+
+  .privacy-container h2 {
+    font-size: 2.25rem;
+  }
+
+  .privacy-container h3 {
+    font-size: 1.75rem;
+  }
+
+  .privacy-container p,
+  .privacy-container li {
+    font-size: 1rem;
+  }
 }

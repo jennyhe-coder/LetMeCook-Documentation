@@ -1,20 +1,21 @@
-/* src/pages/contact.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
 /* 1) Overall container */
 .contact-container {
   background: #ffffff;
-  max-width: 720px;               /* slightly narrower for focus */
-  margin: 4rem auto;              /* more breathing room above */
-  padding: 3rem 2.5rem;           /* generous padding */
+  max-width: 720px;
+  margin: 4rem auto;
+  padding: 3rem 2.5rem;
   border-radius: 12px;
   box-shadow: 0 12px 36px rgba(0,0,0,0.1);
   color: #28200d;
-  line-height: 1.6;
+  line-height: 1.75;
+  font-family: 'Inter', sans-serif;
 }
 
 /* 2) Section heading */
 .contact-container h2 {
-  font-size: 2.5rem;
+  font-size: 2.75rem;
   font-weight: 700;
   color: #b9341f;
   margin-bottom: 1.5rem;
@@ -24,7 +25,7 @@
 
 /* 3) Intro text */
 .contact-container .intro {
-  font-size: 1.025rem;
+  font-size: 1.125rem;
   margin-bottom: 2rem;
   text-align: center;
   color: #4f4831;
@@ -54,7 +55,7 @@
   flex-direction: column;
 }
 .form-group label {
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
   color: #28200d;
@@ -69,6 +70,7 @@
   border-radius: 8px;
   background: #fdfcf9;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: 'Inter', sans-serif;
 }
 .form-input:focus,
 .form-textarea:focus {
@@ -81,21 +83,24 @@
   resize: vertical;
 }
 
-/* 8) Submit button */
+/* 8) Submit button (red palette) */
 .submit-btn {
   grid-column: 1 / -1;
+  display: block;
+  width: 100%;
   padding: 1rem;
   font-size: 1rem;
   font-weight: 700;
   color: #fff;
-  background: linear-gradient(135deg, #b9341f 0%, #d14d30 100%);
+  background: linear-gradient(135deg, #b9341f 0%, #d14d30 100%) !important;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.3s ease, transform 0.1s ease;
+  font-family: 'Inter', sans-serif;
 }
 .submit-btn:hover {
-  background: linear-gradient(135deg, #d14d30 0%, #b9341f 100%);
+  background: linear-gradient(135deg, #d14d30 0%, #b9341f 100%) !important;
   transform: translateY(-2px);
 }
 .submit-btn:active {
@@ -109,6 +114,8 @@
   border-radius: 6px;
   font-weight: 600;
   text-align: center;
+  font-size: 0.95rem;
+  font-family: 'Inter', sans-serif;
 }
 .form-message.error {
   background: #ffe6e6;
@@ -128,10 +135,27 @@
   text-align: center;
   margin-top: 2rem;
   line-height: 1.5;
+  font-family: 'Inter', sans-serif;
 }
 
 /* 11) Tweak footer-links on this page only */
 .footer-links {
   justify-content: center;
   gap: 2rem;
+}
+
+/* 12) Back to Top Button */
+.back-to-top {
+  text-align: right;
+  margin-top: 3rem;
+}
+.back-to-top a {
+  font-size: 0.95rem;
+  color: #b9341f;
+  text-decoration: none;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+}
+.back-to-top a:hover {
+  text-decoration: underline;
 }

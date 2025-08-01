@@ -45,9 +45,11 @@ const About = () => {
             Thank you for being part of our community. We look forward to cooking alongside you
             and making every meal a memorable experience.
           </p>
-        </section>
 
-        <div className="section-line"></div>
+          <div className="back-to-top">
+        <a href="#">↑ Back to Top</a>
+      </div>
+        </section>
       </main>
     </>
   );

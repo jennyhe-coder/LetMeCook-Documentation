@@ -1,4 +1,5 @@
-/* 1) Card container */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
 .terms-container {
   background: #fff;
   max-width: 800px;
@@ -7,72 +8,69 @@
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.08);
   color: #28200d;
-  line-height: 1.6;
+  line-height: 1.75;
+  font-family: 'Inter', sans-serif;
 }
 
-/* 2) Main heading */
+/* Main heading */
 .terms-container h2 {
-  font-size: 2.75rem;      /* ~44px */
+  font-size: 2.75rem;
   font-weight: 700;
-  color: #b9341f;          /* accent */
+  color: #b9341f;
   text-align: center;
   margin-bottom: 1.5rem;
+  letter-spacing: 1px;
 }
 
-/* 3) Section titles */
+/* Section titles */
 .terms-container h3 {
-  font-size: 1.75rem;      /* ~28px */
+  font-size: 2rem;
   font-weight: 600;
-  margin-top: 2rem;
+  color: #28200d;
+  margin-top: 2.5rem;
   margin-bottom: 0.75rem;
+  padding-bottom: 0.25rem;
   border-bottom: 2px solid #d3cdc1;
-  padding-bottom: 0.5rem;
 }
 
-/* 4) Paragraph text */
+/* Paragraph text */
 .terms-container p {
-  font-size: 1rem;         /* 16px */
-  margin-bottom: 1.25rem;
+  font-size: 1.125rem;
+  margin-bottom: 1.5rem;
   text-align: justify;
 }
 
-/* 5) Accept button */
-#accept-terms {
-  display: inline-block;
-  margin-top: 2rem;
-  padding: 0.75rem 1.5rem;
+/* Back to Top */
+.back-to-top {
+  text-align: right;
+  margin-top: 3rem;
+}
+.back-to-top a {
   font-size: 1rem;
+  color: #b9341f;
+  text-decoration: none;
   font-weight: 600;
-  color: #fff;
-  background-color: #b9341f;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+.back-to-top a:hover {
+  text-decoration: underline;
 }
 
-#accept-terms:hover {
-  background-color: #a32f19;
-  transform: translateY(-1px);
-}
-#accept-terms:active {
-  background-color: #8a2713;
-  transform: translateY(0);
-}
-
-/* 6) Responsive tweaks */
+/* Responsive */
 @media (max-width: 768px) {
   .terms-container {
     margin: 2rem 1rem;
     padding: 2rem 1rem;
   }
+
   .terms-container h2 {
     font-size: 2.25rem;
   }
+
   .terms-container h3 {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
   }
+
   .terms-container p {
-    font-size: 0.95rem;
+    font-size: 1rem;
   }
 }
