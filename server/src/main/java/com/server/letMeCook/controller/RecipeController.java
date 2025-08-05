@@ -109,11 +109,35 @@ public class RecipeController {
             @RequestParam(required = false) Set<String> allergies,
             @RequestParam(required = false) Set<String> categories,
             @RequestParam(required = false) Set<String> dietaryPreferences,
-            @RequestParam(required = false, defaultValue = "true") Boolean isPublic,
-            @PageableDefault(size = 20, page = 0, sort = "title", direction = Sort.Direction.ASC) Pageable pageable
+            @RequestParam(defaultValue = "true") boolean isPublic,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "title,asc") String[] sort,
+            @RequestParam(required = false) String imageBase64
     ) {
-        if (keyword != null && keyword.length() > 10) {
-            RecipeSearchFields fields = openAIService.extractRecipeSearchFields(keyword);
+        // Sort mapping
+        Map<String, String> allowedSortFields = Map.of(
+                "title", "title",
+                "cooktime", "time",
+                "viewcount", "viewCount",
+                "createdat", "createdAt"
+        );
+
+        Sort sortObj = Sort.by(Arrays.stream(sort).map(s -> {
+            String[] parts = s.split(",");
+            String field = parts[0].toLowerCase();
+            Sort.Direction direction = (parts.length > 1 && parts[1].equalsIgnoreCase("desc")) ? Sort.Direction.DESC : Sort.Direction.ASC;
+            if (!allowedSortFields.containsKey(field)) {
+                throw new IllegalArgumentException("Invalid sort field: " + field);
+            }
+            return new Sort.Order(direction, allowedSortFields.get(field));
+        }).toList());
+
+        Pageable pageable = PageRequest.of(page, size, sortObj);
+
+        // Extract fields via OpenAI if keyword/image provided
+        if ((keyword != null && keyword.length() > 10) || imageBase64 != null) {
+            RecipeSearchFields fields = openAIService.extractRecipeSearchFields(keyword, imageBase64);
             keyword = fields.getKeyword();
             cuisines = mergeSet(cuisines, fields.getCuisines());
             ingredients = mergeSet(ingredients, fields.getIngredients());
@@ -121,16 +145,6 @@ public class RecipeController {
             categories = mergeSet(categories, fields.getCategories());
             dietaryPreferences = mergeSet(dietaryPreferences, fields.getDietaryPreferences());
         }
-
-        //print the search parameters for debugging
-        System.out.println("Advanced Search Parameters:");
-        System.out.println("Keyword: " + keyword);
-        System.out.println("Cuisines: " + (cuisines != null ? String.join(", ", cuisines) : "null"));
-        System.out.println("Ingredients: " + (ingredients != null ? String.join(", ", ingredients) : "null"));
-        System.out.println("Allergies: " + (allergies != null ? String.join(", ", allergies) : "null"));
-        System.out.println("Categories: " + (categories != null ? String.join(", ", categories) : "null"));
-        System.out.println("Dietary Preferences: " + (dietaryPreferences != null ? String.join(", ", dietaryPreferences) : "null"));
-        System.out.println("Is Public: " + isPublic);
 
         return recipeService.advancedSearch(keyword, cuisines, ingredients, allergies, categories, dietaryPreferences, isPublic, pageable);
     }
@@ -140,7 +154,7 @@ public class RecipeController {
             @RequestParam(required = false, name = "recipeid") UUID recipeId,
             @RequestParam(required = false, name = "userid") UUID userId) {
         if (recipeId != null) {
-            List<RecipeCardDTO> list = recipeService.recommendedByRecipeId(recipeId);
+            Page<RecipeCardDTO> list = recipeService.recommendedByRecipeId(recipeId);
             return ResponseEntity.ok(list);
         }
 
@@ -167,6 +181,4 @@ public class RecipeController {
                     .body("Error connecting to Flask: " + e.getMessage());
         }
     }
-
-
 }

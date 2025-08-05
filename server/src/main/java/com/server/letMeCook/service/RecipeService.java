@@ -11,6 +11,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.server.letMeCook.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -32,10 +33,6 @@ import com.server.letMeCook.model.Ingredient;
 import com.server.letMeCook.model.Recipe;
 import com.server.letMeCook.model.RecipeIngredient;
 import com.server.letMeCook.model.User;
-import com.server.letMeCook.repository.RecipeBrowsingHistoryRepository;
-import com.server.letMeCook.repository.RecipeFavouritesRepository;
-import com.server.letMeCook.repository.RecipeRepository;
-import com.server.letMeCook.repository.UserAllergyRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -62,6 +59,9 @@ public class RecipeService {
     private RecipeBrowsingHistoryRepository browsingHistoryRepository;
     @Autowired
     private UserAllergyRepository userAllergyRepository;
+
+    @Autowired
+    private RecipeDislikedRepository recipeDislikedRepository;
 
     @Value("${recommendation.url}")
     private String recommendationUrl;
@@ -435,12 +435,14 @@ public class RecipeService {
 
 
     @Transactional(readOnly = true)
-    public List<RecipeCardDTO> recommendedByRecipeId(UUID recipeId) {
+    public Page<RecipeCardDTO> recommendedByRecipeId(UUID recipeId) {
         List<UUID> ids = recommendationService.recommendByRecipeId(recipeId, 10);
-        return recipeRepository.findAllById(ids)
+        List<RecipeCardDTO> content = recipeRepository.findAllById(ids)
                 .stream()
                 .map(RecipeMapper::toCardDTO)
                 .toList();
+        Pageable pageable = PageRequest.of(0, 10);
+        return new PageImpl<>(content, pageable, content.size());
     }
 
     @Transactional(readOnly = true)
@@ -471,10 +473,15 @@ public class RecipeService {
                 .toList();
         // filter with allergy
         Set<UUID> allergySet = new HashSet<>(user_allergy_ingredients);
+
+        // filter with user disklike recipe
+        List<UUID> dislikeRecipe = recipeDislikedRepository.findDislikedRecipeIdsByUserId(userId);
+
         List<RecipeCardDTO> content = orderedRecipes.stream()
                 .filter(recipe -> recipe.getRecipeIngredients().stream()
                         .map(ri -> ri.getIngredient().getId())
                         .noneMatch(allergySet::contains))
+                .filter(recipe -> !dislikeRecipe.contains(recipe.getId()))
                 .map(RecipeMapper::toCardDTO)
                 .limit(10)
                 .toList();
