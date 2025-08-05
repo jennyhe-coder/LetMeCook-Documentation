@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../utils/supabaseClient';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import Modal from '../components/Modal';
 
@@ -12,9 +12,20 @@ export default function Register() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [hasEmail, setHasEmail] = useState('');
     const [error, setError] = useState('');
     const [showModal, setShowModal] = useState(false)
+
+    const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const emailFromQuery = searchParams.get('email');
+        if (emailFromQuery && !hasEmail) {
+            setEmail(emailFromQuery);
+            setHasEmail(true);
+        }
+    }, [searchParams, hasEmail]);
 
     const handleRegister = async (e) => {
         e.preventDefault();
