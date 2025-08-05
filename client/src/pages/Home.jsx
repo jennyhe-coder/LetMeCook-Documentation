@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import { Route } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Route, useNavigate } from "react-router-dom";
 import SearchBar from "./../components/SearchBar-Home";
 import CarouselSection from "./../components/CarouselSection";
 import PrivateRoute from "../components/PrivateRoute";
@@ -8,10 +8,22 @@ import sunnythumbsup from "../assets/sunnythumbsup.png";
 import UserDashboard from "./UserDashboard";
 
 export default function Home() {
+  const [email, setEmail] = useState('');
+  const navigate = useNavigate();
   const inputRef = useRef();
+
   useEffect(() => {
     inputRef.current?.focus({ preventScroll: true });
   }, []);
+
+  const handleSignUpSubmit = (e) => {
+    e.preventDefault();
+    const trimEmail = email.trim();
+    if (!trimEmail) return;
+
+    // redirect to /register page 
+    navigate(`/register?email=${encodeURIComponent(trimEmail)}`);
+  };
 
   <Route
     path="/dashboard"
@@ -77,9 +89,17 @@ export default function Home() {
               <li>✓ Save and rate your favorite dishes</li>
               <li>✓ Weekly handpicked recipe inspiration</li>
             </ul>
-            <form className="email-section">
-              <input type="email" placeholder="Your email address" />
-              <button className="button" type="submit">
+            <form className="email-section" onSubmit={handleSignUpSubmit}>
+              <input 
+                name="emailInput"
+                type="email" 
+                placeholder="Your email address" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                ref={inputRef}
+                required
+              />
+              <button className="getStartedBtn" type="submit">
                 Get Started
               </button>
             </form>
