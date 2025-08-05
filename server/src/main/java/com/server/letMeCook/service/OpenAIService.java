@@ -1,5 +1,6 @@
 package com.server.letMeCook.service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -62,13 +63,22 @@ public class OpenAIService {
     }
 
 
-    public RecipeSearchFields extractRecipeSearchFields(String prompt){
+    public RecipeSearchFields extractRecipeSearchFields(String prompt, String imageBase64 ){
         List<String> cuisineNames = cuisineService.getAllCuisineNames();
         List<String> categoryNames = categoryService.getAllCategoryNames();
         List<String> dietNames = dietaryPreferenceService.getAllDietaryPreferenceNames();
-        System.out.println("Extracting recipe search fields from prompt: " + prompt);
-        // Normalize the prompt to remove unnecessary phrases
-        prompt = normalizePromptForSearch(prompt);
+        if (prompt != null) prompt = normalizePromptForSearch(prompt);
+
+        StringBuilder userContent = new StringBuilder();
+        userContent.append("Prompt: ").append(prompt != null ? prompt : "").append("\n");
+
+        if (imageBase64 != null) {
+            userContent.append("Detected ingredients from image:\n");
+            List<String> detectedIngredients = detectIngredientsFromImage(imageBase64);
+            userContent.append(String.join(", ", detectedIngredients));
+            if (prompt != null) userContent.append("\nCombined with prompt above.");
+        }
+
 
         String instruction = String.format("""
     Based on the following user prompt, extract and return a valid JSON object with the following fields:
@@ -120,9 +130,8 @@ public class OpenAIService {
                 String.join(", ", cuisineNames),
                 String.join(", ", categoryNames),
                 String.join(", ", dietNames),
-                prompt.toLowerCase()
+                userContent.toString()
         );
-
         Map<String, Object> requestBody = Map.of(
                 "model", "gpt-4.1",
                 "temperature", 0,
@@ -147,6 +156,46 @@ public class OpenAIService {
 
         return parseResponse(response.getBody());
     }
+
+    private List<String> detectIngredientsFromImage(String imageBase64) {
+        Map<String, Object> imageMessage = Map.of(
+                "role", "user",
+                "content", List.of(
+                        Map.of("type", "text", "text", "List ingredients visible in the image."),
+                        Map.of("type", "image_url", "image_url", Map.of("url", "data:image/jpeg;base64," + imageBase64))
+                )
+        );
+
+        Map<String, Object> requestBody = Map.of(
+                "model", "gpt-4.1",
+                "temperature", 0,
+                "messages", List.of(imageMessage)
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(openAiApiKey);
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+        ResponseEntity<Map> response = restTemplate.exchange(
+                "https://api.openai.com/v1/chat/completions",
+                HttpMethod.POST,
+                request,
+                Map.class
+        );
+
+        Map<String, Object> choice = ((List<Map<String, Object>>) response.getBody().get("choices")).get(0);
+        Map<String, Object> message = (Map<String, Object>) choice.get("message");
+        String ingredientsText = (String) message.get("content");
+
+        return Arrays.stream(ingredientsText.split(",|\n"))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .map(String::toLowerCase)
+                .distinct()
+                .toList();
+    }
+
     @SuppressWarnings("unchecked")
     private RecipeSearchFields parseResponse(Map<String, Object> response) {
         try {

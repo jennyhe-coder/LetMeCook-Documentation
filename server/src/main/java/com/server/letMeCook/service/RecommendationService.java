@@ -63,4 +63,24 @@ public class RecommendationService {
         return Collections.emptyList();
     }
 
+    public String triggerPipeline() {
+        String url = properties.getUrl() + "/pipeline/run";
+        try {
+            ResponseEntity<Map> response = restTemplate.postForEntity(url, null, Map.class);
+            return (String) response.getBody().get("message");
+        } catch (Exception e) {
+            return "Failed to trigger pipeline: " + e.getMessage();
+        }
+    }
+
+    public Map<String, Object> getCacheInfo() {
+        String url = properties.getUrl() + "/cache/info";
+        try {
+            ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
+            return response.getBody();
+        } catch (Exception e) {
+            return Map.of("error", e.getMessage());
+        }
+    }
+
 }

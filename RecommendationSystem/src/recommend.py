@@ -1,119 +1,186 @@
+# src/recommend.py (Updated version)
 import torch
-import pickle
-import pandas as pd
 from sentence_transformers import util
+from typing import List, Tuple
+import logging
 
-from src.clean_data import combine_fields
-from src.embed_with_sbert import append_embedding, remove_embeddings
-from dotenv import load_dotenv
-import os
-from sqlalchemy import create_engine
-from urllib.parse import quote_plus
-load_dotenv()
+from src.cache_manager import get_cache
+
+logger = logging.getLogger(__name__)
 
 
-def load_data():
-    embeddings = torch.load("model/recipe_embeddings.pt", map_location="cpu")
-    with open("model/recipe_ids.pkl", "rb") as f:
-        recipe_ids = pickle.load(f)
-    return recipe_ids, embeddings
+def recommend_by_id(target_id: str, top_k: int = 10) -> List[Tuple[str, float]]:
+    """
+    Recommend recipes based on a target recipe ID using cached embeddings
 
+    Args:
+        target_id: Target recipe ID
+        top_k: Number of recommendations to return
 
-def try_update_missing_embedding(recipe_id):
-    recipe_ids, _ = load_data()
-    if recipe_id in recipe_ids:
-        return
+    Returns:
+        List of (recipe_id, similarity_score) tuples
+    """
+    cache = get_cache()
 
-    # Connect suppabase and check if recipe_id exists
+    try:
+        recipe_ids, embeddings = cache.get_data()
 
-    load_dotenv()
-    user = os.getenv("SUPABASE_USER")
-    password = quote_plus(os.getenv("SUPABASE_PASSWORD", ""))
-    host = os.getenv("SUPABASE_HOST")
-    port = os.getenv("SUPABASE_PORT")
-    db = os.getenv("SUPABASE_DB")
+        # Check if target recipe exists in cache
+        if target_id not in recipe_ids:
+            logger.info(f"Recipe {target_id} not in cache, adding...")
+            cache.add_recipe_to_cache(target_id)
+            recipe_ids, embeddings = cache.get_data()
 
-    url = f'postgresql+pg8000://{user}:{password}@{host}:{port}/{db}'
-    engine = create_engine(url)
-
-    query = f"""
-            SELECT r.id, r.title, r.description, r.directions,
-                STRING_AGG(DISTINCT cu.name, ', ') AS cuisines,
-                STRING_AGG(DISTINCT ing.name, ', ') AS ingredients,
-                STRING_AGG(DISTINCT d_pref.name, ', ') AS dietary_pref
-            FROM recipe r
-            LEFT JOIN recipe_cuisines re_cu ON r.id = re_cu.recipe_id
-            LEFT JOIN cuisines cu ON re_cu.cuisine_id = cu.id
-            LEFT JOIN recipe_ingredients re_in ON r.id = re_in.recipe_id
-            LEFT JOIN ingredients ing ON re_in.ingredient_id = ing.id
-            LEFT JOIN recipe_dietary_pref re_pref ON r.id = re_pref.recipe_id
-            LEFT JOIN dietary_pref d_pref ON re_pref.preference_id = d_pref.id
-            WHERE r.id = '{recipe_id}'
-            GROUP BY r.id, r.title, r.description, r.directions
-        """
-
-    df = pd.read_sql(query, engine)
-    if df.empty:
-        raise ValueError(f"❌ Recipe ID '{recipe_id}' not found in database")
-
-    combined_text = combine_fields(df.iloc[0])
-    append_embedding(recipe_id, combined_text)
-
-def sync_embeddings():
-    df = pd.read_csv("data/recipes_cleaned.csv")
-    valid_ids = set(df["id"].tolist())
-    current_ids, _ = load_data()
-    removed_ids = [rid for rid in current_ids if rid not in valid_ids]
-    if removed_ids:
-        remove_embeddings(removed_ids)
-
-def recommend_by_id(target_id, top_k=10):
-    sync_embeddings()
-    try_update_missing_embedding(target_id)
-    recipe_ids, embeddings = load_data()
-    idx = recipe_ids.index(target_id)
-    target_vector = embeddings[idx].to("cpu")
-    similarities = util.cos_sim(target_vector, embeddings)[0]
-    top_results = torch.topk(similarities, k=top_k + 1)
-    return [(recipe_ids[i], float(score)) for score, i in zip(top_results.values[1:], top_results.indices[1:])]
-
-def recommend_for_user(fav_ids, hist_ids, fav_weight=2.0, hist_weight=1.0, top_k=10):
-    sync_embeddings()
-    for rid in fav_ids + hist_ids:
+        # Find target recipe index
         try:
-            try_update_missing_embedding(rid)
-        except Exception:
-            continue
+            idx = recipe_ids.index(target_id)
+        except ValueError:
+            raise ValueError(f"Recipe ID '{target_id}' not found after cache update")
 
-    recipe_ids, embeddings = load_data()
-    vectors, weights = [], []
+        # Get target vector and compute similarities
+        target_vector = embeddings[idx].to("cpu")
+        similarities = util.cos_sim(target_vector, embeddings)[0]
 
-    for rid in fav_ids:
-        if rid in recipe_ids:
-            vectors.append(embeddings[recipe_ids.index(rid)].to("cpu"))
-            weights.append(fav_weight)
+        # Get top results (excluding the target recipe itself)
+        top_results = torch.topk(similarities, k=min(top_k + 1, len(similarities)))
 
-    for rid in hist_ids:
-        if rid in recipe_ids and rid not in fav_ids:
-            vectors.append(embeddings[recipe_ids.index(rid)].to("cpu"))
-            weights.append(hist_weight)
+        recommendations = []
+        for score, i in zip(top_results.values, top_results.indices):
+            rec_id = recipe_ids[i]
+            if rec_id != target_id:  # Exclude the target recipe
+                recommendations.append((rec_id, float(score)))
 
-    if not vectors:
-        return []
+            if len(recommendations) >= top_k:
+                break
 
-    stacked = torch.stack(vectors).to("cpu")
-    weight_tensor = torch.tensor(weights, dtype=torch.float32).unsqueeze(1).to("cpu")
-    user_vector = torch.sum(stacked * weight_tensor, dim=0) / torch.sum(weight_tensor)
-    similarities = util.cos_sim(user_vector, embeddings)[0]
+        logger.info(f"Generated {len(recommendations)} recommendations for recipe {target_id}")
+        return recommendations
 
-    exclude = set(fav_ids + hist_ids)
-    top_results = torch.topk(similarities, k=top_k + len(exclude) + 5)
-    recommendations = []
-    for score, idx in zip(top_results.values, top_results.indices):
-        rec_id = recipe_ids[idx]
-        if rec_id not in exclude:
-            recommendations.append((rec_id, float(score)))
-        if len(recommendations) >= top_k:
-            break
+    except Exception as e:
+        logger.error(f"Error in recommend_by_id: {e}")
+        raise
 
-    return recommendations
+
+def recommend_for_user(
+        fav_ids: List[str],
+        hist_ids: List[str],
+        fav_weight: float = 2.0,
+        hist_weight: float = 1.0,
+        top_k: int = 10
+) -> List[Tuple[str, float]]:
+    """
+    Recommend recipes for a user based on favorites and history using cached embeddings
+
+    Args:
+        fav_ids: List of favorite recipe IDs
+        hist_ids: List of recipe IDs from user history
+        fav_weight: Weight for favorite recipes
+        hist_weight: Weight for history recipes
+        top_k: Number of recommendations to return
+
+    Returns:
+        List of (recipe_id, similarity_score) tuples
+    """
+    cache = get_cache()
+
+    try:
+        recipe_ids, embeddings = cache.get_data()
+
+        # Ensure all user recipes are in cache
+        missing_recipes = []
+        for rid in fav_ids + hist_ids:
+            if rid not in recipe_ids:
+                missing_recipes.append(rid)
+
+        if missing_recipes:
+            logger.info(f"Adding {len(missing_recipes)} missing recipes to cache...")
+            for rid in missing_recipes:
+                try:
+                    cache.add_recipe_to_cache(rid)
+                except Exception as e:
+                    logger.warning(f"Failed to add recipe {rid} to cache: {e}")
+                    continue
+
+            # Refresh data after adding missing recipes
+            recipe_ids, embeddings = cache.get_data()
+
+        # Collect vectors and weights for user profile
+        vectors = []
+        weights = []
+
+        # Add favorite recipes
+        for rid in fav_ids:
+            if rid in recipe_ids:
+                idx = recipe_ids.index(rid)
+                vectors.append(embeddings[idx].to("cpu"))
+                weights.append(fav_weight)
+
+        # Add history recipes (excluding favorites to avoid double counting)
+        for rid in hist_ids:
+            if rid in recipe_ids and rid not in fav_ids:
+                idx = recipe_ids.index(rid)
+                vectors.append(embeddings[idx].to("cpu"))
+                weights.append(hist_weight)
+
+        if not vectors:
+            logger.warning("No valid recipes found in user profile")
+            return []
+
+        # Create weighted user profile vector
+        stacked = torch.stack(vectors).to("cpu")
+        weight_tensor = torch.tensor(weights, dtype=torch.float32).unsqueeze(1).to("cpu")
+        user_vector = torch.sum(stacked * weight_tensor, dim=0) / torch.sum(weight_tensor)
+
+        # Compute similarities
+        similarities = util.cos_sim(user_vector, embeddings)[0]
+
+        # Get top results excluding user's existing recipes
+        exclude_set = set(fav_ids + hist_ids)
+        top_results = torch.topk(similarities, k=min(top_k + len(exclude_set) + 10, len(similarities)))
+
+        recommendations = []
+        for score, idx in zip(top_results.values, top_results.indices):
+            rec_id = recipe_ids[idx]
+            if rec_id not in exclude_set:
+                recommendations.append((rec_id, float(score)))
+
+            if len(recommendations) >= top_k:
+                break
+
+        logger.info(f"Generated {len(recommendations)} recommendations for user")
+        return recommendations
+
+    except Exception as e:
+        logger.error(f"Error in recommend_for_user: {e}")
+        raise
+
+
+def get_recommendation_stats() -> dict:
+    """Get statistics about the recommendation system"""
+    cache = get_cache()
+
+    try:
+        cache_info = cache.get_cache_info()
+        recipe_ids, embeddings = cache.get_data()
+
+        return {
+            "cache_info": cache_info,
+            "embedding_shape": list(embeddings.shape) if embeddings.numel() > 0 else [0],
+            "system_status": "healthy" if cache_info["is_valid"] else "cache_expired"
+        }
+
+    except Exception as e:
+        logger.error(f"Error getting recommendation stats: {e}")
+        return {
+            "cache_info": {},
+            "embedding_shape": [0],
+            "system_status": "error",
+            "error": str(e)
+        }
+
+
+# Legacy function for backward compatibility
+def try_update_missing_embedding(recipe_id: str):
+    """Legacy function - now handled by cache manager"""
+    cache = get_cache()
+    cache.add_recipe_to_cache(recipe_id)
