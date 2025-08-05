@@ -5,10 +5,11 @@ import '../styles.css';    // global styles
 import '../contact.css';  // page-specific styles
 
 export default function Contact() {
+  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
   const [formMessage, setFormMessage] = useState('');
   const [formClass, setFormClass] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const name = e.target.name.value.trim();
     const email = e.target.email.value.trim();
@@ -20,9 +21,31 @@ export default function Contact() {
       return;
     }
 
-    setFormMessage('Thank you! Your message has been sent successfully.');
-    setFormClass('success');
-    e.target.reset();
+    // send email logic using edge function 
+    try {
+      const res = await fetch('https://cbyiuthgfdbnhrxoaelw.supabase.co/functions/v1/send-contact-email', 
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${anonKey}`
+          },
+          body: JSON.stringify({ name, email, message })
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error('Failed to send message');
+      }
+
+      setFormMessage('Thank you! Your message has been sent successfully.');
+      setFormClass('success');
+      e.target.reset();
+    } catch (err) {
+      console.error(err);
+      setFormMessage('Opps! Something went wrong. Please try again later.');
+      setFormClass('error');
+    }
   };
 
   return (
