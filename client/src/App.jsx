@@ -23,38 +23,44 @@ import EditRecipe from "./pages/EditRecipe";
 import Err401 from "./pages/Err401";
 import Err404 from "./pages/Err404";
 import Err403 from "./pages/Err403";
+import PrivateRoute from "./components/PrivateRoute"
+import GuestRoute  from "./components/GuestRoute";
 
 function App() {
-
   return (
     <>
       <header>
         <MainNav/>
       </header>
       <Routes>
-        <Route path="/" element={<Home />} />   
+        {/* public route always accessible */}
         <Route path="/recipes" element={<Recipes />} />
         <Route path="/recipes/:id" element={<IndividualRecipe />} />
-        <Route path="/login" element={<Login />} />
         <Route path="/search" element={<SearchResults />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/about" element={<About />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/unauthorized" element={<Err401 />} />
+        <Route path="/forbidden" element={<Err403 />} />
+        <Route path="*" element={<Err404 />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+
+        {/* guest only route */}
+        <Route path="/" element={<GuestRoute> <Home /> </GuestRoute>} /> 
+        <Route path="/login" element={<GuestRoute> <Login /> </GuestRoute>} />
+        <Route path="/register" element={<GuestRoute> <Register /> </GuestRoute>} />
+
+        {/* authenticated user route */} 
+        <Route path="/dashboard" element={ <PrivateRoute> <UserDashboard /> </PrivateRoute>} /> 
+        <Route path="/profile" element={<Profile />} />
         <Route path="/edit-profile" element={<EditProfile />} />
-        <Route path="/dashboard" element={<UserDashboard />} />
         <Route path="/favourites" element={<Favourites />} />
         <Route path="/create-recipe" element={<CreateRecipe />} />
         <Route path="/user-recipe" element={<UserRecipe />} />
         <Route path="/edit-recipe/:id" element={<EditRecipe />} />
-        <Route path="/unauthorized" element={<Err401 />} />
-        <Route path="/forbidden" element={<Err403 />} />
-        <Route path="*" element={<Err404 />} />
+
       </Routes>
       <Footer />
     </>

@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { Route, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import SearchBar from "./../components/SearchBar-Home";
 import CarouselSection from "./../components/CarouselSection";
-import PrivateRoute from "../components/PrivateRoute";
 import sunnythechef from "../assets/sunnythechef.png";
 import sunnythumbsup from "../assets/sunnythumbsup.png";
-import UserDashboard from "./UserDashboard";
 
 export default function Home() {
   const [email, setEmail] = useState('');
@@ -24,15 +22,6 @@ export default function Home() {
     // redirect to /register page 
     navigate(`/register?email=${encodeURIComponent(trimEmail)}`);
   };
-
-  <Route
-    path="/dashboard"
-    element={
-      <PrivateRoute>
-        <UserDashboard />
-      </PrivateRoute>
-    }
-  />;
 
   return (
     <>
