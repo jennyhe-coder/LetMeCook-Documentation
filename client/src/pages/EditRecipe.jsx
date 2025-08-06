@@ -429,16 +429,7 @@ export default function EditRecipe() {
           onChange={setCategories}
         />
         </div>
-        <div className='form-group'>
-          <h4>Description</h4>
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            placeholder="Description"
-            type="text"
-          />
-        </div>
+        
         <div className='form-group'>
         <h4>Servings</h4>
         <input

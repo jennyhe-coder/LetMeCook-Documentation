@@ -3,6 +3,7 @@ import { supabase } from '../utils/supabaseClient';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import Modal from '../components/Modal';
+import { set } from 'lodash';
 
 export default function Register() {
     const [email, setEmail] =  useState('');
@@ -29,8 +30,7 @@ export default function Register() {
 
     const handleRegister = async (e) => {
         e.preventDefault();
-
-         if (password !== confirmPassword) {
+        if (password !== confirmPassword) {
             setError('Passwords do not match.');
             return;
         }
@@ -38,30 +38,35 @@ export default function Register() {
             setError('Please fill in all fields.');
             return;
         }
-
-        const {data, error} = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: {
-                    first_name: firstName,
-                    last_name: lastName
+         
+        try {
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        first_name: firstName,
+                        last_name: lastName
+                    }
                 }
+            });
+
+            if (error) {
+                setError(error.message);
+                return;
             }
-        });
 
-
-        if (error) {
-            setError(error.message);
-            return
-        }
-
-        if(!data.user?.id) {
-            setError("No user Id returned");
+            if (!data.user?.id) {
+                setError("No user Id returned");
+                return;
+            } else {
+                setShowModal(true);
+            }
+        } catch (error) {
+            setError('An error occurred while registering: ' + error.message);
             return;
-        } else {
-            setShowModal(true)
-        }      
+        }
+         
     };
 
     return(
