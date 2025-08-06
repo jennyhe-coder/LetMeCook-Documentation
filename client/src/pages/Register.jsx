@@ -28,6 +28,10 @@ export default function Register() {
         }
     }, [searchParams, hasEmail]);
 
+    function isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
     const handleRegister = async (e) => {
         e.preventDefault();
         if (password !== confirmPassword) {
@@ -38,7 +42,12 @@ export default function Register() {
             setError('Please fill in all fields.');
             return;
         }
-         
+
+        if (!isValidEmail(email)) {
+            setError('Please enter a valid email address format.');
+            return;
+        }
+
         try {
             const { data, error } = await supabase.auth.signUp({
                 email,

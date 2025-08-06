@@ -9,6 +9,10 @@ export default function Contact() {
   const [formMessage, setFormMessage] = useState('');
   const [formClass, setFormClass] = useState('');
 
+  function isValidEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const name = e.target.name.value.trim();
@@ -17,6 +21,12 @@ export default function Contact() {
 
     if (!name || !email.includes('@') || !message) {
       setFormMessage('Please fill in all fields with valid information.');
+      setFormClass('error');
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      setFormMessage('Please enter a valid email address format.');
       setFormClass('error');
       return;
     }
