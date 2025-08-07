@@ -365,8 +365,10 @@ export default function EditRecipe() {
 
 
   useEffect(() => {
-    if (!loading && !isAuthorized || !user) {
+    if (!loading && !isAuthorized) {
       navigate('/forbidden');
+    } else if (!user) {
+      navigate('/unauthorized');
     }
   }, [isAuthorized, loading, navigate]);
 
