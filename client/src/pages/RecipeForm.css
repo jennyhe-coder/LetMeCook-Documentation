@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
 .create-recipe-container {
   max-width: 800px;
   margin: 40px auto;
@@ -26,6 +28,12 @@
   font-weight: 600;
   font-size: 1rem;
   margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+}
+
+.form-group label input[type="checkbox"] {
+  margin-right: 8px;
 }
 
 .form-group input,
@@ -33,6 +41,7 @@
 .form-group select {
   padding: 12px;
   font-size: 1rem;
+  font-family: 'Inter', sans-serif; /* ✅ Ensures font consistency */
   border: 1px solid #ccc;
   border-radius: 8px;
   transition: border-color 0.2s;
@@ -86,6 +95,7 @@
   border-radius: 6px;
   border: 1px solid #ccc;
   font-size: 0.95rem;
+  font-family: 'Inter', sans-serif; /* Optional for extra safety */
 }
 
 .add-ingredient-btn {
@@ -127,6 +137,7 @@ button[type="submit"] {
   border-radius: 8px;
   font-weight: 600;
   font-size: 1rem;
+  font-family: 'Inter', sans-serif;
   cursor: pointer;
   margin-top: 20px;
   transition: background 0.3s ease;
@@ -151,6 +162,7 @@ button[type="submit"]:hover {
   border-radius: 8px;
   font-weight: 600;
   font-size: 1rem;
+  font-family: 'Inter', sans-serif;
   cursor: pointer;
   margin-top: 20px;
   transition: background 0.3s ease;

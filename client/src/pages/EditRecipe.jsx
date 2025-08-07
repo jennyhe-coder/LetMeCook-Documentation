@@ -429,16 +429,7 @@ export default function EditRecipe() {
           onChange={setCategories}
         />
         </div>
-        <div className='form-group'>
-          <h4>Description</h4>
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            placeholder="Description"
-            type="text"
-          />
-        </div>
+
         <div className='form-group'>
         <h4>Servings</h4>
         <input
@@ -526,21 +517,26 @@ export default function EditRecipe() {
             </select>
 
             <button
-              type="button"
-              className="delete-ingredient-btn"
-              onClick={() => removeIngredientRow(index)}
-            >
-              Delete
-            </button>
+  type="button"
+  className="delete-ingredient-btn"
+  onClick={() => removeIngredientRow(index)}
+  aria-label="Remove ingredient"
+>
+  &minus;
+</button>
+
           </div>
         ))}
+        
         <button
-          type="button"
-          onClick={addIngredientRow}
-          className="add-ingredient-btn"
-        >
-          Add Ingredient
-        </button>
+  type="button"
+  onClick={addIngredientRow}
+  className="add-ingredient-btn"
+  aria-label="Add ingredient"
+>
+  &#43;
+</button>
+
 
         <br /><br />
         <button type="submit" className="btn btn-success">
