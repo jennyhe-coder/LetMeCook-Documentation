@@ -1773,3 +1773,103 @@ p {
   line-height: normal;
   letter-spacing: -0.32px;
 }
+
+.recommended-section {
+  margin-top: 0px;
+  z-index: 0;
+  position: relative;
+  padding-top: 50px;
+  padding-bottom: 160px;
+  overflow: visible;
+  min-height: 800px;
+}
+
+.pagination-wrapper-recommended {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.recommended-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 40px;
+}
+
+.suggestions-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  max-height: 920px;
+  overflow-y: auto;
+  z-index: 999;
+  margin-top: 4px;
+  padding: 0;
+  list-style: none;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.suggestion-item:hover {
+  background: #f2f2f2;
+}
+
+.suggestion-image {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.suggestions-loading {
+  padding: 10px;
+  font-size: 14px;
+  color: #666;
+}
+
+.camera-icon {
+  position: absolute;
+  right: 50px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #666;
+}
+
+.send-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.mic-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.mic-icon.listening {
+  color: red;
+}
