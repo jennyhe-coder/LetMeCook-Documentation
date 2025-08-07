@@ -362,7 +362,7 @@ export default function CreateRecipe() {
         ))}
 
         <button type="button" className="add-ingredient-btn" onClick={addIngredientRow}>
-          Add Ingredient
+          &#43; 
         </button>
 
         <br /><br />
