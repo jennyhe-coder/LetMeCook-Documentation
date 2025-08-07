@@ -73,17 +73,17 @@ public class OpenAIService {
         String instruction = String.format("""
     Based on the following user prompt, extract and return a valid JSON object with the following fields:
     
-    - keyword: A short and clean phrase for searching dish titles or description. Remove stopwords and keep only meaningful words.
-      - ⚠️ Remove generic phrases: "I want", "Let me", "Give me", "Show me", "Find", "Get me", "Can you", "How to make", etc.
-      - ⚠️ Remove stopwords: "the", "a", "an", "with", "for", "and", "or", "but", etc.
-      - ⚠️ Remove generic food words: "dishes", "meal", "food", "recipe", "cooking", etc.
-      - ⚠️ Remove words already used in cuisines, ingredients, categories, or dietary preferences.
-      - ⚠️ Can be empty/"" if no meaningful words remain after filtering.
-      - ✅ Examples:
-        "I want a spicy Vietnamese soup with noodles" → keyword: "spicy soup"
-        "Give me dishes with avocado without chicken" → keyword: null
-        "Show me Italian pasta recipes" → keyword: "pasta"
-        "Find me some food with tomatoes" → keyword: null
+    - keyword: A short and clean phrase for searching dish titles, person names, or descriptions.\s
+       - ⚠️ Can include a dish name or a person's name **if it appears meaningfully** in the prompt.
+       - ⚠️ Remove generic phrases: "I want", "Let me", "Give me", "Show me", "Find", "Get me", "Can you", "How to make", etc.
+       - ⚠️ Remove stopwords: "the", "a", "an", "with", "for", "and", "or", "but", etc.
+       - ⚠️ Remove generic food words: "dishes", "meal", "food", "recipe", "cooking", etc.
+       - ⚠️ Remove words already used in cuisines, ingredients, categories, or dietary preferences.
+       - ⚠️ Can be null/"" if no meaningful word remains.
+       - ✅ Examples:
+         "I want a spicy Vietnamese soup with noodles" → keyword: "spicy soup"
+         "Show me Jenny's recipe" → keyword: "Jenny"
+         "Give me dishes with avocado without chicken" → keyword: null
     
     - cuisines: Include only if explicitly mentioned in the prompt. Choose only from the following list: [%s]
 
@@ -149,7 +149,7 @@ public class OpenAIService {
         String mimeType = detectMimeTypeFromBase64(imageBase64);
         String imageDataUrl = "data:" + mimeType + ";base64," + imageBase64;
 
-        // 🟢 Prompt yêu cầu chỉ trả về JSON array, không giải thích
+
         Map<String, Object> imageMessage = Map.of(
                 "role", "user",
                 "content", List.of(
