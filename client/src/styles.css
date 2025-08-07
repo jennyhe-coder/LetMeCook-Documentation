@@ -1720,7 +1720,8 @@ p {
   text-align: center;
   padding: 50px;
 }
-.error-page img{
+
+.error-page img {
   max-width: 50%;
   height: auto;
 }
@@ -1760,4 +1761,15 @@ p {
 .back-to-top-btn:hover {
   background-color: #a32f19;
   transform: translateY(-2px);
+}
+
+.filter-summary {
+  margin-left: 4px;
+  color: #1E1E1E;
+  font-family: Raleway;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  letter-spacing: -0.32px;
 }

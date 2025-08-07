@@ -14,48 +14,7 @@ export default function SearchBarModal({ onClose }) {
     }
   }, []);
 
-  const extractFromPrompt = async (prompt) => {
-    const res = await fetch("https://letmecook.ca/api/opencv/extract_search_fields", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt }),
-    });
-
-    if (!res.ok) throw new Error("Failed to extract fields from prompt");
-
-    return await res.json(); // keyword, cuisines, ingredients, ...
-  };
-
-  const extractFromImage = async (imageBase64) => {
-    const res = await fetch("https://letmecook.ca/api/opencv/extract_image_ingredients", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ imageBase64 }),
-    });
-
-    if (!res.ok) throw new Error("Failed to extract ingredients from image");
-
-    const json = await res.json();
-    return json.ingredients || [];
-  };
-
-  const buildSearchParams = (fields) => {
-    const params = new URLSearchParams();
-
-    if (fields.keyword) params.append("keyword", fields.keyword);
-    if (fields.cuisines) fields.cuisines.forEach((c) => params.append("cuisines", c));
-    if (fields.ingredients) fields.ingredients.forEach((i) => params.append("ingredients", i));
-    if (fields.allergies) fields.allergies.forEach((a) => params.append("allergies", a));
-    if (fields.categories) fields.categories.forEach((c) => params.append("categories", c));
-    if (fields.dietaryPreferences) fields.dietaryPreferences.forEach((d) => params.append("dietaryPreferences", d));
-
-    // Always search public recipes
-    params.append("isPublic", "true");
-
-    return params;
-  };
-
-  const handleKeyDown = async (e) => {
+  const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
 
@@ -65,26 +24,20 @@ export default function SearchBarModal({ onClose }) {
         return;
       }
 
-      try {
-        let fields = {};
+      const params = new URLSearchParams();
 
-
-        if (prompt) {
-          fields = await extractFromPrompt(prompt);
-        }
-
-        if (imageIngredients.length > 0) {
-          const existingIngredients = fields.ingredients || [];
-          fields.ingredients = [...new Set([...existingIngredients, ...imageIngredients])];
-        }
-
-        const params = buildSearchParams(fields);
-        navigate(`/search?${params.toString()}`);
-        onClose();
-      } catch (err) {
-        console.error("❌ Search processing error:", err);
-        alert("Failed to process your search.");
+      if (prompt) {
+        params.set("prompt", prompt);
       }
+
+      imageIngredients.forEach((i) => {
+        params.append("ingredients", i);
+      });
+
+      params.append("isPublic", "true");
+
+      navigate(`/search?${params.toString()}`);
+      onClose();
     }
   };
 
@@ -99,14 +52,27 @@ export default function SearchBarModal({ onClose }) {
     const reader = new FileReader();
     reader.onload = async () => {
       try {
-        const base64 = reader.result.split(",")[1]; 
-        const ingredients = await extractFromImage(base64);
+        const base64 = reader.result.split(",")[1];
+
+        const res = await fetch(
+          "https://letmecook.ca/api/opencv/extract_image_ingredients",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ imageBase64: base64 }),
+          }
+        );
+
+        if (!res.ok)
+          throw new Error("Failed to extract ingredients from image");
+
+        const json = await res.json();
+        const ingredients = json.ingredients || [];
 
         setImageIngredients(ingredients);
-        
-        console.log("✅ Extracted ingredients from image:", ingredients);
+        console.log("Extracted ingredients from image:", ingredients);
       } catch (err) {
-        console.error("❌ Image processing error:", err);
+        console.error("Image processing error:", err);
         alert("Failed to extract ingredients from image.");
       }
     };
@@ -136,7 +102,9 @@ export default function SearchBarModal({ onClose }) {
                 rows={1}
               />
               <FaCamera
-                className={`camera-icon ${imageIngredients.length > 0 ? 'has-image' : ''}`}
+                className={`camera-icon ${
+                  imageIngredients.length > 0 ? "has-image" : ""
+                }`}
                 size={20}
                 onClick={handleCameraClick}
               />
@@ -148,10 +116,12 @@ export default function SearchBarModal({ onClose }) {
                 onChange={handleImageUpload}
               />
             </div>
-            
+
             {imageIngredients.length > 0 && (
               <div className="image-ingredients-preview">
-                <small>Ingredients from image: {imageIngredients.join(", ")}</small>
+                <small>
+                  Ingredients from image: {imageIngredients.join(", ")}
+                </small>
               </div>
             )}
           </div>
