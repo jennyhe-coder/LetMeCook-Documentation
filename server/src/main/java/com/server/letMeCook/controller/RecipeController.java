@@ -109,42 +109,18 @@ public class RecipeController {
             @RequestParam(required = false) Set<String> allergies,
             @RequestParam(required = false) Set<String> categories,
             @RequestParam(required = false) Set<String> dietaryPreferences,
-            @RequestParam(defaultValue = "true") boolean isPublic,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
-            @RequestParam(defaultValue = "title,asc") String[] sort,
-            @RequestParam(required = false) String imageBase64
+            @RequestParam(required = false, defaultValue = "true") Boolean isPublic,
+            @PageableDefault(size = 20, page = 0, sort = "title", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        // Sort mapping
-        Map<String, String> allowedSortFields = Map.of(
-                "title", "title",
-                "cooktime", "time",
-                "viewcount", "viewCount",
-                "createdat", "createdAt"
-        );
-
-        Sort sortObj = Sort.by(Arrays.stream(sort).map(s -> {
-            String[] parts = s.split(",");
-            String field = parts[0].toLowerCase();
-            Sort.Direction direction = (parts.length > 1 && parts[1].equalsIgnoreCase("desc")) ? Sort.Direction.DESC : Sort.Direction.ASC;
-            if (!allowedSortFields.containsKey(field)) {
-                throw new IllegalArgumentException("Invalid sort field: " + field);
-            }
-            return new Sort.Order(direction, allowedSortFields.get(field));
-        }).toList());
-
-        Pageable pageable = PageRequest.of(page, size, sortObj);
-
-        // Extract fields via OpenAI if keyword/image provided
-        if ((keyword != null && keyword.length() > 10) || imageBase64 != null) {
-            RecipeSearchFields fields = openAIService.extractRecipeSearchFields(keyword, imageBase64);
-            keyword = fields.getKeyword();
-            cuisines = mergeSet(cuisines, fields.getCuisines());
-            ingredients = mergeSet(ingredients, fields.getIngredients());
-            allergies = mergeSet(allergies, fields.getAllergies());
-            categories = mergeSet(categories, fields.getCategories());
-            dietaryPreferences = mergeSet(dietaryPreferences, fields.getDietaryPreferences());
-        }
+        //print the search parameters for debugging
+        System.out.println("Advanced Search Parameters:");
+        System.out.println("Keyword: " + keyword);
+        System.out.println("Cuisines: " + (cuisines != null ? String.join(", ", cuisines) : "null"));
+        System.out.println("Ingredients: " + (ingredients != null ? String.join(", ", ingredients) : "null"));
+        System.out.println("Allergies: " + (allergies != null ? String.join(", ", allergies) : "null"));
+        System.out.println("Categories: " + (categories != null ? String.join(", ", categories) : "null"));
+        System.out.println("Dietary Preferences: " + (dietaryPreferences != null ? String.join(", ", dietaryPreferences) : "null"));
+        System.out.println("Is Public: " + isPublic);
 
         return recipeService.advancedSearch(keyword, cuisines, ingredients, allergies, categories, dietaryPreferences, isPublic, pageable);
     }

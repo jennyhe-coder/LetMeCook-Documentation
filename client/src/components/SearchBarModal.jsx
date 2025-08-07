@@ -1,12 +1,12 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaTimes } from "react-icons/fa";
-import { FaCamera } from "react-icons/fa";
+import { FaTimes, FaCamera } from "react-icons/fa";
 
 export default function SearchBarModal({ onClose }) {
   const inputRef = useRef(null);
-  const navigate = useNavigate();
   const imgRef = useRef(null);
+  const navigate = useNavigate();
+  const [imageIngredients, setImageIngredients] = useState([]);
 
   useEffect(() => {
     if (inputRef.current) {
@@ -14,43 +14,104 @@ export default function SearchBarModal({ onClose }) {
     }
   }, []);
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      const keyword = inputRef.current.value.trim();
-      if (!keyword) return;
+  const extractFromPrompt = async (prompt) => {
+    const res = await fetch("http://localhost:8080/api/opencv/extract_search_fields", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt }),
+    });
 
-      navigate(`/search?keyword=${encodeURIComponent(keyword)}`);
-      onClose();
+    if (!res.ok) throw new Error("Failed to extract fields from prompt");
+
+    return await res.json(); // keyword, cuisines, ingredients, ...
+  };
+
+  const extractFromImage = async (imageBase64) => {
+    const res = await fetch("http://localhost:8080/api/opencv/extract_image_ingredients", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ imageBase64 }),
+    });
+
+    if (!res.ok) throw new Error("Failed to extract ingredients from image");
+
+    const json = await res.json();
+    return json.ingredients || [];
+  };
+
+  const buildSearchParams = (fields) => {
+    const params = new URLSearchParams();
+
+    if (fields.keyword) params.append("keyword", fields.keyword);
+    if (fields.cuisines) fields.cuisines.forEach((c) => params.append("cuisines", c));
+    if (fields.ingredients) fields.ingredients.forEach((i) => params.append("ingredients", i));
+    if (fields.allergies) fields.allergies.forEach((a) => params.append("allergies", a));
+    if (fields.categories) fields.categories.forEach((c) => params.append("categories", c));
+    if (fields.dietaryPreferences) fields.dietaryPreferences.forEach((d) => params.append("dietaryPreferences", d));
+
+    // Always search public recipes
+    params.append("isPublic", "true");
+
+    return params;
+  };
+
+  const handleKeyDown = async (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+
+      const prompt = inputRef.current.value.trim();
+
+      if (!prompt && imageIngredients.length === 0) {
+        return;
+      }
+
+      try {
+        let fields = {};
+
+
+        if (prompt) {
+          fields = await extractFromPrompt(prompt);
+        }
+
+        if (imageIngredients.length > 0) {
+          const existingIngredients = fields.ingredients || [];
+          fields.ingredients = [...new Set([...existingIngredients, ...imageIngredients])];
+        }
+
+        const params = buildSearchParams(fields);
+        navigate(`/search?${params.toString()}`);
+        onClose();
+      } catch (err) {
+        console.error("❌ Search processing error:", err);
+        alert("Failed to process your search.");
+      }
     }
   };
 
   const handleCameraClick = () => {
-   imgRef.current.click();
+    imgRef.current.click();
   };
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const formData = new FormData();
-    formData.append("image", file);
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const base64 = reader.result.split(",")[1]; 
+        const ingredients = await extractFromImage(base64);
 
-    // insert actual aPI endpoint for image upload once developed, wwait for tai
-    const response = await fetch("/api/upload-image", {
-      method: "POST",
-      body: formData,
-    });
+        setImageIngredients(ingredients);
+        
+        console.log("✅ Extracted ingredients from image:", ingredients);
+      } catch (err) {
+        console.error("❌ Image processing error:", err);
+        alert("Failed to extract ingredients from image.");
+      }
+    };
 
-    if (!response.ok) {
-      console.error("Image upload failed");
-      return;
-    } else {
-      const result = await response.json();
-      // or whatever the API returns
-      navigate(`/search?image=${encodeURIComponent(result.imageUrl)}`);
-      onClose();
-    }
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -75,7 +136,7 @@ export default function SearchBarModal({ onClose }) {
                 rows={1}
               />
               <FaCamera
-                className="camera-icon"
+                className={`camera-icon ${imageIngredients.length > 0 ? 'has-image' : ''}`}
                 size={20}
                 onClick={handleCameraClick}
               />
@@ -87,6 +148,12 @@ export default function SearchBarModal({ onClose }) {
                 onChange={handleImageUpload}
               />
             </div>
+            
+            {imageIngredients.length > 0 && (
+              <div className="image-ingredients-preview">
+                <small>Ingredients from image: {imageIngredients.join(", ")}</small>
+              </div>
+            )}
           </div>
         </div>
       </div>

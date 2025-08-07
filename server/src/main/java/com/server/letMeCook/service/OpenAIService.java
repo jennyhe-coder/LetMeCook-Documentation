@@ -39,7 +39,6 @@ public class OpenAIService {
         this.cuisineService = cuisineService;
         this.categoryService = categoryService;
         this.dietaryPreferenceService = dietaryPreferenceService;
-
         Dotenv dotenv = Dotenv.load();
         this.openAiApiKey = dotenv.get("OPENAI_API_KEY");
 
@@ -47,7 +46,6 @@ public class OpenAIService {
             throw new IllegalArgumentException("❌ OPENAI_API_KEY is not set in the .env file.");
         }
     }
-
     private String normalizePromptForSearch(String prompt) {
         prompt = prompt.toLowerCase();
 
@@ -63,7 +61,7 @@ public class OpenAIService {
     }
 
 
-    public RecipeSearchFields extractRecipeSearchFields(String prompt, String imageBase64 ){
+    public RecipeSearchFields extractRecipeSearchFields(String prompt){
         List<String> cuisineNames = cuisineService.getAllCuisineNames();
         List<String> categoryNames = categoryService.getAllCategoryNames();
         List<String> dietNames = dietaryPreferenceService.getAllDietaryPreferenceNames();
@@ -71,14 +69,6 @@ public class OpenAIService {
 
         StringBuilder userContent = new StringBuilder();
         userContent.append("Prompt: ").append(prompt != null ? prompt : "").append("\n");
-
-        if (imageBase64 != null) {
-            userContent.append("Detected ingredients from image:\n");
-            List<String> detectedIngredients = detectIngredientsFromImage(imageBase64);
-            userContent.append(String.join(", ", detectedIngredients));
-            if (prompt != null) userContent.append("\nCombined with prompt above.");
-        }
-
 
         String instruction = String.format("""
     Based on the following user prompt, extract and return a valid JSON object with the following fields:
@@ -88,7 +78,7 @@ public class OpenAIService {
       - ⚠️ Remove stopwords: "the", "a", "an", "with", "for", "and", "or", "but", etc.
       - ⚠️ Remove generic food words: "dishes", "meal", "food", "recipe", "cooking", etc.
       - ⚠️ Remove words already used in cuisines, ingredients, categories, or dietary preferences.
-      - ⚠️ Can be null/empty if no meaningful words remain after filtering.
+      - ⚠️ Can be empty/"" if no meaningful words remain after filtering.
       - ✅ Examples:
         "I want a spicy Vietnamese soup with noodles" → keyword: "spicy soup"
         "Give me dishes with avocado without chicken" → keyword: null
@@ -140,11 +130,9 @@ public class OpenAIService {
                         Map.of("role", "user", "content", instruction)
                 )
         );
-
         HttpHeaders header = new HttpHeaders();
         header.setContentType(MediaType.APPLICATION_JSON);
         header.setBearerAuth(openAiApiKey);
-
         // post
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, header);
         ResponseEntity<Map> response = restTemplate.exchange(
@@ -153,16 +141,21 @@ public class OpenAIService {
                 request,
                 Map.class
         );
-
-        return parseResponse(response.getBody());
+        RecipeSearchFields result = parseResponse(response.getBody());
+        return result;
     }
 
-    private List<String> detectIngredientsFromImage(String imageBase64) {
+    public List<String> detectIngredientsFromImage(String imageBase64) {
+        String mimeType = detectMimeTypeFromBase64(imageBase64);
+        String imageDataUrl = "data:" + mimeType + ";base64," + imageBase64;
+
+        // 🟢 Prompt yêu cầu chỉ trả về JSON array, không giải thích
         Map<String, Object> imageMessage = Map.of(
                 "role", "user",
                 "content", List.of(
-                        Map.of("type", "text", "text", "List ingredients visible in the image."),
-                        Map.of("type", "image_url", "image_url", Map.of("url", "data:image/jpeg;base64," + imageBase64))
+                        Map.of("type", "text", "text",
+                                "List the visible ingredients in the image and return only a JSON array of strings. No explanation. No markdown."),
+                        Map.of("type", "image_url", "image_url", Map.of("url", imageDataUrl))
                 )
         );
 
@@ -184,16 +177,46 @@ public class OpenAIService {
                 Map.class
         );
 
-        Map<String, Object> choice = ((List<Map<String, Object>>) response.getBody().get("choices")).get(0);
-        Map<String, Object> message = (Map<String, Object>) choice.get("message");
-        String ingredientsText = (String) message.get("content");
+        try {
+            Map<String, Object> choice = ((List<Map<String, Object>>) response.getBody().get("choices")).get(0);
+            Map<String, Object> message = (Map<String, Object>) choice.get("message");
+            String content = (String) message.get("content");
+            return objectMapper.readValue(content, new com.fasterxml.jackson.core.type.TypeReference<List<String>>() {});
+        } catch (Exception e) {
+            String fallback = ((List<Map<String, Object>>) response.getBody().get("choices")).get(0)
+                    .get("message").toString();
 
-        return Arrays.stream(ingredientsText.split(",|\n"))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .map(String::toLowerCase)
-                .distinct()
-                .toList();
+            return Arrays.stream(fallback.split(",|\\n"))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .map(String::toLowerCase)
+                    .distinct()
+                    .limit(5)
+                    .toList();
+        }
+    }
+
+
+    private String detectMimeTypeFromBase64(String base64) {
+        if (base64 == null || base64.isEmpty()) {
+            return "image/jpeg"; // fallback
+        }
+
+        String prefix = base64.substring(0, 10);
+
+        if (prefix.startsWith("/9j/")) {
+            return "image/jpeg"; // JPEG magic number: FF D8
+        } else if (prefix.startsWith("iVBORw0KGgo")) {
+            return "image/png"; // PNG magic number: 89 50 4E 47
+        } else if (prefix.startsWith("R0lGOD")) {
+            return "image/gif"; // GIF magic number: 47 49 46
+        } else if (prefix.startsWith("UklGR")) {
+            return "image/webp"; // WEBP (RIFF)
+        } else if (prefix.startsWith("AAABAA")) {
+            return "image/x-icon"; // ICO
+        }
+
+        return "image/jpeg"; // default fallback
     }
 
     @SuppressWarnings("unchecked")
@@ -208,5 +231,4 @@ public class OpenAIService {
             throw new RuntimeException("❌ Failed to parse OpenAI response", e);
         }
     }
-
 }

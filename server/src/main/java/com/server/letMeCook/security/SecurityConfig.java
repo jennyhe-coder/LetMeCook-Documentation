@@ -43,7 +43,8 @@ public class SecurityConfig {
                                 "/api/categories/**",
                                 "/api/cuisines/**",
                                 "/api/dietary-preferences/**",
-                                "/api/profile"
+                                "/api/profile",
+                                "/api/opencv/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
