@@ -1,4 +1,4 @@
-import React, { use, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthProvider';
 import { supabase } from '../utils/supabaseClient';
 import Modal from '../components/Modal';
@@ -49,12 +49,10 @@ export default function EditRecipe() {
   const [cuisine, setCuisine] = useState([]);
   const [categories, setCategories] = useState([]);
 
-  const [isAuthorized, setIsAuthorized] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(true);
 
   useEffect(() => {
     const fetchRecipeData = async () => {
-      setLoading(true);
       const [
         { data: dietaryOptions },
         { data: cuisineOptions },
@@ -77,23 +75,12 @@ export default function EditRecipe() {
 
       if (error) {
         setError("Failed to fetch recipe: " + error.message);
-        setLoading(false);
-        setIsAuthorized(false);
         return;
       }
 
-      if (!data) {
+      if (user?.id && data.author_id !== user.id) {
         setIsAuthorized(false);
-        setLoading(false);
         return;
-      }
-
-      if (user && data.author_id !== user.id) {
-        setIsAuthorized(false);
-        setLoading(false);
-        return;
-      } else {
-        setIsAuthorized(true);
       }
 
       setForm({
@@ -150,13 +137,10 @@ export default function EditRecipe() {
         const found = categoryOptions?.find(opt => opt.id === item.category_id);
         return found ? { value: found.id, label: found.name } : null;
       }).filter(Boolean));
-      
-      setLoading(false);
-      
     };
 
     if (recipeId) fetchRecipeData();
-  }, [user, recipeId]);
+  }, [recipeId]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -365,30 +349,17 @@ export default function EditRecipe() {
 
 
   useEffect(() => {
-    if (!loading && !isAuthorized) {
+    if (!isAuthorized) {
       navigate('/forbidden');
-    } else if (!loading && isAuthorized && !user) {
-      navigate('/unauthorized');
     }
-  }, [isAuthorized, loading, navigate]);
-
-  if (loading) return (
-    <div className="loading">
-      <h1 className="recipe-title">Loading...</h1>
-      <div className="image-wrapper" />
-        <div className="description">
-          Please wait while the recipe loads.
-        </div>
-    </div>
-  );
+  }, [isAuthorized, navigate]);
 
   return (
-    <>
-      <div className="create-recipe-container">
-        <h2>Edit Recipe</h2>
-        <form onSubmit={handleSubmit}>
-          <div className='form-group'>
-            <input
+    <div className="create-recipe-container">
+      <h2>Edit Recipe</h2>
+      <form onSubmit={handleSubmit}>
+        <div className='form-group'>
+          <input
           type="file"
           accept="image/*"
           ref={fileInputRef}
@@ -559,17 +530,20 @@ export default function EditRecipe() {
           onClick={addIngredientRow}
           className="add-ingredient-btn"
         >
-          &#43; 
+          Add Ingredient
         </button>
 
         <br /><br />
-        <button type="submit" className="btn btn-success">
-          Update Recipe
-        </button>
+        <div className='btn-group'>
+          <button type="submit" className="btn btn-success">
+            Update Recipe
+          </button>
 
-        <button type="button" className="edit-delete-recipe-btn" onClick={confirmDelete}>
-          Delete Recipe
-        </button>
+          <button type="button" className="edit-delete-recipe-btn" onClick={confirmDelete}>
+            Delete Recipe
+          </button>
+        </div>
+        
 
         {error && <p className="error-message">{error}</p>}
       </form>
@@ -591,6 +565,5 @@ export default function EditRecipe() {
         />
       )}
     </div>
-    </>
   );
 }
