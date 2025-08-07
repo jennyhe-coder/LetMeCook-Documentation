@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "../utils/supabaseClient";
 import { useAuth } from "../context/AuthProvider";
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom";
 
 import SearchBar from "./../components/SearchBar-Home";
 import CarouselSection from "./../components/CarouselSection";
+import MyRecommended from "./../components/MyRecommended";
 import sunnywelcome from "../assets/sunnywelcome.png";
 import hat from "../assets/chef-hat.png";
 import eye from "../assets/eye.png";
@@ -171,12 +172,8 @@ export default function UserDashboard() {
               </Link>
             </div>
           </div>
-          <section>
-            <CarouselSection
-              title="Recommended For You"
-              sectionClass="section-1"
-              dataSource={`https://letmecook.ca/api/recipes/recommend?userid=${user?.id}`}
-            />
+          <section className="section-1">
+            <MyRecommended />
           </section>
           <section>
             <CarouselSection
