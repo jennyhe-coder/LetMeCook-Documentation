@@ -24,45 +24,18 @@ export default function SearchBar() {
     adjustHeight();
   };
 
-  const handleKeyDown = async (e) => {
+  const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
 
       const prompt = inputRef.current.value.trim();
       if (!prompt) return;
 
-      try {
-        const res = await fetch("https://letmecook.ca/api/opencv/extract_search_fields", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ prompt }),
-        });
-
-        if (!res.ok) throw new Error("Failed to extract fields");
-
-        const fields = await res.json();
-
-        const params = new URLSearchParams();
-
-        if (fields.keyword) params.append("keyword", fields.keyword);
-        if (fields.cuisines) fields.cuisines.forEach((c) => params.append("cuisines", c));
-        if (fields.ingredients) fields.ingredients.forEach((i) => params.append("ingredients", i));
-        if (fields.allergies) fields.allergies.forEach((a) => params.append("allergies", a));
-        if (fields.categories) fields.categories.forEach((c) => params.append("categories", c));
-        if (fields.dietaryPreferences) fields.dietaryPreferences.forEach((d) => params.append("dietaryPreferences", d));
-
-        params.append("isPublic", "true");
-
-        navigate(`/search?${params.toString()}`);
-      } catch (err) {
-        console.error("❌ Error:", err);
-        alert("Failed to extract search fields.");
-      }
+      const params = new URLSearchParams();
+      params.append("prompt", prompt);
+      navigate(`/search?${params.toString()}`);
     }
   };
-
 
   return (
     <div className="search-box">

@@ -27,8 +27,81 @@ export default function SearchResults() {
   const [sort, setSort] = useState(searchParams.get("sort") || "createdAt");
   const sectionRef = useRef(null);
 
-  useEffect(() => {
+  const prompt = searchParams.get("prompt");
+  const [extracting, setExtracting] = useState(false);
+  const [cachedPrompt, setCachedPrompt] = useState(null);
 
+  useEffect(() => {
+    const currentPrompt = searchParams.get("prompt");
+    if (currentPrompt) {
+      setCachedPrompt(currentPrompt);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    const hasPromptOnly =
+      prompt &&
+      !searchParams.get("keyword") &&
+      searchParams.getAll("cuisines").length === 0 &&
+      searchParams.getAll("ingredients").length === 0 &&
+      searchParams.getAll("allergies").length === 0 &&
+      searchParams.getAll("categories").length === 0 &&
+      searchParams.getAll("dietaryPreferences").length === 0;
+
+    if (!hasPromptOnly) return;
+
+    const extractFieldsAndUpdateParams = async () => {
+      setExtracting(true);
+      setResults([]);
+      setTotalElements(0);
+      try {
+        const res = await fetch(
+          "https://letmecook.ca/api/opencv/extract_search_fields",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ prompt }),
+          }
+        );
+
+        if (!res.ok) throw new Error("Failed to extract fields");
+        const fields = await res.json();
+
+        const newParams = new URLSearchParams();
+
+        if (fields.keyword) newParams.set("keyword", fields.keyword);
+        if (fields.cuisines)
+          fields.cuisines.forEach((c) => newParams.append("cuisines", c));
+        if (fields.ingredients)
+          fields.ingredients.forEach((i) => newParams.append("ingredients", i));
+        if (fields.allergies)
+          fields.allergies.forEach((a) => newParams.append("allergies", a));
+        if (fields.categories)
+          fields.categories.forEach((c) => newParams.append("categories", c));
+        if (fields.dietaryPreferences)
+          fields.dietaryPreferences.forEach((d) =>
+            newParams.append("dietaryPreferences", d)
+          );
+
+        newParams.set("sort", sort);
+        newParams.set("page", "0");
+        newParams.set("size", RESULTS_PER_PAGE.toString());
+
+        setSearchParams(newParams);
+      } catch (err) {
+        console.error("Failed to extract from prompt:", err);
+        alert("Sorry! We couldn't understand your search.");
+      } finally {
+        setExtracting(false);
+      }
+    };
+
+    extractFieldsAndUpdateParams();
+  }, [prompt]);
+
+  useEffect(() => {
     const keyword = searchParams.get("keyword");
     const cuisines = searchParams.getAll("cuisines");
     const ingredients = searchParams.getAll("ingredients");
@@ -62,6 +135,7 @@ export default function SearchResults() {
     const url = `https://letmecook.ca/api/recipes/search?${params.toString()}`;
 
     setLoading(true);
+    setTotalElements(0);
 
     fetch(url)
       .then((res) => res.json())
@@ -79,8 +153,6 @@ export default function SearchResults() {
         setLoading(false);
       });
   }, [searchParams, sort, page]);
-
-  
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -108,20 +180,8 @@ export default function SearchResults() {
       <div className="search-results-bg" />
       <div className="layout-wrapper">
         <div className="user-prompt">
-          {[
-            keyword && `"${keyword}"`,
-            cuisines.length > 0 && `cuisines: ${cuisines.join(", ")}`,
-            ingredients.length > 0 && `ingredients: ${ingredients.join(", ")}`,
-            allergies.length > 0 && `allergies: ${allergies.join(", ")}`,
-            categories.length > 0 && `categories: ${categories.join(", ")}`,
-            dietaryPreferences.length > 0 && `dietary: ${dietaryPreferences.join(", ")}`,
-          ]
-            .filter(Boolean)
-            .join(" | ")}
-
-          {totalElements > 0 && !loading && (
-            <span className="results-count">&nbsp;&nbsp;{totalElements}</span>
-          )}
+          {/*raw prompt */}
+          {cachedPrompt && <div className="prompt-text">"{cachedPrompt}"</div>}
         </div>
 
         <br />
@@ -130,25 +190,43 @@ export default function SearchResults() {
           <h3>Results</h3>
           <SortDropdown sort={sort} setSort={setSort} />
         </div>
-        {/* <br /> */}
 
-        {results.length === 0 && !loading ? (
+        {/*extracted filters */}
+        <div className="filter-summary">
+          <br />
+          {[
+            keyword && `keyword: ${keyword}`,
+            cuisines.length > 0 && `cuisines: ${cuisines.join(", ")}`,
+            ingredients.length > 0 && `ingredients: ${ingredients.join(", ")}`,
+            allergies.length > 0 && `allergies: ${allergies.join(", ")}`,
+            categories.length > 0 && `categories: ${categories.join(", ")}`,
+            dietaryPreferences.length > 0 &&
+              `dietary: ${dietaryPreferences.join(", ")}`,
+          ]
+            .filter(Boolean)
+            .join(", ")}
+          {totalElements > 0 && !loading && (
+            <span className="results-count">&nbsp;&nbsp;{totalElements}</span>
+          )}
+        </div>
+
+        {!extracting && results.length === 0 && !loading ? (
           <>
-            <br />
+            {/* <br /> */}
             <p>No results found.</p>
           </>
         ) : (
           <>
             <RecipeList
               recipes={
-                loading
+                loading || extracting
                   ? Array.from({ length: 24 }, (_, i) => ({
-                    id: `placeholder-${i}`,
-                    title: "Loading...",
-                    authorName: "Please wait",
-                    imageUrl: "/assets/placeholder.jpg", // use same placeholder image
-                    cookingTime: "...",
-                  }))
+                      id: `placeholder-${i}`,
+                      title: "Loading...",
+                      authorName: "Please wait",
+                      imageUrl: "/assets/placeholder.jpg",
+                      cookingTime: "...",
+                    }))
                   : results
               }
             />
@@ -198,8 +276,9 @@ export default function SearchResults() {
                       <span key={p} className="pagination-item">
                         {showDots && <span className="ellipsis">...</span>}
                         <span
-                          className={`page-number ${p === page ? "current" : ""
-                            }`}
+                          className={`page-number ${
+                            p === page ? "current" : ""
+                          }`}
                           onClick={() => setPage(p)}
                         >
                           {p}
@@ -209,8 +288,9 @@ export default function SearchResults() {
                   })}
 
                 <span
-                  className={`page-next ${page === totalPages ? "disabled" : ""
-                    }`}
+                  className={`page-next ${
+                    page === totalPages ? "disabled" : ""
+                  }`}
                   onClick={() => page < totalPages && setPage(page + 1)}
                 >
                   <svg
