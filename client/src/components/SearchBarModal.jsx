@@ -15,7 +15,7 @@ export default function SearchBarModal({ onClose }) {
   }, []);
 
   const extractFromPrompt = async (prompt) => {
-    const res = await fetch("http://localhost:8080/api/opencv/extract_search_fields", {
+    const res = await fetch("https://letmecook.ca/api/opencv/extract_search_fields", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt }),
@@ -27,7 +27,7 @@ export default function SearchBarModal({ onClose }) {
   };
 
   const extractFromImage = async (imageBase64) => {
-    const res = await fetch("http://localhost:8080/api/opencv/extract_image_ingredients", {
+    const res = await fetch("https://letmecook.ca/api/opencv/extract_image_ingredients", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ imageBase64 }),

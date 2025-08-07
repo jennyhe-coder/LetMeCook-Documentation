@@ -32,7 +32,7 @@ export default function SearchBar() {
       if (!prompt) return;
 
       try {
-        const res = await fetch("http://localhost:8080/api/opencv/extract_search_fields", {
+        const res = await fetch("https://letmecook.ca/api/opencv/extract_search_fields", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
