@@ -155,7 +155,7 @@ export default function EditRecipe() {
       
     };
 
-    if (user && recipeId) fetchRecipeData();
+    if (recipeId) fetchRecipeData();
   }, [user, recipeId]);
 
   const handleChange = (e) => {
@@ -367,7 +367,7 @@ export default function EditRecipe() {
   useEffect(() => {
     if (!loading && !isAuthorized) {
       navigate('/forbidden');
-    } else if (!user) {
+    } else if (!loading && isAuthorized && !user) {
       navigate('/unauthorized');
     }
   }, [isAuthorized, loading, navigate]);
