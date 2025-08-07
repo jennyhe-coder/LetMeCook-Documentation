@@ -153,11 +153,17 @@ public class OpenAIService {
         Map<String, Object> imageMessage = Map.of(
                 "role", "user",
                 "content", List.of(
-                        Map.of("type", "text", "text",
-                                "List the visible ingredients in the image and return only a JSON array of strings. No explanation. No markdown."),
-                        Map.of("type", "image_url", "image_url", Map.of("url", imageDataUrl))
+                        Map.of(
+                                "type", "text",
+                                "text", "List the visible ingredients in the image. Only return a pure JSON array of lowercase ingredient names, with no explanation, no markdown, no extra words. Remove any adjectives or extra descriptions. Example: [\"corn\", \"carrot\"]."
+                        ),
+                        Map.of(
+                                "type", "image_url",
+                                "image_url", Map.of("url", imageDataUrl)
+                        )
                 )
         );
+
 
         Map<String, Object> requestBody = Map.of(
                 "model", "gpt-4.1",
