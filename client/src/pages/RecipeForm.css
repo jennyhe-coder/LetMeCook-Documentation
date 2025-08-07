@@ -1,4 +1,4 @@
-.create-recipe-container {
+/* .create-recipe-container {
   max-width: 800px;
   margin: 40px auto;
   background: #fffdf7;
@@ -151,6 +151,176 @@ button[type="submit"]:hover {
   border-radius: 8px;
   font-weight: 600;
   font-size: 1rem;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background 0.3s ease;
+} */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+.create-recipe-container {
+  max-width: 800px;
+  margin: 40px auto;
+  background: #fffdf7;
+  padding: 40px;
+  border-radius: 14px;
+  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.08);
+  font-family: 'Inter', sans-serif;
+  color: #333;
+}
+
+.create-recipe-container h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #222;
+}
+
+.form-group {
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+}
+
+.form-group label input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  padding: 12px;
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif; /* ✅ Ensures font consistency */
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #6ac045;
+}
+
+.form-group input[type="file"] {
+  padding: 0;
+  border: none;
+}
+
+.create-recipe-container img {
+  margin-top: 12px;
+  max-width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.checkbox-group {
+  margin: 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+}
+
+.ingredients-title {
+  margin: 30px 0 12px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #444;
+}
+
+.ingredient-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1.2fr 0.5fr;
+  gap: 10px;
+  margin-bottom: 12px;
+  align-items: center;
+}
+
+.ingredient-row input,
+.ingredient-row select {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 0.95rem;
+  font-family: 'Inter', sans-serif; /* Optional for extra safety */
+}
+
+.add-ingredient-btn {
+  background: #ffa94d;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.add-ingredient-btn:hover {
+  background: #e9832b;
+}
+
+.delete-ingredient-btn {
+  background: #fa5252;
+  color: white;
+  border: none;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.delete-ingredient-btn:hover {
+  background: #e03131;
+}
+
+button[type="submit"] {
+  background: #6ac045;
+  color: white;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background 0.3s ease;
+}
+
+button[type="submit"]:hover {
+  background: #57a133;
+}
+
+.error-message {
+  color: #e63946;
+  font-weight: 600;
+  margin-top: 20px;
+}
+
+.edit-delete-recipe-btn {
+  background: #fa5252;
+  color: white;
+  padding: 12px 28px;
+  margin-left: 405px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif;
   cursor: pointer;
   margin-top: 20px;
   transition: background 0.3s ease;

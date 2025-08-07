@@ -530,7 +530,7 @@ export default function EditRecipe() {
           onClick={addIngredientRow}
           className="add-ingredient-btn"
         >
-          Add Ingredient
+          &#43; 
         </button>
 
         <br /><br />
