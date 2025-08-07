@@ -372,8 +372,16 @@ export default function EditRecipe() {
     }
   }, [isAuthorized, loading, navigate]);
 
-  if (loading) return <div>Loading...</div>;                  
-    
+  if (loading) return (
+    <div className="loading">
+      <h1 className="recipe-title">Loading...</h1>
+      <div className="image-wrapper" />
+        <div className="description">
+          Please wait while the recipe loads.
+        </div>
+    </div>
+  );
+
   return (
     <>
       <div className="create-recipe-container">
