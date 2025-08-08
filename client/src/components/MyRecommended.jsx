@@ -95,10 +95,6 @@ export default function MyRecommended() {
   }, [user, userLoading]);
 
   useEffect(() => {
-    setPage(1);
-  }, [recommended]);
-
-  useEffect(() => {
     const el = sectionRef.current;
     if (el) {
       gsap.fromTo(

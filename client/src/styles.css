@@ -1293,7 +1293,8 @@ p {
   right: 0;
   background: #FCF8ED;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  padding: 8px 0px;
+  padding-top: 8px;
+  padding-bottom: 18px;
   margin: 0;
   list-style: none;
   width: max-content;
@@ -1311,7 +1312,8 @@ p {
 .dropdown-nav-item {
   padding: 0.5rem 21px;
   cursor: pointer;
-  margin-bottom: 8px;
+  /* margin-bottom: 12px; */
+  margin-top: 10px;
   white-space: nowrap;
 }
 
@@ -1321,7 +1323,7 @@ p {
 }
 
 .dropdown-nav-item:last-child {
-  margin-bottom: 0;
+  /* margin-bottom: 0; */
   /* no margin on last item */
 }
 
@@ -1875,7 +1877,7 @@ p {
 }
 
 .dislike-recipe-btn {
-  color: #fff;
+  color: #28200d;
 }
 
 .dislike-menu-container {
@@ -1898,19 +1900,26 @@ p {
   right: 0px;
   z-index: 999;
   cursor: pointer;
-  /* font-size: 14px; */
   white-space: nowrap;
-  background-color: #1E1E1e;
+  background-color: #28200d;
   color: #fff;
-  cursor: pointer;
   border: none;
-  padding: 8px 12px;
+  padding: 9px 12px;
   border-radius: 4px;
   transition: background-color 0.1s ease;
   font-family: Raleway;
   font-size: 15px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .dislike-menu:hover {
   background-color: #a32f19;
+}
+
+.dislike-text {
+  display: inline-block;
+  transform: translateY(-1px);
 }
