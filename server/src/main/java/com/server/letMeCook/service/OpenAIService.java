@@ -148,27 +148,42 @@ public class OpenAIService {
     public List<String> detectIngredientsFromImage(String imageBase64) {
         String mimeType = detectMimeTypeFromBase64(imageBase64);
         String imageDataUrl = "data:" + mimeType + ";base64," + imageBase64;
-
-
-        Map<String, Object> imageMessage = Map.of(
-                "role", "user",
-                "content", List.of(
-                        Map.of(
-                                "type", "text",
-                                "text", "List the visible ingredients in the image. Only return a pure JSON array of lowercase ingredient names, with no explanation, no markdown, no extra words. Remove any adjectives or extra descriptions. Example: [\"corn\", \"carrot\"]."
-                        ),
-                        Map.of(
-                                "type", "image_url",
-                                "image_url", Map.of("url", imageDataUrl)
-                        )
-                )
+        Map<String, Object> systemMsg = Map.of(
+                "role", "system",
+                "content",
+                "You are an expert culinary vision assistant. " +
+                        "Your task: return ONLY a raw JSON array of BASE ingredient names in lowercase, singular, unique. " +
+                        "STRICT RULES:\n" +
+                        "- Output must be a pure JSON array of strings (no markdown, no commentary).\n" +
+                        "- Return only ingredients VISIBLE in the image.\n" +
+                        "- Use base ingredient names (collapse forms/cuts/parts/descriptors):\n" +
+                        "  * Meat/fish cuts → animal/fish base: 'chicken breast/thigh/wing' → 'chicken'; 'beef steak' → 'beef'; 'salmon fillet' → 'salmon'.\n" +
+                        "  * Plant parts/forms → plant base: 'corn on the cob'/'corn husk'/'corn kernels' → 'corn'; 'garlic cloves' → 'garlic'; 'lemon zest' → 'lemon'.\n" +
+                        "  * Remove descriptors: size (large/small/medium), state (fresh/ripe/raw/cooked), prep (chopped/sliced/minced/grated/shredded/peeled/seeded), " +
+                        "    skinless/boneless/whole/ground, and similar adjectives.\n" +
+                        "- Singularize nouns: 'tomatoes' → 'tomato', 'chilies' → 'chili'.\n" +
+                        "- Ensure uniqueness (no duplicates).\n" +
+                        "Examples of desired mapping:\n" +
+                        "  ['corn on the cob','corn husk'] → ['corn']\n" +
+                        "  ['garlic cloves'] → ['garlic']\n" +
+                        "  ['chicken breast','chicken thigh'] → ['chicken']\n" +
+                        "If nothing is confidently visible, return []."
         );
 
+        Map<String, Object> userMsg = Map.of(
+                "role", "user",
+                "content", List.of(
+                        Map.of("type", "text",
+                                "text", "Identify ONLY the visible ingredients. Return a RAW JSON array of base ingredient names in lowercase, singular, unique. No markdown, no explanation."),
+                        Map.of("type", "image_url",
+                                "image_url", Map.of("url", imageDataUrl))
+                )
+        );
 
         Map<String, Object> requestBody = Map.of(
                 "model", "gpt-4.1",
                 "temperature", 0,
-                "messages", List.of(imageMessage)
+                "messages", List.of(systemMsg, userMsg)
         );
 
         HttpHeaders headers = new HttpHeaders();
@@ -187,21 +202,19 @@ public class OpenAIService {
             Map<String, Object> choice = ((List<Map<String, Object>>) response.getBody().get("choices")).get(0);
             Map<String, Object> message = (Map<String, Object>) choice.get("message");
             String content = (String) message.get("content");
-            return objectMapper.readValue(content, new com.fasterxml.jackson.core.type.TypeReference<List<String>>() {});
-        } catch (Exception e) {
-            String fallback = ((List<Map<String, Object>>) response.getBody().get("choices")).get(0)
-                    .get("message").toString();
 
-            return Arrays.stream(fallback.split(",|\\n"))
-                    .map(String::trim)
-                    .filter(s -> !s.isEmpty())
-                    .map(String::toLowerCase)
-                    .distinct()
-                    .limit(5)
-                    .toList();
+            if (content != null && content.startsWith("```")) {
+                content = content.replaceAll("```json|```", "").trim();
+            }
+
+            return objectMapper.readValue(
+                    content,
+                    new com.fasterxml.jackson.core.type.TypeReference<List<String>>() {}
+            );
+        } catch (Exception e) {
+            return List.of();
         }
     }
-
 
     private String detectMimeTypeFromBase64(String base64) {
         if (base64 == null || base64.isEmpty()) {

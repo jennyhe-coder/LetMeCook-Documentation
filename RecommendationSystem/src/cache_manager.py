@@ -1,15 +1,15 @@
-# src/cache_manager.py
 import threading
 import time
 import torch
 import pickle
 import pandas as pd
 from datetime import datetime, timedelta
-from typing import Tuple, List, Optional
+from typing import Tuple, List,Optional
 import logging
 from pathlib import Path
 import os
 from sentence_transformers import util
+import fcntl
 
 from src.clean_data import combine_fields
 from src.embed_with_sbert import append_embedding, remove_embeddings
@@ -25,14 +25,22 @@ logger = logging.getLogger(__name__)
 
 
 class RecipeCache:
-    def __init__(self, cache_duration_minutes: int = 15):
-        self._cache_duration = timedelta(minutes=cache_duration_minutes)
+    def __init__(self, cache_duration_minutes: Optional[int] = None):
+        # Mặc định 1 ngày; cho phép override qua  ENV
+        minutes = cache_duration_minutes if cache_duration_minutes is not None \
+            else int(os.getenv("CACHE_DURATION_MINUTES", "1440"))
+        self._cache_duration = timedelta(minutes=minutes)
         self._last_reload = None
         self._recipe_ids = None
         self._embeddings = None
         self._lock = threading.RLock()
         self._reload_timer = None
         self._is_loading = False
+
+        # Leader election state
+        self._is_leader = False
+        self._lockfile_fd = None
+        self._lockfile_path = "/tmp/letmecook_scheduler.lock"
 
         # Ensure model directory exists
         Path("model").mkdir(exist_ok=True)
@@ -94,8 +102,11 @@ class RecipeCache:
 
                 logger.info(f"✅ Cache loaded: {len(recipe_ids)} recipes")
 
-                # Schedule next reload
-                self._schedule_reload()
+                if self._become_leader():
+                    logger.info("🧭 This worker is SCHEDULER LEADER. Scheduling auto-reload.")
+                    self._schedule_reload()
+                else:
+                    logger.info("🧭 Not leader; skip auto-reload scheduling in this worker.")
 
             finally:
                 self._is_loading = False
@@ -121,7 +132,30 @@ class RecipeCache:
         self._reload_timer.start()
 
         next_reload = datetime.now() + self._cache_duration
-        logger.info(f"⏰ Next auto-reload scheduled at: {next_reload.strftime('%H:%M:%S')}")
+        logger.info(f"⏰ Next auto-reload scheduled at: {next_reload.strftime('%Y-%m-%d %H:%M:%S')}")
+
+    def _become_leader(self) -> bool:
+        """Elect a single scheduler leader across Gunicorn workers via file lock."""
+        if self._is_leader:
+            return True
+        try:
+            fd = os.open(self._lockfile_path, os.O_CREAT | os.O_RDWR, 0o644)
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            os.ftruncate(fd, 0)
+            os.write(fd, str(os.getpid()).encode())
+            os.fsync(fd)
+            self._lockfile_fd = fd
+            self._is_leader = True
+            return True
+        except OSError:
+            # another worker already holds the lock
+            if self._lockfile_fd is not None:
+                try:
+                    os.close(self._lockfile_fd)
+                except Exception:
+                    pass
+                self._lockfile_fd = None
+            return False
 
     def get_data(self) -> Tuple[List[str], torch.Tensor]:
         """Get cached data with thread safety"""
@@ -256,6 +290,18 @@ class RecipeCache:
         """Clean shutdown of cache manager"""
         if self._reload_timer:
             self._reload_timer.cancel()
+        # Release leader lock if held
+        if self._is_leader and self._lockfile_fd is not None:
+            try:
+                fcntl.flock(self._lockfile_fd, fcntl.LOCK_UN)
+            except Exception:
+                pass
+            try:
+                os.close(self._lockfile_fd)
+            except Exception:
+                pass
+            self._lockfile_fd = None
+            self._is_leader = False
         logger.info("🛑 Cache manager shutdown")
 
 
