@@ -15,7 +15,7 @@ const UNITS = [
 ];
 
 export default function EditRecipe() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const { id: recipeId } = useParams();
@@ -78,10 +78,16 @@ export default function EditRecipe() {
         return;
       }
 
-      if (user?.id && data.author_id !== user.id) {
+      if (!user?.id) {
         setIsAuthorized(false);
         return;
       }
+
+      if (data.author_id !== user.id) {
+        setIsAuthorized(false);
+        return;
+      }
+      setIsAuthorized(true);
 
       setForm({
         title: data.title,
