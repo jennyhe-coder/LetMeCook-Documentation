@@ -43,7 +43,14 @@ public interface RecipeRepository extends JpaRepository<Recipe, UUID> {
     List<Recipe> findAllWithFullRelationsByIds(@Param("ids") List<UUID> ids);
 
 
-
+    @Query("""
+    select r.id
+    from Recipe r
+    where r.isPublic = true
+    order by coalesce(r.viewCount, 0) desc,
+             r.createdAt desc
+    """)
+    List<UUID> findTopPublicRecipeIds(Pageable pageable);
 
     // Find recipes by author ID
     List<Recipe> findByAuthorId(UUID authorId);
