@@ -34,7 +34,7 @@ export default function Favourites() {
 
   useEffect(() => {
     if (!user && !userLoading) {
-      navigate('/unauthorized');
+      navigate("/unauthorized");
       return;
     }
   }, [user, navigate, userLoading]);
@@ -128,12 +128,6 @@ export default function Favourites() {
 
     fetchFav();
   }, [user, userLoading]);
-
-  // useEffect(() => {
-  //   if (sectionRef.current) {
-  //     sectionRef.current.scrollIntoView({ behavior: "smooth" });
-  //   }
-  // }, [page]);
 
   useEffect(() => {
     const el = sectionRef.current;

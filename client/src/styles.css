@@ -1705,7 +1705,7 @@ p {
 .height-padding-profile {
   display: flex;
   flex-direction: column;
-  min-height: 156px;
+  min-height: 147px;
 }
 
 .height-padding-2 {
