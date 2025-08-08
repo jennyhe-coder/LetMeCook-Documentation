@@ -1,4 +1,6 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "../utils/supabaseClient";
 
 export default function RecipeCard({
   id,
@@ -7,6 +9,87 @@ export default function RecipeCard({
   imageUrl,
   cookingTime,
 }) {
+
+  const [rating, setRating] = useState({
+    difficulty: 0,
+    time: 0,
+    cost: 0
+  });
+
+  const [loading, setLoading] = useState("true");
+
+  useEffect(() => {
+    if(!id) return;
+
+    let cancelled = false;
+
+    async function fetchAllReviews(){
+      setLoading(true);
+
+      // query all reviews for specific recipe id
+      const{ data, error } = await supabase
+        .from("review_ratings")
+        .select("category, value, reviews!inner(recipe_id)")
+        .eq("reviews.recipe_id", id);
+
+      if (error) {
+        console.error("Error fetching review ratings:", error);
+        if (!cancelled) setLoading(false);
+        return;
+      }
+
+      // average out all cost, time, difficulty values
+      const categories = ["cost", "time", "difficulty"];
+      const avg = {};
+
+      // Calculate average for each category
+      categories.forEach((cat) => {
+        const values = (data || [])
+          .filter((row) => row.category === cat && Number.isFinite(Number(row.value)))
+          .map((row) => Number(row.value));
+
+        avg[cat] = values.length
+          ? values.reduce((a, b) => a + b, 0) / values.length
+          : null;
+      });
+
+      // Calculate overall average (ignoring nulls)
+      const validAverages = categories
+        .map((cat) => avg[cat])
+        .filter((v) => v != null);
+
+      avg.overall = validAverages.length
+        ? validAverages.reduce((a, b) => a + b, 0) / validAverages.length
+        : null;
+
+      if(!cancelled){
+        setRating(avg);
+        setLoading(false);
+      }
+    }
+
+    fetchAllReviews();
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  const renderStars = (avg) => {
+    // nothing will be shown if there is no review ratings
+    if(avg == null) return null;
+
+    const fill = Math.round(avg);
+    return (
+      <span className="stars" aria-hidden>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <span key={i} className={i < fill ? "star filled" : "star"}>
+            ★
+          </span>
+        ))}
+      </span>
+    );
+  };
+
   return (
     <Link to={`/recipes/${id}`} className="recipe-card">
       <div className="recipe-card-img-container">
@@ -19,10 +102,26 @@ export default function RecipeCard({
         </div>
         <div className="bot-half">
           <div className="left">
-            <div className="recipe-card-rating">Rating&nbsp;&nbsp;★★★★★</div>
-            <div className="recipe-card-difficulty">
-              Difficulty&nbsp;&nbsp;★★★★★
-            </div>
+            {rating.difficulty != null && (
+              <div className="rating-row">
+                <div className="rating-category">Difficulty</div>
+                <div className="rating-stars">{loading ? "…" : renderStars(rating.difficulty)}</div>
+              </div>
+            )}
+
+            {rating.time != null && (
+              <div className="rating-row">
+                <div className="rating-category">Time</div>
+                <div className="rating-stars">{loading ? "…" : renderStars(rating.time)}</div>
+              </div>
+            )}
+
+            {rating.cost != null && (
+              <div className="rating-row">
+                <div className="rating-category">Cost</div>
+                <div className="rating-stars">{loading ? "…" : renderStars(rating.cost)}</div>
+              </div>
+            )}
           </div>
           <div className="right recipe-card-time">
             {cookingTime}&nbsp;min&nbsp;

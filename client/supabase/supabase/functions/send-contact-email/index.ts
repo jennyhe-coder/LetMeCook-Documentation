@@ -11,7 +11,7 @@ import "https://deno.land/x/dotenv/load.ts";
 // acceptable URL's for the origin header 
 const origins = [
   "http://localhost:5173",
-  "https://letmecook.ca/"
+  "https://letmecook.ca"
 ]
 
 serve(async (req: Request) => {
