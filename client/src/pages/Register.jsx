@@ -93,8 +93,8 @@ export default function Register() {
             <div className="center-container">
                 <form onSubmit={handleRegister} className='login-form'>
                 <h2>Register</h2>
-                <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder='FirstName'/>
-                <input value={lastName} onChange={(e) => {setLastName(e.target.value)}} placeholder='LastName' />
+                <input value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder='First Name'/>
+                <input value={lastName} onChange={(e) => {setLastName(e.target.value)}} placeholder='Last Name' />
                 <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
                 <div className="password-wrapper">
                     <input type={showPassword ? "text" : "password" } 

@@ -38,7 +38,7 @@ export default function Home() {
                 tailored just for you!
               </p>
             </div>
-            <a href="/recipes" class="button">
+            <a href="/recipes" class="exploreRecipeBtn">
               Start Exploring Recipes
             </a>
             <div className="search-container">

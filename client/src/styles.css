@@ -1614,6 +1614,17 @@ p {
   background-color: #ffc400;
 }
 
+.exploreRecipeBtn {
+  background-color: #dc9926;
+  color: #fff;
+  padding: 10px 18px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+}
+
 .text {
   font-size: 0.95rem;
   color: black;
