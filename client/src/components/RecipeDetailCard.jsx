@@ -129,7 +129,7 @@ export default function RecipeDetailCard({ recipe }) {
             alt={recipe.title}
             className="recipe-detail-image"
           />
-          <p className="recipe-detail-rating">★★★★★ ({recipe.rating || 0})</p>
+          {/* <p className="recipe-detail-rating">★★★★★ ({recipe.rating || 0})</p> */}
         </div>
       </div>
 
