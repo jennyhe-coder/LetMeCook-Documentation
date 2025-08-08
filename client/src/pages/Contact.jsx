@@ -125,8 +125,8 @@ export default function Contact() {
           your data during transmission and storage.
         </p>
         <div className="back-to-top">
-  <a href="#">↑ Back to Top</a>
-</div>
+          <a href="#">↑ Back to Top</a>
+        </div>
 
       </section>
     </main>

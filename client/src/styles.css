@@ -538,6 +538,33 @@ p {
   overflow: visible;
 }
 
+.star {
+  user-select: none;     
+  font-size: 1.1em;       
+  color: #ccc;           
+  display: inline-block;
+}
+
+.star {
+  margin-right: 2px;
+  color: #e0dddd;           
+}
+
+.star.filled {
+  color: #292929;         
+}
+
+.rating-row {
+  display: flex;
+  align-items: center;       
+  gap: 6px;                 
+}
+
+.rating-category {
+  font-weight: 600;          
+  white-space: nowrap;       
+}
+
 .carousel {
   /* overflow-x: hidden; */
   overflow-x: auto;
