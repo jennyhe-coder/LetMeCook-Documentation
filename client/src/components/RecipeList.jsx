@@ -87,7 +87,6 @@ export default function RecipeList({
               <button
                 className="dislike-recipe-btn"
                 onClick={() => toggleMenu(recipe.id)}
-                title="Dislike this recipe"
               >
                 <FaEllipsisH size={20} />
               </button>
