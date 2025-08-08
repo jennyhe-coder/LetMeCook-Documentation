@@ -462,6 +462,12 @@ public class RecipeService {
 
         // uuid of 50 recommendations Recipe base on 5 history browsing and 5 favourites
         List<UUID> recommendedIds = recommendationService.recommendForUser(favIds, historyIds, 50);
+
+        // check ìf recommendation is null or not - get 50 recipes top view count 
+        if (recommendedIds.isEmpty()) {
+            recommendedIds = recipeRepository.findTopPublicRecipeIds(PageRequest.of(0, 50));
+        }
+
         // uuid of all user allergy ingredient
         List<UUID> user_allergy_ingredients = userAllergyRepository.findAllAllergyIngredientIdsByUserId(userId);
         List<Recipe> recommendedRecipes = recipeRepository.findAllWithFullRelationsByIds(recommendedIds);
