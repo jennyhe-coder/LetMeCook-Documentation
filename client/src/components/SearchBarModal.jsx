@@ -23,18 +23,18 @@ export default function SearchBarModal({ onClose }) {
     }
   }, []);
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (modalRef.current && !modalRef.current.contains(event.target)) {
-        onClose(); // Close if clicked outside the modal content
-      }
-    };
+  // useEffect(() => {
+  //   const handleClickOutside = (event) => {
+  //     if (modalRef.current && !modalRef.current.contains(event.target)) {
+  //       onClose(); // Close if clicked outside the modal content
+  //     }
+  //   };
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [onClose]);
+  //   document.addEventListener("mousedown", handleClickOutside);
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside);
+  //   };
+  // }, [onClose]);
 
   useEffect(() => {
     const SpeechRecognition =
@@ -233,7 +233,7 @@ export default function SearchBarModal({ onClose }) {
                 onClick={handleCameraClick}
               />
 
-              {inputValue.trim() === "" ? (
+              {inputValue.trim() === "" && imageIngredients.length === 0 ? (
                 <FaMicrophone
                   className={`mic-icon ${listening ? "listening" : ""}`}
                   size={20}
@@ -248,9 +248,20 @@ export default function SearchBarModal({ onClose }) {
                   className="send-icon"
                   size={20}
                   onClick={() => {
-                    const keyword = inputValue.trim();
-                    if (!keyword) return;
-                    navigate(`/search?prompt=${encodeURIComponent(keyword)}`);
+                    const prompt = inputValue.trim();
+                    const params = new URLSearchParams();
+
+                    if (prompt) {
+                      params.set("prompt", prompt);
+                    }
+
+                    imageIngredients.forEach((i) => {
+                      params.append("ingredients", i);
+                    });
+
+                    params.append("isPublic", "true");
+
+                    navigate(`/search?${params.toString()}`);
                     onClose();
                   }}
                   style={{ cursor: "pointer" }}
@@ -288,18 +299,15 @@ export default function SearchBarModal({ onClose }) {
                 </ul>
               )}
 
-              {imageIngredients.length > 0 && (
-                <div className="image-ingredients-preview">
-                  <small>
-                    Ingredients from image: {imageIngredients.join(", ")}
-                  </small>
-                </div>
-              )}
-
               {/* {loading && (
                 <div className="suggestions-loading">Searching recipes...</div>
               )} */}
             </div>
+            {imageIngredients.length > 0 && (
+              <div className="image-ingredients-preview">
+                Ingredients from image: {imageIngredients.join(", ")}
+              </div>
+            )}
           </div>
         </div>
       </div>
