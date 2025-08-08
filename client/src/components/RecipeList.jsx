@@ -96,7 +96,7 @@ export default function RecipeList({
                   className="dislike-menu button"
                   onClick={() => handleNotInterested(recipe.id)}
                 >
-                  Not Interested
+                  <span className="dislike-text">Suggest less</span>
                 </div>
               )}
             </div>

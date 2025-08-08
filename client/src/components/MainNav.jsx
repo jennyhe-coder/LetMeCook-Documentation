@@ -175,7 +175,7 @@ export default function MainNav() {
                         setTimeout(() => setDisableHover(false), 300);
                       }}
                     >
-                      Profile
+                      My Profile
                     </NavLink>
                   </li>
                   <li className="dropdown-nav-item">
