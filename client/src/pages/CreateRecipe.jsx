@@ -351,13 +351,14 @@ export default function CreateRecipe() {
                 <option key={unit} value={unit}>{unit}</option>
               ))}
             </select>
-            <button
-              type="button"
-              className="delete-ingredient-btn"
-              onClick={() => handleRemoveIngredient(index)}
-            >
-              Delete
-            </button>
+           <button
+  type="button"
+  className="delete-ingredient-btn"
+  onClick={() => handleRemoveIngredient(index)}
+>
+  &minus;
+</button>
+
           </div>
         ))}
 

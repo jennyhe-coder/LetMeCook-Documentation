@@ -517,33 +517,31 @@ export default function EditRecipe() {
             </select>
 
             <button
-              type="button"
-              className="delete-ingredient-btn"
-              onClick={() => removeIngredientRow(index)}
-            >
-              Delete
-            </button>
+  type="button"
+  className="delete-ingredient-btn"
+  onClick={() => handleRemoveIngredient(index)}
+>
+  &minus;
+</button>
+
           </div>
         ))}
-        <button
-          type="button"
-          onClick={addIngredientRow}
-          className="add-ingredient-btn"
-        >
-          Add Ingredient
-        </button>
+       <button
+  type="button"
+  onClick={addIngredientRow}
+  className="add-ingredient-btn"
+>
+  &#43;
+</button>
 
         <br /><br />
-        <div className='btn-group'>
-          <button type="submit" className="btn btn-success">
-            Update Recipe
-          </button>
+        <button type="submit" className="btn btn-success">
+          Update Recipe
+        </button>
 
-          <button type="button" className="edit-delete-recipe-btn" onClick={confirmDelete}>
-            Delete Recipe
-          </button>
-        </div>
-        
+        <button type="button" className="edit-delete-recipe-btn" onClick={confirmDelete}>
+          Delete Recipe
+        </button>
 
         {error && <p className="error-message">{error}</p>}
       </form>
