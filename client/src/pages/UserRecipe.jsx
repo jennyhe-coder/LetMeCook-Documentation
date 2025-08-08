@@ -28,11 +28,12 @@ export default function UserRecipe() {
   const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
-    if (!user) {
+    if (!user && !userLoading) {
       navigate('/unauthorized');
       return;
     }
-  }, [user, navigate]);
+  }, [user, navigate, userLoading]);
+
   useEffect(() => {
     if (userLoading) return;
     if (!user?.id) {
@@ -63,12 +64,6 @@ export default function UserRecipe() {
     }
     fetchRecipe();
   }, [user]);
-
-  // useEffect(() => {
-  //   if (sectionRef.current) {
-  //     sectionRef.current.scrollIntoView({ behavior: "smooth" });
-  //   }
-  // }, [page]);
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -112,14 +107,6 @@ export default function UserRecipe() {
     setTotalPages(Math.ceil(updatedList.length / RESULTS_PER_PAGE));
   };
 
-  //To Do: remove recipe from favourites logic
-  //   const handleRemove = async () => {
-  //     const {error} = await supabase
-  //     .from("recipe_favourites")
-  //     .delete()
-  //     .eq("user_id", user.id)
-  //     .eq("recipe_id", idk yet)
-  //   };
   return (
     <section className="all-recipes-section" ref={sectionRef}>
       <div className="all-recipes-bg" />

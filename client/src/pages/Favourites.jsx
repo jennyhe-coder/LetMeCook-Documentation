@@ -33,11 +33,11 @@ export default function Favourites() {
   };
 
   useEffect(() => {
-    if (!user) {
+    if (!user && !userLoading) {
       navigate('/unauthorized');
       return;
     }
-  }, [user, navigate]);
+  }, [user, navigate, userLoading]);
 
   const handleRemove = async (recipeId) => {
     if (!user?.id) return;

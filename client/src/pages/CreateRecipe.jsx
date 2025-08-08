@@ -356,7 +356,7 @@ export default function CreateRecipe() {
               className="delete-ingredient-btn"
               onClick={() => handleRemoveIngredient(index)}
             >
-              Delete
+              &#8722;
             </button>
           </div>
         ))}
