@@ -3,26 +3,24 @@ import { supabase } from "../utils/supabaseClient";
 import { useAuth } from "../context/AuthProvider";
 import { Link, useNavigate } from "react-router-dom";
 import "../Profile.css";
+import { set } from "lodash";
 
 export default function Profile() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [allergyNames, setAllergyNames] = useState([]);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
       if (!user && !loading) {
-        setLoading(false);
         setProfile(null);
         navigate('/unauthorized');
         return;
-      }
+      } 
+    
+    if (user) {
     const fetchProfile = async () => {
-
-      setLoading(true);
-
       const { data, error } = await supabase
         .from("users")
         .select("*")
@@ -30,7 +28,6 @@ export default function Profile() {
         .single();
 
       setProfile(data);
-      setLoading(false);
       setError(error ? error.message : null);
 
       if (data?.user_allergy?.length > 0) {
@@ -45,10 +42,10 @@ export default function Profile() {
           setAllergyNames(ingredients);
         }
       }
-      setLoading(false);
     };
 
     fetchProfile();
+  }
   }, [loading, navigate, user]);
 
   if (loading) return <p>Loading profile...</p>;

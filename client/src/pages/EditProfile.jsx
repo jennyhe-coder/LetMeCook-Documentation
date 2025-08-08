@@ -15,8 +15,7 @@ const DIETARY_OPTIONS = [
 const COOKING_SKILL = ['beginner', 'home cook', 'skilled', 'chef', 'master chef'];
 
 export default function EditProfile() {
-  const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
+  const { user, loading } = useAuth();
   const [profile, setProfile] = useState(null);
   const [form, setForm] = useState({
     full_name: '',
@@ -37,7 +36,6 @@ export default function EditProfile() {
 
   useEffect(() => {
     if (!user && !loading) {
-      setLoading(false);
       navigate('/unauthorized');
       return;
     }
@@ -71,7 +69,6 @@ export default function EditProfile() {
         setError(error?.message || "No profile found");
       }
     })();
-    setLoading(false);
   }, [user, loading, navigate]);
 
   const debouncedSearch = useRef(debounce(async (input) => {
