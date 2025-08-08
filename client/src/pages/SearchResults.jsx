@@ -187,33 +187,38 @@ export default function SearchResults() {
         <br />
 
         <div className="results-header">
-          <h3>Results</h3>
+          <h3 style={{ marginLeft: "2px" }}>Results</h3>
           <SortDropdown sort={sort} setSort={setSort} />
         </div>
 
         {/*extracted filters */}
-        <div className="filter-summary">
-          <br />
-          {[
-            keyword && `keyword: ${keyword}`,
-            cuisines.length > 0 && `cuisines: ${cuisines.join(", ")}`,
-            ingredients.length > 0 && `ingredients: ${ingredients.join(", ")}`,
-            allergies.length > 0 && `allergies: ${allergies.join(", ")}`,
-            categories.length > 0 && `categories: ${categories.join(", ")}`,
-            dietaryPreferences.length > 0 &&
-              `dietary: ${dietaryPreferences.join(", ")}`,
-          ]
-            .filter(Boolean)
-            .join(", ")}
-          {totalElements > 0 && !loading && (
-            <span className="results-count">&nbsp;&nbsp;{totalElements}</span>
-          )}
-        </div>
+        {results.length !== 0 && (
+          <div className="filter-summary">
+            <br />
+            {[
+              keyword && `Keyword: ${keyword}`,
+              cuisines.length > 0 && `Cuisines: ${cuisines.join(", ")}`,
+              ingredients.length > 0 &&
+                `Ingredients: ${ingredients.join(", ")}`,
+              allergies.length > 0 && `Allergies: ${allergies.join(", ")}`,
+              categories.length > 0 && `Categories: ${categories.join(", ")}`,
+              dietaryPreferences.length > 0 &&
+                `Dietary: ${dietaryPreferences.join(", ")}`,
+            ]
+              .filter(Boolean)
+              .join(", ")}
+            {totalElements > 0 && !loading && (
+              <span className="results-count">&nbsp;&nbsp;{totalElements}</span>
+            )}
+          </div>
+        )}
+
+        {/* <br /> */}
 
         {!extracting && results.length === 0 && !loading ? (
           <>
-            {/* <br /> */}
-            <p>No results found.</p>
+            <br />
+            <p style={{ marginLeft: "4px" }}>No results found.</p>
           </>
         ) : (
           <>

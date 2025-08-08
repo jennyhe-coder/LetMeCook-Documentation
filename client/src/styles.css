@@ -354,7 +354,7 @@ h3 {
   font-style: normal;
   font-weight: 700;
   line-height: normal;
-  letter-spacing: -0.62px;
+  letter-spacing: -0.42px;
 }
 
 .search-container {
@@ -1872,4 +1872,45 @@ p {
 
 .mic-icon.listening {
   color: red;
+}
+
+.dislike-recipe-btn {
+  color: #fff;
+}
+
+.dislike-menu-container {
+  position: absolute;
+  top: -22px;
+  right: 0;
+  z-index: 20;
+}
+
+.dislike-recipe-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.dislike-menu {
+  position: absolute;
+  top: 26px;
+  right: 0px;
+  z-index: 999;
+  cursor: pointer;
+  /* font-size: 14px; */
+  white-space: nowrap;
+  background-color: #1E1E1e;
+  color: #fff;
+  cursor: pointer;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: background-color 0.1s ease;
+  font-family: Raleway;
+  font-size: 15px;
+}
+
+.dislike-menu:hover {
+  background-color: #a32f19;
 }

@@ -4,6 +4,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useAuth } from "../context/AuthProvider";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "../utils/supabaseClient";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -118,12 +119,31 @@ export default function MyRecommended() {
     }
   }, []);
 
+  const handleDislike = async (recipeId) => {
+    try {
+      const { error } = await supabase
+        .from("recipe_disliked")
+        .insert({ user_id: user.id, recipe_id: recipeId });
+
+      if (error) throw error;
+
+      // remove the disliked recipe from view
+      const updated = recommended.filter((r) => r.id !== recipeId);
+      cachedRecommendations.current = updated;
+      setRecommended(updated);
+      setTotalElements(updated.length);
+      setTotalPages(Math.ceil(updated.length / RESULTS_PER_PAGE));
+    } catch (err) {
+      console.error("Failed to dislike recipe:", err.message);
+    }
+  };
+
   return (
     <section className="recommended-section" ref={sectionRef}>
       <div className="all-recipes-bg" />
       <div className="layout-wrapper">
         <div className="recommended-header">
-          <h3>Recommended For You</h3>
+          <h3 style={{ paddingBottom: "16px" }}>Recommended For You</h3>
         </div>
 
         <br />
@@ -137,6 +157,7 @@ export default function MyRecommended() {
                 (page - 1) * RESULTS_PER_PAGE,
                 page * RESULTS_PER_PAGE
               )}
+              onDislike={handleDislike}
             />
 
             <br />
