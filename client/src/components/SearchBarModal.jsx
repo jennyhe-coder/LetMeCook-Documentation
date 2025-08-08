@@ -140,13 +140,8 @@ export default function SearchBarModal({ onClose }) {
 
       const params = new URLSearchParams();
 
-      // Use keyword if there's no imageIngredients, for backward compatibility
       if (prompt) {
-        if (imageIngredients.length === 0) {
-          params.set("keyword", prompt);
-        } else {
-          params.set("prompt", prompt);
-        }
+        params.set("prompt", prompt);
       }
 
       imageIngredients.forEach((i) => {
@@ -255,7 +250,7 @@ export default function SearchBarModal({ onClose }) {
                   onClick={() => {
                     const keyword = inputValue.trim();
                     if (!keyword) return;
-                    navigate(`/search?keyword=${encodeURIComponent(keyword)}`);
+                    navigate(`/search?prompt=${encodeURIComponent(keyword)}`);
                     onClose();
                   }}
                   style={{ cursor: "pointer" }}
