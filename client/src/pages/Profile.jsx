@@ -7,19 +7,19 @@ import "../Profile.css";
 export default function Profile() {
   const { user } = useAuth();
   const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [allergyNames, setAllergyNames] = useState([]);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (!user) {
+      if (!user && !loading) {
         setLoading(false);
         setProfile(null);
         navigate('/unauthorized');
         return;
       }
+    const fetchProfile = async () => {
 
       setLoading(true);
 
@@ -45,12 +45,12 @@ export default function Profile() {
           setAllergyNames(ingredients);
         }
       }
+      setLoading(false);
     };
 
     fetchProfile();
-  }, [user]);
+  }, [loading, navigate, user]);
 
-  if (!user) return <p>Please log in.</p>;
   if (loading) return <p>Loading profile...</p>;
   if (error) return <p>Error loading profile: {error}</p>;
   if (!profile) return <p>No profile found.</p>;

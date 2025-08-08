@@ -5,7 +5,7 @@ import Select from 'react-select';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../components/Modal';
 import '../EditProfile.css';
-import { debounce } from 'lodash';
+import { debounce, set } from 'lodash';
 
 const DIETARY_OPTIONS = [
   'Vegetarian', 'Vegan', 'Gluten-Free', 'Dairy-Free', 'Nut-Free',
@@ -16,6 +16,7 @@ const COOKING_SKILL = ['beginner', 'home cook', 'skilled', 'chef', 'master chef'
 
 export default function EditProfile() {
   const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
   const [form, setForm] = useState({
     full_name: '',
@@ -35,7 +36,8 @@ export default function EditProfile() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) {
+    if (!user && !loading) {
+      setLoading(false);
       navigate('/unauthorized');
       return;
     }
@@ -49,6 +51,7 @@ export default function EditProfile() {
 
       if (data) {
         let allergiesArr = [];
+
 
         if (data.user_allergy?.length > 0) {
           const { data: allergyData } = await supabase
@@ -68,7 +71,8 @@ export default function EditProfile() {
         setError(error?.message || "No profile found");
       }
     })();
-  }, [user]);
+    setLoading(false);
+  }, [user, loading, navigate]);
 
   const debouncedSearch = useRef(debounce(async (input) => {
     if (!input) return;

@@ -521,7 +521,7 @@ export default function EditRecipe() {
               className="delete-ingredient-btn"
               onClick={() => removeIngredientRow(index)}
             >
-              Delete
+              &#8722;
             </button>
           </div>
         ))}
