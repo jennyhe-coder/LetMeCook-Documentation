@@ -299,6 +299,7 @@ button[type="submit"] {
   cursor: pointer;
   margin-top: 20px;
   transition: background 0.3s ease;
+  white-space: nowrap;
 }
 
 button[type="submit"]:hover {
@@ -324,4 +325,11 @@ button[type="submit"]:hover {
   cursor: pointer;
   margin-top: 20px;
   transition: background 0.3s ease;
+  white-space: nowrap;
+}
+
+.btn-group {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
 }
