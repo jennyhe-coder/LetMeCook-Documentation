@@ -7,29 +7,45 @@ export default function RecipeList({
   editMode = false,
   onRemove,
   onDislike,
+  onExitEditMode,
+  ignoreClickRefs = [],
 }) {
   const [openMenuId, setOpenMenuId] = useState(null);
-  const menuRefs = useRef({}); // To store refs of each dislike-menu-container
+  const menuRefs = useRef({}); // refs for dislike menus
+  const listRef = useRef(null); // ref for the root container
 
   useEffect(() => {
     function handleClickOutside(event) {
-      // If no menu is open, do nothing
-      if (openMenuId === null) return;
+      // existing dislike menu logic
+      if (openMenuId !== null) {
+        const container = menuRefs.current[openMenuId];
+        if (container && !container.contains(event.target)) {
+          setOpenMenuId(null);
+        }
+      }
 
-      // Get the container ref for the open menu
-      const container = menuRefs.current[openMenuId];
+      // Check if click is inside any ignoreClickRefs elements
+      const clickedInsideIgnored = ignoreClickRefs.some(
+        (ref) => ref.current && ref.current.contains(event.target)
+      );
 
-      // If click is outside container, close menu
-      if (container && !container.contains(event.target)) {
-        setOpenMenuId(null);
+      // Exit edit mode if editMode && click outside recipe-list and NOT inside ignored refs
+      if (
+        editMode &&
+        listRef.current &&
+        !listRef.current.contains(event.target) &&
+        !clickedInsideIgnored
+      ) {
+        if (typeof onExitEditMode === "function") {
+          onExitEditMode();
+        }
       }
     }
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [openMenuId]);
+  }, [openMenuId, editMode, onExitEditMode]);
 
   if (recipes.length === 0) {
     return (
@@ -50,7 +66,7 @@ export default function RecipeList({
   };
 
   return (
-    <div className="recipe-list">
+    <div className="recipe-list" ref={listRef}>
       {recipes.map((recipe, i) => (
         <div
           key={`${recipe.id}-${i}`}

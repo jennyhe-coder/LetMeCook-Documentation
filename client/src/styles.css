@@ -1617,7 +1617,29 @@ p {
   display: flex;
   justify-content: center;
   padding-top: 1rem;
-  padding-bottom: 2rem;
+  padding-bottom: 54px;
+}
+
+.image-ingredients-preview {
+  width: 100%;
+  font-size: 20px;
+  /* padding: 0 20px; */
+  color: #28200d;
+  font-family: Raleway;
+  font-weight: 600;
+  line-height: 32px;
+  resize: none;
+  overflow-y: auto;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  border: none;
+  border-bottom: 1px dotted #888;
+  outline: none;
+  background-color: transparent;
+  /* border-radius: 20px; */
+  /* max-height: 160px; */
+  padding: 16px 20px !important;
+  margin: 0 auto;
 }
 
 .search-bar-modal-wrapper {
@@ -1705,7 +1727,7 @@ p {
 .height-padding-profile {
   display: flex;
   flex-direction: column;
-  min-height: 156px;
+  min-height: 147px;
 }
 
 .height-padding-2 {

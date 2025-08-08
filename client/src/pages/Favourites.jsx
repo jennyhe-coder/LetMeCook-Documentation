@@ -28,13 +28,15 @@ export default function Favourites() {
 
   const navigate = useNavigate();
 
+  const editBtnRef = useRef(null);
+
   const handleReorder = (newOrder) => {
     setFavRecipes(newOrder);
   };
 
   useEffect(() => {
     if (!user && !userLoading) {
-      navigate('/unauthorized');
+      navigate("/unauthorized");
       return;
     }
   }, [user, navigate, userLoading]);
@@ -129,12 +131,6 @@ export default function Favourites() {
     fetchFav();
   }, [user, userLoading]);
 
-  // useEffect(() => {
-  //   if (sectionRef.current) {
-  //     sectionRef.current.scrollIntoView({ behavior: "smooth" });
-  //   }
-  // }, [page]);
-
   useEffect(() => {
     const el = sectionRef.current;
 
@@ -168,6 +164,7 @@ export default function Favourites() {
             className={`edit-icon ${editMode ? "active" : ""}`}
             title={editMode ? "Exit Edit Mode" : "Edit Favourites"}
             onClick={() => setEditMode(!editMode)}
+            ref={editBtnRef}
           />
         </div>
 
@@ -180,6 +177,8 @@ export default function Favourites() {
             editMode={editMode}
             onRemove={handleRemove}
             onReorder={handleReorder}
+            onExitEditMode={() => setEditMode(false)}
+            ignoreClickRefs={[editBtnRef]}
           />
 
           <br />
