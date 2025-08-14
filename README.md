@@ -5,6 +5,22 @@
 
 ---
 
+### Team Members
+| Name | Email | GitHub |
+|---|---|---|
+| VAN TAI HUYNH | hvtai.it@gmail.com | [VanTaiHuynh](https://github.com/VanTaiHuynh) |
+| Carmen Lam | clam98@myseneca.ca | [Carmen-jx](https://github.com/Carmen-jx) |
+| Vinh Tran | tvtran8@myseneca.ca | [vintrn](https://github.com/vintrn) |
+| Amiel Thompson | Athompson64@myseneca.ca | [Amavige](https://github.com/Amavige) |
+| Jie He | jhe118@myseneca.ca | [jennyhe-coder](https://github.com/jennyhe-coder) |
+
+### Instructor
+| Name | Email |
+|---|---|
+| Yasser Elmankabady | yasser.elmankabady@senecapolytechnic.ca |
+
+---
+
 ## 0) Architecture Overview
 
 - **Frontend** (`/client`): Vite + React. Calls the Backend API and Supabase (for auth/storage/queries used by the app).
@@ -318,5 +334,3 @@ npm run dev
 - Avoid logging secrets (tokens/keys) in any environment.
 
 ---
-
-**Done.** Use this as your English setup README for the team or as part of your project documentation.
