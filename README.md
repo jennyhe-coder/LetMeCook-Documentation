@@ -3,6 +3,9 @@
 **Goal:** Run the complete system locally: **Backend (Spring Boot)** · **Frontend (Vite/React)** · **Database (Supabase/Postgres)** · **Recommendation System (Python)**.  
 **Audience:** New developers who just cloned the repo and want a fast, reliable local setup, with pointers for production.
 
+**VIDEO DEMO**
+Click on this link to view a demo video of the app: https://drive.google.com/file/d/1t0xgwnRSZMYGZzsJs8h1D_uQR1hMpfYb/view?usp=sharing
+
 ---
 
 ### Team Members
